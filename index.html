@@ -159,6 +159,9 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .day[aria-pressed="true"]{background:var(--violet); border-color:var(--violet); color:#fff}
 .day[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
 .day[aria-pressed="true"] i{background:#fff}
+.day.full{background:#F4F1F6; color:#8C8496}
+.day.full b{text-decoration:line-through}
+.day.full[aria-pressed="true"]{background:#6E6579; border-color:#6E6579; color:#fff}
 .slots{display:flex; flex-direction:column; gap:6px; margin-top:8px}
 .hour{display:grid; grid-template-columns:46px repeat(4, minmax(0,1fr)); gap:6px; align-items:center}
 .hour > span{font-weight:800; font-size:.85rem; color:var(--muted)}
@@ -293,6 +296,7 @@ footer .container{align-items:flex-start}
           <div class="days" id="days" role="group" aria-label="Días disponibles"></div>
           <h3>2. Marcá los horarios que te sirven</h3>
           <p class="help">Cada visita dura 15 minutos. Podés marcar varios horarios y de distintos días.</p>
+          <p class="help" id="legend" hidden><b>Los horarios en gris no están disponibles</b> (ya reservados o fuera de plazo).</p>
           <div class="slots" id="slots" role="group" aria-label="Horarios disponibles"></div>
           <ul class="picked" id="picked" aria-live="polite"></ul>
           <p class="msg" id="msg" role="alert"></p>
@@ -410,6 +414,7 @@ footer .container{align-items:flex-start}
   })();
 
   // Coordinar visita: el cliente marca días y horarios y se arma un mensaje de WhatsApp para Magali, que confirma.
+  // Los horarios ocupados se leen de una hoja de Google Sheets (ver AGENDA_CSV_URL).
   (function(){
     var TZ = 'America/Argentina/Buenos_Aires';
     var PASO = 15;               // duración de cada visita, en minutos
@@ -419,13 +424,17 @@ footer .container{align-items:flex-start}
     var AVISO_PREVIO_H = 3;      // no se ofrecen turnos con menos de 3 horas de anticipación
     var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime(); // fin de semana largo
     var NUM = '5491140827284';
+    // Link CSV de la hoja de horarios ocupados. Vacío = no se leen ocupados.
+    // Formato: https://docs.google.com/spreadsheets/d/ID_DE_LA_HOJA/gviz/tq?tqx=out:csv&sheet=Ocupados
+    var AGENDA_CSV_URL = '';
     var DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
     var DIA_LARGO = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
     var form = document.getElementById('visit-form');
     if (!form) return;
     var elDays = document.getElementById('days'), elSlots = document.getElementById('slots'),
-        elPicked = document.getElementById('picked'), elMsg = document.getElementById('msg');
+        elPicked = document.getElementById('picked'), elMsg = document.getElementById('msg'),
+        elLegend = document.getElementById('legend');
 
     function pad(n){ return n < 10 ? '0' + n : '' + n; }
     function fmt(min){ return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
@@ -439,12 +448,29 @@ footer .container{align-items:flex-start}
       var dt = new Date(Date.UTC(t.y, t.m - 1, t.d + i)), wd = dt.getUTCDay(), cfg = HORARIOS[wd];
       if (!cfg) continue;
       var key = dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate());
-      var avail = {}, n = 0;
+      var base = {}, n = 0;
       for (var m = cfg[0]; m + PASO <= cfg[1]; m += PASO) {
         var ini = new Date(key + 'T' + fmt(m) + ':00-03:00').getTime();
-        if (ini >= ahora + AVISO_PREVIO_H * 3600000 && ini >= SIN_ATENCION_HASTA) { avail[m] = true; n++; }
+        if (ini >= ahora + AVISO_PREVIO_H * 3600000 && ini >= SIN_ATENCION_HASTA) { base[m] = true; n++; }
       }
-      if (n) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, open:cfg[0], close:cfg[1], avail:avail});
+      if (n) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, open:cfg[0], close:cfg[1], base:base, avail:{}, free:0});
+    }
+    var busy = {};   // key -> [[desde, hasta], ...] en minutos
+
+    function applyBusy(){
+      days.forEach(function(day){
+        day.avail = {}; day.free = 0;
+        var b = busy[day.key] || [];
+        Object.keys(day.base).forEach(function(k){
+          var m = +k, taken = b.some(function(r){ return m < r[1] && m + PASO > r[0]; });
+          if (!taken) { day.avail[m] = true; day.free++; }
+        });
+        // si algo elegido se ocupó mientras tanto, se descarta
+        if (sel[day.key]) {
+          sel[day.key] = sel[day.key].filter(function(m){ return day.avail[m]; });
+          if (!sel[day.key].length) delete sel[day.key];
+        }
+      });
     }
 
     var sel = {};          // key -> minutos elegidos
@@ -458,9 +484,9 @@ footer .container{align-items:flex-start}
       days.forEach(function(day){
         var b = document.createElement('button');
         b.type = 'button';
-        b.className = 'day' + (count(day.key) ? ' has' : '');
+        b.className = 'day' + (count(day.key) ? ' has' : '') + (day.free ? '' : ' full');
         b.setAttribute('aria-pressed', day.key === current ? 'true' : 'false');
-        b.setAttribute('aria-label', DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m);
+        b.setAttribute('aria-label', DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m + (day.free ? '' : ', sin horarios disponibles'));
         b.innerHTML = '<small>' + DIA[day.wd] + '</small><b>' + day.d + '</b><i></i>';
         b.addEventListener('click', function(){ current = day.key; renderDays(); renderSlots(); });
         elDays.appendChild(b);
@@ -468,25 +494,33 @@ footer .container{align-items:flex-start}
     }
     function renderSlots(){
       elSlots.innerHTML = '';
-      var day = find(current);
-      if (!day) return;
+      var day = find(current), anyOff = false;
+      if (!day) { elLegend.hidden = true; return; }
+      if (!day.free) {
+        var p = document.createElement('p'); p.className = 'help';
+        p.textContent = 'Este día ya no tiene horarios disponibles. Probá con otro día.';
+        elSlots.appendChild(p);
+        elLegend.hidden = true; return;
+      }
       for (var h = Math.floor(day.open / 60); h * 60 < day.close; h++) {
         var row = document.createElement('div'); row.className = 'hour';
         var lab = document.createElement('span'); lab.textContent = pad(h) + ' h'; row.appendChild(lab);
         for (var q = 0; q < 60; q += PASO) {
           var min = h * 60 + q;
           if (min < day.open || min + PASO > day.close) { row.appendChild(document.createElement('span')); continue; }
+          if (!day.avail[min]) anyOff = true;
           row.appendChild(slotBtn(day, min));
         }
         elSlots.appendChild(row);
       }
+      elLegend.hidden = !anyOff;
     }
     function slotBtn(day, min){
       var on = (sel[day.key] || []).indexOf(min) > -1;
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'slot'; b.textContent = fmt(min);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      if (!day.avail[min]) { b.disabled = true; return b; }
+      if (!day.avail[min]) { b.disabled = true; b.title = 'No disponible'; return b; }
       b.addEventListener('click', function(){ toggle(day.key, min); });
       return b;
     }
@@ -512,11 +546,56 @@ footer .container{align-items:flex-start}
         });
       });
     }
+    function refresh(){ applyBusy(); renderDays(); renderSlots(); renderPicked(); }
+
+    // --- Lectura de horarios ocupados (hoja de Google Sheets en CSV) ---
+    function parseCSV(text){
+      var rows = [], row = [], cur = '', q = false;
+      for (var i = 0; i < text.length; i++) {
+        var c = text[i];
+        if (q) {
+          if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c;
+        } else if (c === '"') q = true;
+        else if (c === ',') { row.push(cur); cur = ''; }
+        else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+        else cur += c;
+      }
+      if (cur.length || row.length) { row.push(cur); rows.push(row); }
+      return rows;
+    }
+    function parseFecha(s){
+      s = (s || '').trim(); var m;
+      if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + '-' + pad(+m[2]) + '-' + pad(+m[3]);
+      if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/))) { var y = +m[3]; if (y < 100) y += 2000; return y + '-' + pad(+m[2]) + '-' + pad(+m[1]); }
+      return null;
+    }
+    function parseHora(s){
+      var m = (s || '').trim().match(/^(\d{1,2}):(\d{2})/);
+      return m ? (+m[1]) * 60 + (+m[2]) : null;
+    }
+    function cargarOcupados(){
+      if (!AGENDA_CSV_URL) return;
+      var url = AGENDA_CSV_URL + (AGENDA_CSV_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
+      fetch(url).then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(function(txt){
+        var nuevo = {};
+        parseCSV(txt).forEach(function(r){
+          var k = parseFecha(r[0]); if (!k) return;      // salta encabezados y filas vacías
+          var d = parseHora(r[1]), h = parseHora(r[2]);
+          if (d === null && h === null) { d = 0; h = 1440; }   // sin horas = todo el día
+          else if (d === null) d = 0;
+          else if (h === null) h = d + PASO;
+          (nuevo[k] = nuevo[k] || []).push([d, h]);
+        });
+        busy = nuevo; refresh();
+      }).catch(function(){ /* si falla la lectura, se muestran todos los horarios y Magali confirma igual */ });
+    }
 
     if (!days.length) {
       elDays.innerHTML = '<p class="help">No hay horarios disponibles por ahora. Escribime por WhatsApp y coordinamos.</p>';
     }
-    renderDays(); renderSlots(); renderPicked();
+    refresh();
+    cargarOcupados();
+    setInterval(cargarOcupados, 120000);
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
