@@ -123,6 +123,18 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
   .stat span{margin-top:0; text-align:right}
 }
 
+/* Agregamos valor */
+.valor{color:#fff; background:linear-gradient(160deg, var(--deep) 0%, #5B2370 60%, var(--violet) 100%)}
+.valor .eyebrow{margin-bottom:12px}
+.valor .intro{max-width:62ch; margin-top:14px; font-size:1.08rem; opacity:.95}
+.vgrid{display:grid; grid-template-columns:repeat(auto-fit, minmax(270px, 1fr)); gap:16px; margin-top:40px}
+.vitem{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22); border-radius:22px; padding:28px; min-width:0}
+.vitem svg{width:46px; height:46px; stroke:#fff; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; display:block}
+.vitem h3{font-size:1.1rem; font-weight:800; letter-spacing:-0.01em; margin-top:18px}
+.vitem p{margin-top:8px; opacity:.92; font-size:.97rem}
+.valor .cta{margin-top:36px}
+.btn-white{background:#fff; color:var(--violet); box-shadow:0 10px 26px rgba(0,0,0,.2)}
+
 /* Tasación */
 .tasgrid{display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.35fr); gap:20px; align-items:start}
 @media (max-width:900px){.tasgrid{grid-template-columns:1fr}}
@@ -405,6 +417,47 @@ footer .container{align-items:flex-start}
           <div class="row"><dt>IVA</dt><dd>El alquiler es + IVA.</dd></div>
         </dl>
       </div>
+    </div>
+  </section>
+
+  <section class="valor" id="agregamos-valor">
+    <div class="container">
+      <p class="eyebrow">Para propietarios</p>
+      <h2>Agregamos valor a tu inmueble</h2>
+      <p class="intro">Publicar en portales lo puede hacer cualquiera. Nosotros sabemos cómo obtener el mejor precio por tu inmueble, incrementando su valor a través de:</p>
+      <div class="vgrid">
+        <div class="vitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/><path d="M6 18l4-4 3 2 5-6" stroke-width="1.8"/></svg>
+          <h3>Market analysis</h3>
+          <p>Con big data sabemos qué se ofrece en la zona y cuál es el valor real de venta.</p>
+        </div>
+        <div class="vitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M12 12.5v4M10 14.5h4"/></svg>
+          <h3>Puesta en valor</h3>
+          <p>Nuestro arquitecto propone mejoras simples que realzan los aspectos más importantes de tu unidad.</p>
+        </div>
+        <div class="vitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20 3.5V7h-3.5"/><text x="12" y="14.6" font-size="6.6" font-weight="800" text-anchor="middle" fill="#fff" stroke="none" font-family="Plus Jakarta Sans, Arial, sans-serif">360</text></svg>
+          <h3>Tour virtual 360°</h3>
+          <p>Aumentamos la visualización de tu unidad destacándose sobre el resto con tecnología RICOH y MATTERPORT.</p>
+        </div>
+        <div class="vitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 8h3.2l1.6-2.2h7.4L17.3 8h3.2v11.5h-17z"/><circle cx="12" cy="13.5" r="3.6"/></svg>
+          <h3>Fotografía inmobiliaria</h3>
+          <p>Fotografía profesional que impacta y atrae interesados.</p>
+        </div>
+        <div class="vitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.6 14.2l2 2 3.6-4.2"/></svg>
+          <h3>Asesoría integral inmobiliaria</h3>
+          <p>Convenio con Escribanía para asesorarte en lo jurídico notarial y asesoría contable dentro del equipo.</p>
+        </div>
+        <div class="vitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#fff"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg>
+          <h3>Publicidad digital</h3>
+          <p>Invertimos en posicionar tu unidad al tope del ranking de los portales.</p>
+        </div>
+      </div>
+      <div class="cta"><a class="btn btn-white" href="#tasacion">Quiero asesoramiento inmobiliario</a></div>
     </div>
   </section>
 
