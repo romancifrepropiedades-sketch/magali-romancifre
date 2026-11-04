@@ -52,6 +52,8 @@
   "detalle": "1 dorm., 45 m²",
   "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6531904",
   "dorm": 1,
-  "precio": 750000
+  "precio": 750000,
+  "lat": -34.567887,
+  "lng": -58.450578
  }
 ]
