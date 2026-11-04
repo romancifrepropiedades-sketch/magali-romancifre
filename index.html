@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Magali · ROMÁN CIFRE Propiedades</title>
-<meta name="description" content="Magali, asesora inmobiliaria de ROMÁN CIFRE Propiedades. Alquileres, propiedades y locales, condiciones de alquiler y contacto por WhatsApp.">
+<meta name="description" content="Magali, asesora inmobiliaria de ROMÁN CIFRE Propiedades. Alquileres, propiedades y locales, condiciones de alquiler, tasaciones sin cargo y contacto por WhatsApp.">
 <meta name="theme-color" content="#732F84">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,6 +124,8 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 }
 
 /* Tasación */
+.perks{list-style:none; margin:18px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px}
+.perks li{background:var(--tint); color:var(--violet); font-weight:700; font-size:.92rem; padding:8px 14px; border-radius:999px}
 .tas{max-width:760px}
 .fgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 16px}
 .fgrid .full{grid-column:1 / -1}
@@ -276,7 +278,7 @@ footer .container{align-items:flex-start}
         <a class="tile" href="#tasacion">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10.5V20h14v-9.5"/><path d="M12 8.5v7M14 10h-3a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3h-3"/></svg></span>
           <h3>Tasá tu propiedad</h3>
-          <p>¿Querés vender o alquilar tu inmueble? Pedí una tasación profesional.</p>
+          <p>Tasación sin cargo en 24 hs, con informe profesional firmado por un matriculado.</p>
           <span class="go">Solicitar tasación →</span>
         </a>
       </div>
@@ -375,7 +377,8 @@ footer .container{align-items:flex-start}
     <div class="container">
       <div class="sec-head">
         <h2>Tasá tu propiedad</h2>
-        <p class="sub">Completá los datos de tu inmueble. Magali recibe tu pedido por WhatsApp y te contacta para coordinar la tasación.</p>
+        <p class="sub">Completá los datos de tu inmueble y Magali recibe tu pedido por WhatsApp para coordinar la tasación.</p>
+        <ul class="perks"><li>Sin cargo</li><li>En 24 hs</li><li>Informe profesional firmado por un matriculado</li></ul>
       </div>
       <form class="vcard tas" id="tas-form" novalidate>
         <div class="fgrid">
@@ -406,7 +409,7 @@ footer .container{align-items:flex-start}
         </div>
         <p class="msg" id="t-msg" role="alert"></p>
         <button class="btn btn-wa" type="submit">Solicitar tasación por WhatsApp</button>
-        <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Magali te contacta en su horario de atención: lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
+        <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Solo tenés que enviarlo.</p>
         <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20solicitar%20una%20tasaci%C3%B3n" target="_blank" rel="noopener">Solicitar tasación por WhatsApp</a></p></noscript>
       </form>
     </div>
