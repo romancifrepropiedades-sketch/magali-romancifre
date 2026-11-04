@@ -40,7 +40,9 @@
   "detalle": "3 dorm., 80 m²",
   "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-3dorm-3banos--6543443",
   "dorm": 3,
-  "precio": 1500000
+  "precio": 1500000,
+  "lat": -34.559972,
+  "lng": -58.464254
  },
  {
   "operacion": "alquiler",
