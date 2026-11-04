@@ -86,7 +86,7 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .sec-head{margin-bottom:32px}
 
 /* Accesos */
-.tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px}
+.tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px}
 .tile{
   display:flex; flex-direction:column; gap:10px; padding:26px; min-width:0;
   background:#fff; border:1px solid var(--line); border-radius:22px; text-decoration:none;
@@ -122,6 +122,13 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
   .stat{display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:14px 18px}
   .stat span{margin-top:0; text-align:right}
 }
+
+/* Tasación */
+.tas{max-width:760px}
+.fgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 16px}
+.fgrid .full{grid-column:1 / -1}
+@media (max-width:640px){.fgrid{grid-template-columns:1fr}}
+.tas .btn-wa{width:100%; margin-top:6px}
 
 /* Contacto */
 .contact{
@@ -266,6 +273,12 @@ footer .container{align-items:flex-start}
           <p>Contame qué propiedad te interesa y tus horarios disponibles.</p>
           <span class="go">Pedir visita →</span>
         </a>
+        <a class="tile" href="#tasacion">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10.5V20h14v-9.5"/><path d="M12 8.5v7M14 10h-3a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3h-3"/></svg></span>
+          <h3>Tasá tu propiedad</h3>
+          <p>¿Querés vender o alquilar tu inmueble? Pedí una tasación profesional.</p>
+          <span class="go">Solicitar tasación →</span>
+        </a>
       </div>
     </div>
   </section>
@@ -355,6 +368,47 @@ footer .container{align-items:flex-start}
           <div class="row"><dt>IVA</dt><dd>El alquiler es + IVA.</dd></div>
         </dl>
       </div>
+    </div>
+  </section>
+
+  <section id="tasacion">
+    <div class="container">
+      <div class="sec-head">
+        <h2>Tasá tu propiedad</h2>
+        <p class="sub">Completá los datos de tu inmueble. Magali recibe tu pedido por WhatsApp y te contacta para coordinar la tasación.</p>
+      </div>
+      <form class="vcard tas" id="tas-form" novalidate>
+        <div class="fgrid">
+          <div class="field">
+            <label for="t-op">¿Qué querés hacer?</label>
+            <select id="t-op"><option>Vender</option><option>Alquilar</option><option>Todavía no lo sé</option></select>
+          </div>
+          <div class="field">
+            <label for="t-tipo">Tipo de inmueble</label>
+            <select id="t-tipo"><option>Departamento</option><option>Casa</option><option>PH</option><option>Local comercial</option><option>Oficina</option><option>Terreno</option><option>Otro</option></select>
+          </div>
+          <div class="field full">
+            <label for="t-dir">Dirección o barrio</label>
+            <input id="t-dir" type="text" placeholder="Ej: Cabildo 2000, Belgrano" autocomplete="street-address">
+          </div>
+          <div class="field full">
+            <label for="t-det">Ambientes y superficie aproximada <span style="font-weight:500;color:var(--muted)">(opcional)</span></label>
+            <input id="t-det" type="text" placeholder="Ej: 3 ambientes, 65 m²" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="t-name">Tu nombre</label>
+            <input id="t-name" type="text" placeholder="Nombre y apellido" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="t-phone">Tu celular</label>
+            <input id="t-phone" type="tel" inputmode="tel" placeholder="Ej: 11 5555-1234" autocomplete="tel">
+          </div>
+        </div>
+        <p class="msg" id="t-msg" role="alert"></p>
+        <button class="btn btn-wa" type="submit">Solicitar tasación por WhatsApp</button>
+        <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Magali te contacta en su horario de atención: lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
+        <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20solicitar%20una%20tasaci%C3%B3n" target="_blank" rel="noopener">Solicitar tasación por WhatsApp</a></p></noscript>
+      </form>
     </div>
   </section>
 
@@ -624,6 +678,32 @@ footer .container{align-items:flex-start}
         'Días y horarios que me sirven (visitas de 15 min):\n' + lines.join('\n') + '\n' +
         'Quedo a la espera de tu confirmación. ¡Gracias!';
       var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
+      var w = window.open(url, '_blank', 'noopener');
+      if (!w) window.location.href = url;
+    });
+  })();
+
+  // Tasación: arma el pedido y lo envía a Magali por WhatsApp.
+  (function(){
+    var form = document.getElementById('tas-form');
+    if (!form) return;
+    var msg = document.getElementById('t-msg');
+    function v(id){ return document.getElementById(id).value.trim(); }
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if (!v('t-dir')) { msg.textContent = 'Indicá la dirección o el barrio del inmueble.'; document.getElementById('t-dir').focus(); return; }
+      if (!v('t-name')) { msg.textContent = 'Escribí tu nombre.'; document.getElementById('t-name').focus(); return; }
+      if (v('t-phone').replace(/\D/g, '').length < 8) { msg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('t-phone').focus(); return; }
+      msg.textContent = '';
+      var text = 'Hola Magali, quiero solicitar una tasación.\n' +
+        'Quiero: ' + v('t-op') + '\n' +
+        'Tipo de inmueble: ' + v('t-tipo') + '\n' +
+        'Dirección o barrio: ' + v('t-dir') + '\n' +
+        (v('t-det') ? 'Ambientes y superficie: ' + v('t-det') + '\n' : '') +
+        'Nombre: ' + v('t-name') + '\n' +
+        'Celular: ' + v('t-phone') + '\n' +
+        'Quedo a la espera de tu contacto. ¡Gracias!';
+      var url = 'https://wa.me/5491140827284?text=' + encodeURIComponent(text);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
     });
