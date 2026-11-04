@@ -262,6 +262,9 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .help{color:var(--muted); font-size:.92rem}
 .msg{margin-top:12px; color:#8A1F11; font-weight:600; min-height:1.3em}
 .msg.ok{color:#12803F}
+.consent{display:flex; gap:10px; align-items:flex-start; margin-top:16px; font-size:.9rem; line-height:1.45; color:var(--muted); cursor:pointer}
+.consent input{flex:none; width:20px; height:20px; margin:1px 0 0; accent-color:var(--violet); cursor:pointer}
+.consent a{color:var(--violet); font-weight:700}
 .visit .btn-wa{width:100%; margin-top:6px}
 
 /* Pie */
@@ -521,6 +524,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
           <p class="help" id="legend" hidden><b>Los horarios en gris no están disponibles</b> (ya reservados o fuera de plazo).</p>
           <div class="slots" id="slots" role="group" aria-label="Horarios disponibles"></div>
           <ul class="picked" id="picked" aria-live="polite"></ul>
+          <label class="consent"><input type="checkbox" id="v-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
           <p class="msg" id="msg" role="alert"></p>
           <button class="btn btn-wa" type="submit">Enviar pedido por WhatsApp</button>
           <p class="help" style="margin-top:10px">No es una reserva automática: Magali te confirma o te propone otro horario. Atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
@@ -679,6 +683,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
           <div class="days" id="t-days" role="group" aria-label="Días disponibles para tasar"></div>
           <div id="t-franjas"></div>
 
+          <label class="consent"><input type="checkbox" id="t-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
           <p class="msg" id="t-msg" role="alert"></p>
           <button class="btn btn-wa" type="submit">Solicitar tasación por WhatsApp</button>
           <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Solo tenés que enviarlo.</p>
@@ -727,7 +732,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
     <div class="branches">
       <p><strong>Sucursal Belgrano</strong>Av. Olazábal 2690, Belgrano, CABA</p>
       <p><strong>Sucursal Colegiales</strong>Ciudad de la Paz 1384, Colegiales, CABA</p>
-      <p><strong>Contacto</strong><a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a><br><a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram @romancifrepropiedades</a><br><a href="https://g.page/r/CcMc9ofe5SZfEBM/review" target="_blank" rel="noopener">Dejá tu reseña en Google</a></p>
+      <p><strong>Contacto</strong><a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a><br><a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram @romancifrepropiedades</a><br><a href="https://g.page/r/CcMc9ofe5SZfEBM/review" target="_blank" rel="noopener">Dejá tu reseña en Google</a><br><a href="privacidad.html">Aviso de privacidad</a></p>
     </div>
   </div>
 </footer>
@@ -977,6 +982,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       if (!name) { elMsg.textContent = 'Escribí tu nombre.'; document.getElementById('v-name').focus(); return; }
       if (phone.replace(/\D/g, '').length < 8) { elMsg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('v-phone').focus(); return; }
       if (!picked.length) { elMsg.textContent = 'Marcá al menos un día y horario.'; return; }
+      if (!document.getElementById('v-ok').checked) { elMsg.textContent = 'Para enviar, aceptá el aviso de privacidad.'; document.getElementById('v-ok').focus(); return; }
       elMsg.textContent = '';
       var lines = picked.map(function(d){
         return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(fmt).join(', ');
@@ -991,7 +997,8 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
       registrar('Nueva solicitud de visita - ' + name, {
         'Propiedad o local': prop, 'Nombre': name, 'Celular': phone, 'Personas': people,
-        'Días y horarios (visitas de 15 min)': lines.join('\n')
+        'Días y horarios (visitas de 15 min)': lines.join('\n'),
+        'Aceptó el aviso de privacidad': 'Sí'
       }, elMsg);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
@@ -1089,6 +1096,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       if (v('t-phone').replace(/\D/g, '').length < 8) { msg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('t-phone').focus(); return; }
       var elegidos = days.filter(function(d){ return (sel[d.key] || []).length; });
       if (days.length && !elegidos.length) { msg.textContent = 'Marcá al menos un día y una franja horaria para ir a tasar.'; return; }
+      if (!document.getElementById('t-ok').checked) { msg.textContent = 'Para enviar, aceptá el aviso de privacidad.'; document.getElementById('t-ok').focus(); return; }
       msg.textContent = '';
       var lineas = elegidos.map(function(d){
         return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(function(ix){ return etiqueta(d.fr[ix].f); }).join(' / ');
@@ -1109,7 +1117,8 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         'Quiere': op, 'Tipo de propiedad': v('t-tipo'), 'Dirección': v('t-dir'),
         'Ambientes': amb || '-', 'Superficie (m2)': m2 || '-',
         'Nombre': v('t-name'), 'Celular': v('t-phone'),
-        'Días y horarios para ir a tasar': lineas.join('\n') || '-'
+        'Días y horarios para ir a tasar': lineas.join('\n') || '-',
+        'Aceptó el aviso de privacidad': 'Sí'
       }, msg);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
