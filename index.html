@@ -9,6 +9,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="preload" as="image" href="esfera.webp">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -393,6 +394,61 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
   .contact-who{flex-direction:column; align-items:flex-start; gap:18px}
   .portrait{width:112px; height:112px}
 }
+
+/* ===== Mapa de propiedades ===== */
+.mapbox{margin-bottom:20px; background:#fff; border:1px solid var(--line); border-radius:22px; overflow:hidden}
+.mapbox[hidden]{display:none}
+.mapbar{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 16px; padding:16px 20px; border-bottom:1px solid var(--line)}
+.mapbar span{color:var(--muted); font-size:.92rem}
+.map{height:380px; background:#EEE9F2}
+.mapnote{margin:0; padding:10px 20px; border-top:1px solid var(--line)}
+.mapnote[hidden]{display:none}
+.leaflet-container{font-family:var(--font)}
+.pin-img{border-radius:50%; border:3px solid #fff; background:#fff; box-shadow:0 8px 18px rgba(63,22,80,.45)}
+.leaflet-popup-content-wrapper{border-radius:16px; box-shadow:0 14px 32px rgba(30,17,40,.25)}
+.leaflet-popup-content{margin:14px 16px; line-height:1.4}
+.pop strong{display:block; font-size:1rem; color:var(--ink)}
+.pop span{display:block; margin-top:2px; font-size:.88rem; color:var(--muted)}
+.pop-acc{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+.pop-link{display:block; text-align:center; padding:10px 14px; border-radius:999px; background:var(--violet); color:#fff !important; font-weight:700; font-size:.9rem; text-decoration:none}
+.pop-btn{padding:9px 14px; border-radius:999px; border:1px solid var(--violet); background:#fff; color:var(--violet); font:inherit; font-weight:700; font-size:.9rem; cursor:pointer}
+@media (max-width:640px){ .map{height:300px} .mapbar{padding:14px 16px} }
+
+/* ===== Sucursales ===== */
+.btn-line{background:#fff; color:var(--violet); border-color:var(--violet)}
+.branch-grid{display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr); gap:20px; align-items:stretch}
+@media (max-width:860px){.branch-grid{grid-template-columns:1fr}}
+.branch-list{display:flex; flex-direction:column; gap:12px}
+.branch{text-align:left; padding:18px 20px; border-radius:18px; border:1px solid var(--line); background:#fff; font:inherit; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; gap:2px}
+.branch b{font-size:1.05rem; font-weight:800}
+.branch span{color:var(--muted); font-size:.93rem}
+.branch[aria-pressed="true"]{border-color:var(--violet); background:var(--tint); box-shadow:inset 0 0 0 1px var(--violet)}
+.branch:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
+.branch-actions{display:flex; flex-direction:column; gap:10px; margin-top:6px}
+.gmap{border-radius:22px; overflow:hidden; border:1px solid var(--line); background:var(--tint); min-height:340px}
+.gmap iframe{display:block; width:100%; height:100%; min-height:340px; border:0}
+
+/* ===== Pie de página ===== */
+footer{background:var(--tint); border-top:1px solid var(--line); padding:52px 0 28px}
+footer .container{display:block}
+.f-grid{display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:32px 28px}
+@media (max-width:900px){.f-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.f-grid{grid-template-columns:1fr}}
+.f-brand .logo{height:40px}
+.f-brand p{margin:14px 0 18px; max-width:30ch; color:var(--muted); font-size:.95rem}
+.f-btn{min-height:46px; padding:10px 20px; font-size:.95rem}
+.f-col h4{margin:0 0 14px; font-size:.74rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+footer .f-col p{margin:0 0 12px; color:var(--ink); font-size:.95rem; line-height:1.5}
+.f-col a{display:block; padding:4px 0; color:var(--ink); font-weight:600; font-size:.95rem; text-decoration:none; overflow-wrap:anywhere}
+.f-col a:hover{color:var(--violet); text-decoration:underline}
+.f-bottom{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 20px; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:.88rem}
+.f-bottom a{color:var(--muted); font-weight:600}
+@media (max-width:1100px) and (min-width:961px){ .menu a{padding:9px 10px; font-size:.9rem} }
+
+/* Pie sin franja blanca: el espacio del botón flotante queda dentro del pie */
+body{padding-bottom:0}
+footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
+@media (max-width:640px){ footer{padding-bottom:calc(88px + env(safe-area-inset-bottom, 0px))} }
 </style>
 </head>
 <body>
@@ -407,6 +463,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       <a href="#agregamos-valor">Servicios</a>
       <a href="#tasacion">Tasaciones</a>
       <a href="#contacto">Contacto</a>
+      <a href="#sucursales">Sucursales</a>
     </nav>
     <div class="bar-actions">
       <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribime</a>
@@ -496,6 +553,11 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       <div class="sec-head">
         <h2>Coordiná tu visita</h2>
         <p class="sub">Elegí los días y horarios en que podés. Magali recibe tu pedido por WhatsApp y te confirma la visita.</p>
+      </div>
+      <div class="mapbox" id="prop-map-box" hidden>
+        <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita</span></div>
+        <div id="prop-map" class="map" role="region" aria-label="Mapa de las propiedades en alquiler"></div>
+        <p class="help mapnote" id="map-note">Ubicando propiedades…</p>
       </div>
       <form class="visit" id="visit-form" novalidate>
         <div class="vcard">
@@ -728,15 +790,61 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
     </div>
   </section>
 
+  <section id="sucursales">
+    <div class="container">
+      <div class="sec-head">
+        <h2>Nuestras sucursales</h2>
+        <p class="sub">Visitanos en Belgrano o en Colegiales.</p>
+      </div>
+      <div class="branch-grid">
+        <div class="branch-list">
+          <button class="branch" type="button" aria-pressed="true" data-dir="Av. Olazábal 2690, Belgrano, Ciudad Autónoma de Buenos Aires, Argentina"><b>Sucursal Belgrano</b><span>Av. Olazábal 2690, Belgrano, CABA</span></button>
+          <button class="branch" type="button" aria-pressed="false" data-dir="Ciudad de la Paz 1384, Colegiales, Ciudad Autónoma de Buenos Aires, Argentina"><b>Sucursal Colegiales</b><span>Ciudad de la Paz 1384, Colegiales, CABA</span></button>
+          <div class="branch-actions">
+            <a class="btn btn-violet" id="branch-go" href="https://www.google.com/maps/dir/?api=1&amp;destination=Av.%20Olaz%C3%A1bal%202690%2C%20Belgrano%2C%20Ciudad%20Aut%C3%B3noma%20de%20Buenos%20Aires%2C%20Argentina" target="_blank" rel="noopener">Cómo llegar <span aria-hidden="true">→</span></a>
+            <a class="btn btn-line" id="branch-view" href="https://www.google.com/maps/search/?api=1&amp;query=Av.%20Olaz%C3%A1bal%202690%2C%20Belgrano%2C%20Ciudad%20Aut%C3%B3noma%20de%20Buenos%20Aires%2C%20Argentina" target="_blank" rel="noopener">Abrir en Google Maps</a>
+          </div>
+        </div>
+        <div class="gmap">
+          <iframe id="gmap" title="Mapa de la sucursal en Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
+            src="https://www.google.com/maps?q=Av.%20Olaz%C3%A1bal%202690%2C%20Belgrano%2C%20Ciudad%20Aut%C3%B3noma%20de%20Buenos%20Aires%2C%20Argentina&amp;hl=es&amp;z=16&amp;output=embed"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer>
   <div class="container">
-    <img class="logo" src="logo.webp" width="465" height="126" alt="Román Cifre Propiedades">
-    <div class="branches">
-      <p><strong>Sucursal Belgrano</strong>Av. Olazábal 2690, Belgrano, CABA</p>
-      <p><strong>Sucursal Colegiales</strong>Ciudad de la Paz 1384, Colegiales, CABA</p>
-      <p><strong>Contacto</strong><a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a><br><a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram @romancifrepropiedades</a><br><a href="https://g.page/r/CcMc9ofe5SZfEBM/review" target="_blank" rel="noopener">Dejá tu reseña en Google</a><br><a href="privacidad.html">Aviso de privacidad</a></p>
+    <div class="f-grid">
+      <div class="f-brand">
+        <img class="logo" src="logo.webp" width="465" height="126" alt="Román Cifre Propiedades">
+        <p>Asesoramiento inmobiliario con atención personalizada.</p>
+        <a class="btn btn-wa f-btn" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribime por WhatsApp</a>
+      </div>
+      <div class="f-col">
+        <h4>Sucursales</h4>
+        <p><strong>Belgrano</strong><br>Av. Olazábal 2690</p>
+        <p><strong>Colegiales</strong><br>Ciudad de la Paz 1384</p>
+      </div>
+      <div class="f-col">
+        <h4>Contacto</h4>
+        <a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a>
+        <a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://g.page/r/CcMc9ofe5SZfEBM/review" target="_blank" rel="noopener">Dejá tu reseña en Google</a>
+      </div>
+      <div class="f-col">
+        <h4>En esta página</h4>
+        <a href="#que-buscas">Alquileres</a>
+        <a href="#visita">Coordinar una visita</a>
+        <a href="#tasacion">Tasaciones</a>
+        <a href="#sucursales">Sucursales</a>
+      </div>
+    </div>
+    <div class="f-bottom">
+      <span>© 2026 ROMÁN CIFRE Propiedades</span>
+      <a href="privacidad.html">Aviso de privacidad</a>
     </div>
   </div>
 </footer>
@@ -746,6 +854,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
   <span class="fab-txt">Hablar con Magali</span>
 </a>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
   // Registro de pedidos por mail (servicio FormSubmit). El destino se puede cambiar acá.
   var MAIL_PEDIDOS = 'magali@romancifre.com.ar';
@@ -773,6 +882,10 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       else { el.className = 'msg'; el.textContent = 'No pudimos registrar el pedido por mail (' + res.detalle + '). Enviá el mensaje de WhatsApp y llega igual.'; }
       return res;
     });
+  }
+  // Texto con que se muestra una propiedad en el selector y en el mapa.
+  function etiquetaProp(x){
+    return x.tipo + ' · ' + x.direccion + (x.barrio ? ' · ' + x.barrio : '') + (x.detalle ? ' (' + x.detalle + ')' : (x.m2 ? ' (' + x.m2 + ')' : ''));
   }
   // Abre WhatsApp en la pestaña que se abrió al tocar el botón (así no lo bloquea el navegador).
   function abrirWhatsApp(w, url){
@@ -1010,7 +1123,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         var og = document.createElement('optgroup'); og.label = nombres[op];
         items.forEach(function(x){
           var o = document.createElement('option');
-          o.textContent = x.tipo + ' · ' + x.direccion + (x.barrio ? ' · ' + x.barrio : '') + (x.detalle ? ' (' + x.detalle + ')' : (x.m2 ? ' (' + x.m2 + ')' : ''));
+          o.textContent = etiquetaProp(x);
           if (x.link) o.setAttribute('data-link', x.link);
           og.appendChild(o);
         });
@@ -1259,6 +1372,96 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       });
     }, {rootMargin:'-35% 0px -60% 0px'});
     for (var id2 in map) io.observe(document.getElementById(id2));
+  })();
+
+  // Mapa de propiedades: pines con el isologo; al tocar uno se ve el aviso de Adinco o se elige para la visita.
+  (function(){
+    var caja = document.getElementById('prop-map-box');
+    if (!caja || typeof L === 'undefined') return;
+    var nota = document.getElementById('map-note'), CLAVE = 'rcGeo1', cache = {};
+    try { cache = JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch (e) { cache = {}; }
+    function guardar(){ try { localStorage.setItem(CLAVE, JSON.stringify(cache)); } catch (e) {} }
+    function sinPiso(d){ return d.replace(/,?\s*\d+\s*°.*$/, ''); }
+    var fila = Promise.resolve();
+    // Ubicación: usa lat/lng del archivo si existen; si no, la busca una vez (OpenStreetMap) y la recuerda en el navegador.
+    function ubicar(x){
+      if (typeof x.lat === 'number' && typeof x.lng === 'number') return Promise.resolve([x.lat, x.lng]);
+      var dir = sinPiso(x.direccion);
+      if (cache[dir] !== undefined) return Promise.resolve(cache[dir]);
+      var mia = fila.then(function(){
+        var q = dir + ', ' + (x.barrio ? x.barrio + ', ' : '') + 'Ciudad Autónoma de Buenos Aires, Argentina';
+        var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ar&bounded=1&viewbox=-58.54,-34.51,-58.33,-34.71&q=' + encodeURIComponent(q);
+        return fetch(url, {headers: {'Accept': 'application/json'}}).then(function(r){ return r.json(); }).then(function(res){
+          var c = (res && res[0]) ? [parseFloat(res[0].lat), parseFloat(res[0].lon)] : null;
+          cache[dir] = c; guardar(); return c;
+        }).catch(function(){ return null; });
+      });
+      fila = mia.then(function(){ return new Promise(function(ok){ setTimeout(ok, 1100); }); });   // 1 consulta por segundo
+      return mia;
+    }
+    var mapa;
+    function contenido(x){
+      var d = document.createElement('div'); d.className = 'pop';
+      var t = document.createElement('strong'); t.textContent = x.tipo + ' · ' + x.direccion; d.appendChild(t);
+      var s = document.createElement('span'); s.textContent = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · '); d.appendChild(s);
+      var acc = document.createElement('div'); acc.className = 'pop-acc';
+      if (x.link) {
+        var a = document.createElement('a'); a.className = 'pop-link'; a.href = x.link; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = 'Ver publicación en Adinco'; acc.appendChild(a);
+      }
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'pop-btn'; b.textContent = 'Elegir para mi visita';
+      b.addEventListener('click', function(){ elegir(x); }); acc.appendChild(b);
+      d.appendChild(acc); return d;
+    }
+    function elegir(x){
+      var sel = document.getElementById('v-sel'); if (!sel || sel.hidden) return;
+      var et = etiquetaProp(x);
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].text === et) { sel.selectedIndex = i; sel.dispatchEvent(new Event('change')); break; }
+      }
+      mapa.closePopup();
+      document.getElementById('v-name').scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+    function iniciar(lista){
+      if (!lista || !lista.length) return;
+      caja.hidden = false;
+      mapa = L.map('prop-map', {scrollWheelZoom: false}).setView([-34.5627, -58.4577], 13);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap · © CARTO'
+      }).addTo(mapa);
+      var icono = L.icon({iconUrl: 'favicon.png', iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -24], className: 'pin-img'});
+      var puestos = [];
+      Promise.all(lista.map(function(x){
+        return ubicar(x).then(function(c){
+          if (!c) return;
+          var m = L.marker(c, {icon: icono, title: etiquetaProp(x), alt: etiquetaProp(x)}).addTo(mapa);
+          m.bindPopup(contenido(x), {maxWidth: 260});
+          puestos.push(m);
+          mapa.fitBounds(L.featureGroup(puestos).getBounds().pad(0.3), {maxZoom: 16});
+        });
+      })).then(function(){
+        if (!puestos.length) { caja.hidden = true; return; }
+        var faltan = lista.length - puestos.length;
+        nota.textContent = faltan > 0 ? faltan + (faltan === 1 ? ' propiedad no se pudo ubicar en el mapa, pero podés elegirla en la lista.' : ' propiedades no se pudieron ubicar en el mapa, pero podés elegirlas en la lista.') : '';
+        nota.hidden = faltan <= 0;
+      });
+    }
+    fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); }).then(iniciar).catch(function(){ caja.hidden = true; });
+  })();
+
+  // Sucursales: el mapa de Google cambia según la sucursal elegida.
+  (function(){
+    var btns = document.querySelectorAll('.branch'), frame = document.getElementById('gmap'),
+        ir = document.getElementById('branch-go'), ver = document.getElementById('branch-view');
+    if (!btns.length || !frame) return;
+    function elegir(b){
+      var dir = b.getAttribute('data-dir');
+      for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', btns[i] === b ? 'true' : 'false');
+      frame.src = 'https://www.google.com/maps?q=' + encodeURIComponent(dir) + '&hl=es&z=16&output=embed';
+      ir.href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dir);
+      ver.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dir);
+    }
+    for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', function(){ elegir(this); });
   })();
 </script>
 </body>
