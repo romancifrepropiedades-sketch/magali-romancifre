@@ -261,6 +261,7 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .picked button{border:0; background:#fff; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:1rem; line-height:1; color:var(--violet)}
 .help{color:var(--muted); font-size:.92rem}
 .msg{margin-top:12px; color:#8A1F11; font-weight:600; min-height:1.3em}
+.msg.ok{color:#12803F}
 .visit .btn-wa{width:100%; margin-top:6px}
 
 /* Pie */
@@ -737,6 +738,24 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
 </a>
 
 <script>
+  // Registro de pedidos por mail (servicio FormSubmit). El destino se puede cambiar acá.
+  var MAIL_PEDIDOS = 'magali@romancifre.com.ar';
+  function registrar(asunto, datos, el){
+    el.className = 'msg'; el.textContent = 'Registrando tu pedido…';
+    var cuerpo = {_subject: asunto, _template: 'table', _captcha: 'false'};
+    for (var k in datos) cuerpo[k] = datos[k];
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 10000);
+    fetch('https://formsubmit.co/ajax/' + MAIL_PEDIDOS, {
+      method: 'POST', keepalive: true,
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: JSON.stringify(cuerpo), signal: ctrl ? ctrl.signal : undefined
+    }).then(function(r){ clearTimeout(corte); return r.ok; }).catch(function(){ return false; }).then(function(ok){
+      if (ok) { el.className = 'msg ok'; el.textContent = '✓ Pedido registrado. Enviá el mensaje de WhatsApp que se abrió para que Magali te confirme.'; }
+      else { el.className = 'msg'; el.textContent = 'No pudimos registrar el pedido por mail. Enviá el mensaje de WhatsApp y llega igual.'; }
+    });
+  }
+
   (function(){
     // El aviso del fin de semana largo se oculta solo después del miércoles 11 de noviembre de 2026, 10:00 (hora de Argentina).
     var fin = new Date('2026-11-11T10:00:00-03:00');
@@ -948,6 +967,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
+      elMsg.className = 'msg';
       var prop = document.getElementById('v-prop').value.trim(),
           name = document.getElementById('v-name').value.trim(),
           phone = document.getElementById('v-phone').value.trim(),
@@ -969,6 +989,10 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         'Días y horarios que me sirven (visitas de 15 min):\n' + lines.join('\n') + '\n' +
         'Quedo a la espera de tu confirmación. ¡Gracias!';
       var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
+      registrar('Nueva solicitud de visita - ' + name, {
+        'Propiedad o local': prop, 'Nombre': name, 'Celular': phone, 'Personas': people,
+        'Días y horarios (visitas de 15 min)': lines.join('\n')
+      }, elMsg);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
     });
@@ -1058,6 +1082,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
+      msg.className = 'msg';
       var op = (form.querySelector('input[name="t-op"]:checked') || {}).value || '';
       if (!v('t-dir')) { msg.textContent = 'Indicá la dirección del inmueble.'; document.getElementById('t-dir').focus(); return; }
       if (!v('t-name')) { msg.textContent = 'Escribí tu nombre.'; document.getElementById('t-name').focus(); return; }
@@ -1080,6 +1105,12 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         (lineas.length ? 'Días y horarios para ir a tasar:\n' + lineas.join('\n') + '\n' : '') +
         'Quedo a la espera de tu contacto. ¡Gracias!';
       var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
+      registrar('Nueva solicitud de tasación - ' + v('t-name'), {
+        'Quiere': op, 'Tipo de propiedad': v('t-tipo'), 'Dirección': v('t-dir'),
+        'Ambientes': amb || '-', 'Superficie (m2)': m2 || '-',
+        'Nombre': v('t-name'), 'Celular': v('t-phone'),
+        'Días y horarios para ir a tasar': lineas.join('\n') || '-'
+      }, msg);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
     });
