@@ -500,7 +500,11 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       <form class="visit" id="visit-form" novalidate>
         <div class="vcard">
           <div class="field">
-            <label for="v-prop">Propiedad o local</label>
+            <label for="v-prop" id="v-lab">Propiedad o local</label>
+            <select id="v-sel" hidden>
+              <option value="">Elegí una propiedad…</option>
+              <option value="otra">Otra: escribir link, código o dirección</option>
+            </select>
             <input id="v-prop" type="text" placeholder="Link o código del aviso, o dirección" autocomplete="off">
           </div>
           <div class="field">
@@ -985,15 +989,40 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
     cargarOcupados();
     setInterval(cargarOcupados, 120000);
 
+    // Lista de propiedades (propiedades.json). Si no carga, queda el campo de texto.
+    var selProp = document.getElementById('v-sel'), inProp = document.getElementById('v-prop'), labProp = document.getElementById('v-lab');
+    function mostrarOtra(){ var otra = selProp.value === 'otra'; inProp.hidden = !otra; if (otra) inProp.focus(); }
+    function propSeleccionada(){
+      if (!selProp.hidden && selProp.value && selProp.value !== 'otra') return selProp.options[selProp.selectedIndex].text;
+      return inProp.value.trim();
+    }
+    selProp.addEventListener('change', function(){ elMsg.textContent = ''; mostrarOtra(); });
+    fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); }).then(function(lista){
+      if (!lista || !lista.length) return;
+      var nombres = {alquiler: 'En alquiler', venta: 'En venta'};
+      ['alquiler', 'venta'].forEach(function(op){
+        var items = lista.filter(function(x){ return x.operacion === op; });
+        if (!items.length) return;
+        var og = document.createElement('optgroup'); og.label = nombres[op];
+        items.forEach(function(x){
+          var o = document.createElement('option');
+          o.textContent = x.tipo + ' · ' + x.direccion + (x.barrio ? ' · ' + x.barrio : '') + (x.m2 ? ' (' + x.m2 + ')' : '');
+          og.appendChild(o);
+        });
+        selProp.insertBefore(og, selProp.querySelector('option[value="otra"]'));
+      });
+      selProp.hidden = false; inProp.hidden = true; labProp.setAttribute('for', 'v-sel');
+    }).catch(function(){ /* sin lista: queda el campo de texto */ });
+
     form.addEventListener('submit', function(e){
       e.preventDefault();
       elMsg.className = 'msg';
-      var prop = document.getElementById('v-prop').value.trim(),
+      var prop = propSeleccionada(),
           name = document.getElementById('v-name').value.trim(),
           phone = document.getElementById('v-phone').value.trim(),
           people = document.getElementById('v-people').value;
       var picked = days.filter(function(d){ return count(d.key); });
-      if (!prop) { elMsg.textContent = 'Indicá la propiedad o local que querés visitar.'; document.getElementById('v-prop').focus(); return; }
+      if (!prop) { elMsg.textContent = 'Elegí o indicá la propiedad o local que querés visitar.'; (selProp.hidden ? inProp : selProp).focus(); return; }
       if (!name) { elMsg.textContent = 'Escribí tu nombre.'; document.getElementById('v-name').focus(); return; }
       if (phone.replace(/\D/g, '').length < 8) { elMsg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('v-phone').focus(); return; }
       if (!picked.length) { elMsg.textContent = 'Marcá al menos un día y horario.'; return; }
