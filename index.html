@@ -132,6 +132,43 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .contact p{opacity:.9; margin-top:10px; max-width:42ch}
 .contact .cta-row{margin-top:0}
 
+/* Coordinar visita */
+.visit{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:20px; align-items:start}
+@media (max-width:820px){.visit{grid-template-columns:1fr}}
+.vcard{background:#fff; border:1px solid var(--line); border-radius:22px; padding:clamp(18px, 4vw, 28px); min-width:0}
+.vcard h3{font-size:1.02rem; font-weight:800; margin:0 0 8px}
+.vcard h3:not(:first-child){margin-top:20px}
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.field label{font-weight:700; font-size:.92rem}
+.field input,.field select{
+  font:inherit; width:100%; min-height:50px; padding:12px 14px; color:var(--ink);
+  background:#fff; border:1px solid #CFC4D6; border-radius:12px;
+}
+.field input:focus,.field select:focus{outline:3px solid rgba(115,47,132,.3); border-color:var(--violet)}
+.days{display:flex; gap:8px; overflow-x:auto; padding:4px 2px 10px; scroll-snap-type:x proximity}
+.day{
+  flex:none; scroll-snap-align:start; min-width:66px; padding:10px 8px; border-radius:14px;
+  border:1px solid var(--line); background:#fff; font:inherit; color:var(--ink); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+}
+.day small{font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.day b{font-size:1.25rem; line-height:1.1; font-weight:800}
+.day i{width:6px; height:6px; border-radius:50%; background:var(--violet); visibility:hidden}
+.day.has i{visibility:visible}
+.day[aria-pressed="true"]{background:var(--violet); border-color:var(--violet); color:#fff}
+.day[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
+.day[aria-pressed="true"] i{background:#fff}
+.slots{display:grid; grid-template-columns:repeat(auto-fill, minmax(86px, 1fr)); gap:8px; margin-top:8px}
+.slot{padding:12px 8px; border-radius:12px; border:1px solid #CFC4D6; background:#fff; font:inherit; font-weight:700; color:var(--ink); cursor:pointer}
+.slot[aria-pressed="true"]{background:var(--tint); border-color:var(--violet); color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet)}
+.picked{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; padding:0; list-style:none}
+.picked li{display:inline-flex; align-items:center; gap:8px; padding:5px 6px 5px 12px; background:var(--tint); border-radius:999px; font-size:.9rem; font-weight:600}
+.picked button{border:0; background:#fff; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:1rem; line-height:1; color:var(--violet)}
+.help{color:var(--muted); font-size:.92rem}
+.msg{margin-top:12px; color:#8A1F11; font-weight:600; min-height:1.3em}
+.visit .btn-wa{width:100%; margin-top:6px}
+
 /* Pie */
 footer{border-top:1px solid var(--line); padding:32px 0}
 footer .container{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px}
@@ -217,13 +254,50 @@ footer .container{align-items:flex-start}
           <p>Espacios comerciales para tu negocio, en ubicaciones estratégicas.</p>
           <span class="go">Ver locales →</span>
         </a>
-        <a class="tile" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20coordinar%20una%20visita.%20Propiedad%3A%20" target="_blank" rel="noopener">
+        <a class="tile" href="#visita">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L16 13"/></svg></span>
           <h3>Coordinar una visita</h3>
           <p>Contame qué propiedad te interesa y tus horarios disponibles.</p>
           <span class="go">Pedir visita →</span>
         </a>
       </div>
+    </div>
+  </section>
+
+  <section id="visita">
+    <div class="container">
+      <div class="sec-head">
+        <h2>Coordiná tu visita</h2>
+        <p class="sub">Elegí los días y horarios en que podés. Magali recibe tu pedido por WhatsApp y te confirma la visita.</p>
+      </div>
+      <form class="visit" id="visit-form" novalidate>
+        <div class="vcard">
+          <div class="field">
+            <label for="v-prop">Propiedad o local</label>
+            <input id="v-prop" type="text" placeholder="Link o código del aviso, o dirección" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="v-name">Tu nombre</label>
+            <input id="v-name" type="text" placeholder="Nombre y apellido" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="v-people">Personas que asisten</label>
+            <select id="v-people"><option>1</option><option>2</option><option>3</option><option>4</option><option>5 o más</option></select>
+          </div>
+        </div>
+        <div class="vcard">
+          <h3>1. Elegí un día</h3>
+          <div class="days" id="days" role="group" aria-label="Días disponibles"></div>
+          <h3>2. Marcá los horarios que te sirven</h3>
+          <p class="help">Podés marcar varios horarios y de distintos días.</p>
+          <div class="slots" id="slots" role="group" aria-label="Horarios disponibles"></div>
+          <ul class="picked" id="picked" aria-live="polite"></ul>
+          <p class="msg" id="msg" role="alert"></p>
+          <button class="btn btn-wa" type="submit">Enviar pedido por WhatsApp</button>
+          <p class="help" style="margin-top:10px">No es una reserva automática: Magali te confirma o te propone otro horario. Atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
+          <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20coordinar%20una%20visita" target="_blank" rel="noopener">Pedir una visita por WhatsApp</a></p></noscript>
+        </div>
+      </form>
     </div>
   </section>
 
@@ -330,6 +404,128 @@ footer .container{align-items:flex-start}
       tabs[i].addEventListener('click', function(){ show(this.id); });
     }
     show('tab-vivienda');
+  })();
+
+  // Coordinar visita: el cliente marca días y horarios y se arma un mensaje de WhatsApp para Magali, que confirma.
+  (function(){
+    var TZ = 'America/Argentina/Buenos_Aires';
+    // Primer y último horario de inicio de visita por día de la semana (0 = domingo). Sin entrada = no se atiende.
+    var HORARIOS = {1:[10,17], 2:[10,17], 3:[10,17], 4:[10,17], 5:[10,17], 6:[10,12]};
+    var DIAS_ADELANTE = 21;      // cuántos días hacia adelante se muestran
+    var AVISO_PREVIO_H = 3;      // no se ofrecen turnos con menos de 3 horas de anticipación
+    var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime(); // fin de semana largo
+    var NUM = '5491140827284';
+    var DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
+    var DIA_LARGO = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+    var form = document.getElementById('visit-form');
+    if (!form) return;
+    var elDays = document.getElementById('days'), elSlots = document.getElementById('slots'),
+        elPicked = document.getElementById('picked'), elMsg = document.getElementById('msg');
+
+    function pad(n){ return n < 10 ? '0' + n : '' + n; }
+    function hoyAR(){
+      var p = new Intl.DateTimeFormat('en-CA', {timeZone: TZ}).format(new Date()).split('-');
+      return {y:+p[0], m:+p[1], d:+p[2]};
+    }
+
+    var t = hoyAR(), ahora = Date.now(), days = [];
+    for (var i = 0; i <= DIAS_ADELANTE; i++) {
+      var dt = new Date(Date.UTC(t.y, t.m - 1, t.d + i)), wd = dt.getUTCDay(), cfg = HORARIOS[wd];
+      if (!cfg) continue;
+      var key = dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate());
+      var hs = [];
+      for (var h = cfg[0]; h <= cfg[1]; h++) {
+        var ini = new Date(key + 'T' + pad(h) + ':00:00-03:00').getTime();
+        if (ini >= ahora + AVISO_PREVIO_H * 3600000 && ini >= SIN_ATENCION_HASTA) hs.push(h);
+      }
+      if (hs.length) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, hs:hs});
+    }
+
+    var sel = {};          // key -> horas elegidas
+    var current = days.length ? days[0].key : null;
+
+    function find(k){ for (var i = 0; i < days.length; i++) if (days[i].key === k) return days[i]; }
+    function count(k){ return (sel[k] || []).length; }
+
+    function renderDays(){
+      elDays.innerHTML = '';
+      days.forEach(function(day){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'day' + (count(day.key) ? ' has' : '');
+        b.setAttribute('aria-pressed', day.key === current ? 'true' : 'false');
+        b.setAttribute('aria-label', DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m);
+        b.innerHTML = '<small>' + DIA[day.wd] + '</small><b>' + day.d + '</b><i></i>';
+        b.addEventListener('click', function(){ current = day.key; renderDays(); renderSlots(); });
+        elDays.appendChild(b);
+      });
+    }
+    function renderSlots(){
+      elSlots.innerHTML = '';
+      var day = find(current);
+      if (!day) return;
+      day.hs.forEach(function(h){
+        var on = (sel[day.key] || []).indexOf(h) > -1;
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'slot';
+        b.textContent = pad(h) + ':00';
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.addEventListener('click', function(){ toggle(day.key, h); });
+        elSlots.appendChild(b);
+      });
+    }
+    function toggle(k, h){
+      var a = sel[k] || [], ix = a.indexOf(h);
+      if (ix > -1) a.splice(ix, 1); else a.push(h);
+      a.sort(function(x, y){ return x - y; });
+      sel[k] = a; if (!a.length) delete sel[k];
+      elMsg.textContent = '';
+      renderDays(); renderSlots(); renderPicked();
+    }
+    function renderPicked(){
+      elPicked.innerHTML = '';
+      days.forEach(function(day){
+        (sel[day.key] || []).forEach(function(h){
+          var li = document.createElement('li');
+          li.appendChild(document.createTextNode(DIA[day.wd] + ' ' + day.d + '/' + day.m + ' · ' + pad(h) + ':00'));
+          var x = document.createElement('button');
+          x.type = 'button'; x.textContent = '×';
+          x.setAttribute('aria-label', 'Quitar ' + DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m + ' ' + pad(h) + ':00');
+          x.addEventListener('click', function(){ toggle(day.key, h); });
+          li.appendChild(x); elPicked.appendChild(li);
+        });
+      });
+    }
+
+    if (!days.length) {
+      elDays.innerHTML = '<p class="help">No hay horarios disponibles por ahora. Escribime por WhatsApp y coordinamos.</p>';
+    }
+    renderDays(); renderSlots(); renderPicked();
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var prop = document.getElementById('v-prop').value.trim(),
+          name = document.getElementById('v-name').value.trim(),
+          people = document.getElementById('v-people').value;
+      var picked = days.filter(function(d){ return count(d.key); });
+      if (!prop) { elMsg.textContent = 'Indicá la propiedad o local que querés visitar.'; document.getElementById('v-prop').focus(); return; }
+      if (!name) { elMsg.textContent = 'Escribí tu nombre.'; document.getElementById('v-name').focus(); return; }
+      if (!picked.length) { elMsg.textContent = 'Marcá al menos un día y horario.'; return; }
+      elMsg.textContent = '';
+      var lines = picked.map(function(d){
+        return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(function(h){ return pad(h) + ':00'; }).join(', ');
+      });
+      var text = 'Hola Magali, quiero coordinar una visita.\n' +
+        'Propiedad: ' + prop + '\n' +
+        'Nombre: ' + name + '\n' +
+        'Personas: ' + people + '\n' +
+        'Días y horarios que me sirven:\n' + lines.join('\n') + '\n' +
+        'Quedo a la espera de tu confirmación. ¡Gracias!';
+      var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
+      var w = window.open(url, '_blank', 'noopener');
+      if (!w) window.location.href = url;
+    });
   })();
 </script>
 </body>
