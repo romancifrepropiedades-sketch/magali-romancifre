@@ -750,15 +750,30 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
     var cuerpo = {_subject: asunto, _template: 'table', _captcha: 'false'};
     for (var k in datos) cuerpo[k] = datos[k];
     var ctrl = ('AbortController' in window) ? new AbortController() : null;
-    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 10000);
-    fetch('https://formsubmit.co/ajax/' + MAIL_PEDIDOS, {
-      method: 'POST', keepalive: true,
+    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 12000);
+    return fetch('https://formsubmit.co/ajax/' + MAIL_PEDIDOS, {
+      method: 'POST',
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       body: JSON.stringify(cuerpo), signal: ctrl ? ctrl.signal : undefined
-    }).then(function(r){ clearTimeout(corte); return r.ok; }).catch(function(){ return false; }).then(function(ok){
-      if (ok) { el.className = 'msg ok'; el.textContent = '✓ Pedido registrado. Enviá el mensaje de WhatsApp que se abrió para que Magali te confirme.'; }
-      else { el.className = 'msg'; el.textContent = 'No pudimos registrar el pedido por mail. Enviá el mensaje de WhatsApp y llega igual.'; }
+    }).then(function(r){
+      clearTimeout(corte);
+      return r.json().catch(function(){ return {}; }).then(function(d){
+        var exito = r.ok && (d.success === true || d.success === 'true');
+        return {ok: exito, detalle: (d && d.message) ? String(d.message) : ('respuesta ' + r.status)};
+      });
+    }).catch(function(e){
+      clearTimeout(corte);
+      return {ok: false, detalle: (e && e.name === 'AbortError') ? 'el servicio no respondió a tiempo' : 'no se pudo conectar con el servicio'};
+    }).then(function(res){
+      if (res.ok) { el.className = 'msg ok'; el.textContent = '✓ Pedido registrado. Se abre WhatsApp: enviá el mensaje para que Magali te confirme.'; }
+      else { el.className = 'msg'; el.textContent = 'No pudimos registrar el pedido por mail (' + res.detalle + '). Enviá el mensaje de WhatsApp y llega igual.'; }
+      return res;
     });
+  }
+  // Abre WhatsApp en la pestaña que se abrió al tocar el botón (así no lo bloquea el navegador).
+  function abrirWhatsApp(w, url){
+    if (w && !w.closed) { try { w.opener = null; } catch (e) {} w.location.href = url; }
+    else { window.location.href = url; }
   }
 
   (function(){
@@ -995,13 +1010,13 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         'Días y horarios que me sirven (visitas de 15 min):\n' + lines.join('\n') + '\n' +
         'Quedo a la espera de tu confirmación. ¡Gracias!';
       var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
+      var w = window.open('', '_blank'), sb = form.querySelector('button[type=submit]');
+      sb.disabled = true;
       registrar('Nueva solicitud de visita - ' + name, {
         'Propiedad o local': prop, 'Nombre': name, 'Celular': phone, 'Personas': people,
         'Días y horarios (visitas de 15 min)': lines.join('\n'),
         'Aceptó el aviso de privacidad': 'Sí'
-      }, elMsg);
-      var w = window.open(url, '_blank', 'noopener');
-      if (!w) window.location.href = url;
+      }, elMsg).then(function(){ sb.disabled = false; abrirWhatsApp(w, url); });
     });
   })();
 
@@ -1113,15 +1128,15 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         (lineas.length ? 'Días y horarios para ir a tasar:\n' + lineas.join('\n') + '\n' : '') +
         'Quedo a la espera de tu contacto. ¡Gracias!';
       var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
+      var w = window.open('', '_blank'), sb = form.querySelector('button[type=submit]');
+      sb.disabled = true;
       registrar('Nueva solicitud de tasación - ' + v('t-name'), {
         'Quiere': op, 'Tipo de propiedad': v('t-tipo'), 'Dirección': v('t-dir'),
         'Ambientes': amb || '-', 'Superficie (m2)': m2 || '-',
         'Nombre': v('t-name'), 'Celular': v('t-phone'),
         'Días y horarios para ir a tasar': lineas.join('\n') || '-',
         'Aceptó el aviso de privacidad': 'Sí'
-      }, msg);
-      var w = window.open(url, '_blank', 'noopener');
-      if (!w) window.location.href = url;
+      }, msg).then(function(){ sb.disabled = false; abrirWhatsApp(w, url); });
     });
   })();
 
