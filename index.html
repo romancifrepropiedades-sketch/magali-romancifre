@@ -159,6 +159,14 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .fbtn:disabled{opacity:.35; cursor:not-allowed; background:#F4F1F6}
 .tform .btn-wa{width:100%; margin-top:6px}
 
+/* Reseñas */
+.review{background:var(--tint); border:1px solid var(--line); border-radius:28px; padding:clamp(24px, 5vw, 44px); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:24px}
+.review h2{font-size:clamp(1.5rem, 4.8vw, 2.1rem); max-width:20ch}
+.review p{color:var(--muted); margin-top:8px; max-width:46ch}
+.stars{display:flex; gap:4px; margin-bottom:14px}
+.stars svg{width:30px; height:30px; fill:#F5B301}
+.btn-violet{background:var(--violet); color:#fff; box-shadow:0 8px 22px rgba(115,47,132,.28)}
+
 /* Contacto */
 .contact{
   background:linear-gradient(135deg, var(--deep), var(--violet)); color:#fff; border-radius:28px;
@@ -471,6 +479,19 @@ footer .container{align-items:flex-start}
     </div>
   </section>
 
+  <section id="resenas">
+    <div class="container">
+      <div class="review">
+        <div>
+          <div class="stars" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9z"/></svg></div>
+          <h2>¿Te atendí? Tu opinión me ayuda</h2>
+          <p>Si te gustó la atención, dejame tu calificación en Google. Te lleva menos de un minuto y me ayuda a que más personas me encuentren.</p>
+        </div>
+        <a class="btn btn-violet" href="https://g.page/r/CcMc9ofe5SZfEBM/review" target="_blank" rel="noopener">Calificar mi atención en Google</a>
+      </div>
+    </div>
+  </section>
+
   <section>
     <div class="container">
       <div class="contact">
@@ -494,7 +515,7 @@ footer .container{align-items:flex-start}
     <div class="branches">
       <p><strong>Sucursal Olazábal</strong>Av. Olazábal 2690, CABA</p>
       <p><strong>Sucursal Ciudad de la Paz</strong>Ciudad de la Paz 1384, CABA</p>
-      <p><strong>Contacto</strong><a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a><br><a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram @romancifrepropiedades</a></p>
+      <p><strong>Contacto</strong><a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a><br><a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram @romancifrepropiedades</a><br><a href="https://g.page/r/CcMc9ofe5SZfEBM/review" target="_blank" rel="noopener">Dejá tu reseña en Google</a></p>
     </div>
   </div>
 </footer>
