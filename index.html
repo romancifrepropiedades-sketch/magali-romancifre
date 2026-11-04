@@ -35,7 +35,7 @@ a{color:inherit}
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:10px;
   min-height:52px; padding:14px 24px; border-radius:999px;
-  font-weight:700; font-size:1rem; text-decoration:none; border:2px solid transparent;
+  font-family:inherit; font-weight:700; font-size:1rem; text-decoration:none; border:2px solid transparent; cursor:pointer;
   transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
 }
 .btn:hover{transform:translateY(-1px)}
@@ -124,13 +124,40 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 }
 
 /* Tasación */
-.perks{list-style:none; margin:18px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px}
-.perks li{background:var(--tint); color:var(--violet); font-weight:700; font-size:.92rem; padding:8px 14px; border-radius:999px}
-.tas{max-width:760px}
+.tasgrid{display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.35fr); gap:20px; align-items:start}
+@media (max-width:900px){.tasgrid{grid-template-columns:1fr}}
+.tpanel{position:relative; overflow:hidden; color:#fff; border-radius:28px; padding:clamp(24px, 5vw, 40px);
+  background:linear-gradient(160deg, var(--deep) 0%, #5B2370 55%, var(--violet) 100%)}
+.tpanel .eyebrow{margin-bottom:10px}
+.tpanel h2{max-width:14ch}
+.tpanel .lead2{margin-top:12px; opacity:.92; max-width:34ch}
+.checks{list-style:none; margin:24px 0 0; padding:0; display:flex; flex-direction:column; gap:14px}
+.checks li{display:flex; gap:12px; align-items:flex-start; font-weight:700; line-height:1.35}
+.checks .tick{flex:none; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.2); display:grid; place-items:center}
+.checks .tick svg{width:14px; height:14px}
+.steps{list-style:none; margin:28px 0 0; padding:22px 0 0; border-top:1px solid rgba(255,255,255,.25); display:flex; flex-direction:column; gap:12px; counter-reset:paso}
+.steps li{counter-increment:paso; display:flex; gap:12px; align-items:flex-start; font-size:.95rem}
+.steps li::before{content:counter(paso); flex:none; width:24px; height:24px; border-radius:50%; background:#fff; color:var(--violet); font-weight:800; font-size:.82rem; display:grid; place-items:center}
+.tform h3{font-size:1.02rem; font-weight:800; margin:0 0 10px}
+.tform h3:not(:first-child){margin-top:24px}
 .fgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 16px}
 .fgrid .full{grid-column:1 / -1}
 @media (max-width:640px){.fgrid{grid-template-columns:1fr}}
-.tas .btn-wa{width:100%; margin-top:6px}
+.opt{font-weight:500; color:var(--muted)}
+.chip{position:relative; display:inline-block}
+.chip input{position:absolute; opacity:0; inset:0; width:100%; height:100%; margin:0; cursor:pointer}
+.chip span{display:inline-block; padding:11px 20px; border:1px solid #CFC4D6; border-radius:999px; font-weight:700; background:#fff}
+.chip input:checked + span{background:var(--violet); border-color:var(--violet); color:#fff}
+.chip input:focus-visible + span{outline:3px solid var(--ink); outline-offset:2px}
+.seg{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px}
+.frow{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:12px 0; border-top:1px solid var(--line)}
+.frow:first-child{border-top:0}
+.frow > b{min-width:104px; font-weight:800}
+.fbtns{display:flex; flex-wrap:wrap; gap:8px}
+.fbtn{padding:10px 14px; border-radius:12px; border:1px solid #CFC4D6; background:#fff; font:inherit; font-size:.92rem; font-weight:700; color:var(--ink); cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--tint); border-color:var(--violet); color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet)}
+.fbtn:disabled{opacity:.35; cursor:not-allowed; background:#F4F1F6}
+.tform .btn-wa{width:100%; margin-top:6px}
 
 /* Contacto */
 .contact{
@@ -375,43 +402,72 @@ footer .container{align-items:flex-start}
 
   <section id="tasacion">
     <div class="container">
-      <div class="sec-head">
-        <h2>Tasá tu propiedad</h2>
-        <p class="sub">Completá los datos de tu inmueble y Magali recibe tu pedido por WhatsApp para coordinar la tasación.</p>
-        <ul class="perks"><li>Sin cargo</li><li>En 24 hs</li><li>Informe profesional firmado por un matriculado</li></ul>
-      </div>
-      <form class="vcard tas" id="tas-form" novalidate>
-        <div class="fgrid">
-          <div class="field">
-            <label for="t-op">¿Qué querés hacer?</label>
-            <select id="t-op"><option>Vender</option><option>Alquilar</option><option>Todavía no lo sé</option></select>
-          </div>
-          <div class="field">
-            <label for="t-tipo">Tipo de inmueble</label>
-            <select id="t-tipo"><option>Departamento</option><option>Casa</option><option>PH</option><option>Local comercial</option><option>Oficina</option><option>Terreno</option><option>Otro</option></select>
-          </div>
-          <div class="field full">
-            <label for="t-dir">Dirección o barrio</label>
-            <input id="t-dir" type="text" placeholder="Ej: Cabildo 2000, Belgrano" autocomplete="street-address">
-          </div>
-          <div class="field full">
-            <label for="t-det">Ambientes y superficie aproximada <span style="font-weight:500;color:var(--muted)">(opcional)</span></label>
-            <input id="t-det" type="text" placeholder="Ej: 3 ambientes, 65 m²" autocomplete="off">
-          </div>
-          <div class="field">
-            <label for="t-name">Tu nombre</label>
-            <input id="t-name" type="text" placeholder="Nombre y apellido" autocomplete="name">
-          </div>
-          <div class="field">
-            <label for="t-phone">Tu celular</label>
-            <input id="t-phone" type="tel" inputmode="tel" placeholder="Ej: 11 5555-1234" autocomplete="tel">
-          </div>
+      <div class="tasgrid">
+        <div class="tpanel">
+          <p class="eyebrow">Tasaciones</p>
+          <h2>Conocé el valor real de tu propiedad</h2>
+          <p class="lead2">Para vender o para alquilar, con respaldo profesional.</p>
+          <ul class="checks">
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Sin cargo</span></li>
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Tasación en 24 hs</span></li>
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Informe profesional firmado por un matriculado</span></li>
+          </ul>
+          <ol class="steps">
+            <li>Completás los datos de tu inmueble y tu disponibilidad.</li>
+            <li>Coordinamos la visita para tasar.</li>
+            <li>Recibís el informe profesional firmado por un matriculado.</li>
+          </ol>
         </div>
-        <p class="msg" id="t-msg" role="alert"></p>
-        <button class="btn btn-wa" type="submit">Solicitar tasación por WhatsApp</button>
-        <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Solo tenés que enviarlo.</p>
-        <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20solicitar%20una%20tasaci%C3%B3n" target="_blank" rel="noopener">Solicitar tasación por WhatsApp</a></p></noscript>
-      </form>
+
+        <form class="vcard tform" id="tas-form" novalidate>
+          <h3>Tu inmueble</h3>
+          <div class="seg" role="radiogroup" aria-label="¿Qué querés hacer?">
+            <label class="chip"><input type="radio" name="t-op" value="Vender" checked><span>Vender</span></label>
+            <label class="chip"><input type="radio" name="t-op" value="Alquilar"><span>Alquilar</span></label>
+            <label class="chip"><input type="radio" name="t-op" value="Todavía no lo sé"><span>Todavía no lo sé</span></label>
+          </div>
+          <div class="fgrid">
+            <div class="field full">
+              <label for="t-dir">Dirección</label>
+              <input id="t-dir" type="text" placeholder="Calle, número y barrio" autocomplete="street-address">
+            </div>
+            <div class="field">
+              <label for="t-tipo">Tipo de propiedad</label>
+              <select id="t-tipo"><option>Departamento</option><option>Casa</option><option>PH</option><option>Local comercial</option><option>Oficina</option><option>Terreno</option><option>Otro</option></select>
+            </div>
+            <div class="field">
+              <label for="t-amb">Ambientes <span class="opt">(opcional)</span></label>
+              <select id="t-amb"><option value="">Elegí</option><option>Monoambiente</option><option>2 ambientes</option><option>3 ambientes</option><option>4 ambientes</option><option>5 o más</option></select>
+            </div>
+            <div class="field full">
+              <label for="t-m2">Metros cuadrados <span class="opt">(opcional)</span></label>
+              <input id="t-m2" type="number" inputmode="numeric" min="1" max="100000" placeholder="Ej: 65" autocomplete="off">
+            </div>
+          </div>
+
+          <h3>Tus datos</h3>
+          <div class="fgrid">
+            <div class="field">
+              <label for="t-name">Nombre y apellido</label>
+              <input id="t-name" type="text" placeholder="Tu nombre" autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="t-phone">Celular</label>
+              <input id="t-phone" type="tel" inputmode="tel" placeholder="Ej: 11 5555-1234" autocomplete="tel">
+            </div>
+          </div>
+
+          <h3>¿Cuándo podemos ir a tasar?</h3>
+          <p class="help">Elegí los días en que te queda cómodo y marcá la franja horaria de cada uno.</p>
+          <div class="days" id="t-days" role="group" aria-label="Días disponibles para tasar"></div>
+          <div id="t-franjas"></div>
+
+          <p class="msg" id="t-msg" role="alert"></p>
+          <button class="btn btn-wa" type="submit">Solicitar tasación por WhatsApp</button>
+          <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Solo tenés que enviarlo.</p>
+          <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20solicitar%20una%20tasaci%C3%B3n" target="_blank" rel="noopener">Solicitar tasación por WhatsApp</a></p></noscript>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -686,27 +742,112 @@ footer .container{align-items:flex-start}
     });
   })();
 
-  // Tasación: arma el pedido y lo envía a Magali por WhatsApp.
+  // Tasación: el cliente completa los datos del inmueble y su disponibilidad, y el pedido se envía a Magali por WhatsApp.
   (function(){
+    var TZ = 'America/Argentina/Buenos_Aires';
+    var DIAS_ADELANTE = 14, AVISO_PREVIO_H = 3;
+    var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime(); // fin de semana largo
+    var NUM = '5491140827284';
+    // Franjas horarias para ir a tasar, en minutos desde las 00:00: [desde, hasta]
+    var SEMANA = [[600,780],[780,960],[960,1080]];   // lunes a viernes: 10 a 13, 13 a 16, 16 a 18
+    var SABADO = [[600,780]];                        // sábados: 10 a 13
+    var DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
+    var DIA_LARGO = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
     var form = document.getElementById('tas-form');
     if (!form) return;
-    var msg = document.getElementById('t-msg');
+    var elDays = document.getElementById('t-days'), elFr = document.getElementById('t-franjas'), msg = document.getElementById('t-msg');
+
+    function pad(n){ return n < 10 ? '0' + n : '' + n; }
+    function hh(min){ return Math.floor(min / 60); }
+    function etiqueta(f){ return hh(f[0]) + ' a ' + hh(f[1]) + ' h'; }
+    function hoyAR(){
+      var p = new Intl.DateTimeFormat('en-CA', {timeZone: TZ}).format(new Date()).split('-');
+      return {y:+p[0], m:+p[1], d:+p[2]};
+    }
     function v(id){ return document.getElementById(id).value.trim(); }
+
+    var t0 = hoyAR(), ahora = Date.now(), days = [];
+    for (var i = 0; i <= DIAS_ADELANTE; i++) {
+      var dt = new Date(Date.UTC(t0.y, t0.m - 1, t0.d + i)), wd = dt.getUTCDay();
+      if (wd === 0) continue;
+      var key = dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate());
+      var fr = (wd === 6 ? SABADO : SEMANA).map(function(f){
+        var ini = new Date(key + 'T' + pad(hh(f[0])) + ':00:00-03:00').getTime();
+        return {f:f, ok: ini >= ahora + AVISO_PREVIO_H * 3600000 && ini >= SIN_ATENCION_HASTA};
+      });
+      if (fr.some(function(x){ return x.ok; })) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, fr:fr});
+    }
+
+    var on = {};    // día elegido: key -> true
+    var sel = {};   // key -> índices de franjas elegidas
+    function find(k){ for (var i = 0; i < days.length; i++) if (days[i].key === k) return days[i]; }
+
+    function renderDays(){
+      elDays.innerHTML = '';
+      days.forEach(function(day){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'day';
+        b.setAttribute('aria-pressed', on[day.key] ? 'true' : 'false');
+        b.setAttribute('aria-label', DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m);
+        b.innerHTML = '<small>' + DIA[day.wd] + '</small><b>' + day.d + '</b><i></i>';
+        b.addEventListener('click', function(){
+          if (on[day.key]) { delete on[day.key]; delete sel[day.key]; } else on[day.key] = true;
+          msg.textContent = ''; renderDays(); renderFr();
+        });
+        elDays.appendChild(b);
+      });
+    }
+    function renderFr(){
+      elFr.innerHTML = '';
+      days.forEach(function(day){
+        if (!on[day.key]) return;
+        var row = document.createElement('div'); row.className = 'frow';
+        var lab = document.createElement('b'); lab.textContent = DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m; row.appendChild(lab);
+        var box = document.createElement('div'); box.className = 'fbtns';
+        day.fr.forEach(function(x, ix){
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'fbtn'; b.textContent = etiqueta(x.f);
+          b.setAttribute('aria-pressed', (sel[day.key] || []).indexOf(ix) > -1 ? 'true' : 'false');
+          if (!x.ok) b.disabled = true;
+          b.addEventListener('click', function(){
+            var a = sel[day.key] || [], p = a.indexOf(ix);
+            if (p > -1) a.splice(p, 1); else a.push(ix);
+            a.sort(function(m, n){ return m - n; });
+            sel[day.key] = a; msg.textContent = ''; renderFr();
+          });
+          box.appendChild(b);
+        });
+        row.appendChild(box); elFr.appendChild(row);
+      });
+    }
+    if (!days.length) elDays.innerHTML = '<p class="help">No hay días disponibles por ahora. Enviá tu pedido y coordinamos por WhatsApp.</p>';
+    renderDays(); renderFr();
+
     form.addEventListener('submit', function(e){
       e.preventDefault();
-      if (!v('t-dir')) { msg.textContent = 'Indicá la dirección o el barrio del inmueble.'; document.getElementById('t-dir').focus(); return; }
+      var op = (form.querySelector('input[name="t-op"]:checked') || {}).value || '';
+      if (!v('t-dir')) { msg.textContent = 'Indicá la dirección del inmueble.'; document.getElementById('t-dir').focus(); return; }
       if (!v('t-name')) { msg.textContent = 'Escribí tu nombre.'; document.getElementById('t-name').focus(); return; }
       if (v('t-phone').replace(/\D/g, '').length < 8) { msg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('t-phone').focus(); return; }
+      var elegidos = days.filter(function(d){ return (sel[d.key] || []).length; });
+      if (days.length && !elegidos.length) { msg.textContent = 'Marcá al menos un día y una franja horaria para ir a tasar.'; return; }
       msg.textContent = '';
+      var lineas = elegidos.map(function(d){
+        return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(function(ix){ return etiqueta(d.fr[ix].f); }).join(' / ');
+      });
+      var amb = v('t-amb'), m2 = v('t-m2');
       var text = 'Hola Magali, quiero solicitar una tasación.\n' +
-        'Quiero: ' + v('t-op') + '\n' +
-        'Tipo de inmueble: ' + v('t-tipo') + '\n' +
-        'Dirección o barrio: ' + v('t-dir') + '\n' +
-        (v('t-det') ? 'Ambientes y superficie: ' + v('t-det') + '\n' : '') +
+        'Quiero: ' + op + '\n' +
+        'Tipo de propiedad: ' + v('t-tipo') + '\n' +
+        'Dirección: ' + v('t-dir') + '\n' +
+        (amb ? 'Ambientes: ' + amb + '\n' : '') +
+        (m2 ? 'Superficie: ' + m2 + ' m²\n' : '') +
         'Nombre: ' + v('t-name') + '\n' +
         'Celular: ' + v('t-phone') + '\n' +
+        (lineas.length ? 'Días y horarios para ir a tasar:\n' + lineas.join('\n') + '\n' : '') +
         'Quedo a la espera de tu contacto. ¡Gracias!';
-      var url = 'https://wa.me/5491140827284?text=' + encodeURIComponent(text);
+      var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
     });
