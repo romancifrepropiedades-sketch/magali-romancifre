@@ -6,7 +6,9 @@
   "barrio": "Belgrano",
   "detalle": "55 m²",
   "link": "https://propiedades.adinco.net/aviso/local-alquiler-belgrano-belgrano-capital-federal--6532842",
-  "precio": 2500000
+  "precio": 2500000,
+  "lat": -34.558618,
+  "lng": -58.45588
  },
  {
   "operacion": "alquiler",
