@@ -25,12 +25,14 @@
  {
   "operacion": "alquiler",
   "tipo": "Departamento",
-  "direccion": "Quesada 2100, 2°",
+  "direccion": "Quesada 2118, 2°",
   "barrio": "Belgrano",
   "detalle": "2 dorm., 56 m²",
   "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-2dorm-1bano--6548746",
   "dorm": 2,
-  "precio": 1050000
+  "precio": 1050000,
+  "lat": -34.55297,
+  "lng": -58.460496
  },
  {
   "operacion": "alquiler",
