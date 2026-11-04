@@ -13,14 +13,14 @@
  {
   "operacion": "alquiler",
   "tipo": "Departamento",
-  "direccion": "Olazábal 3100",
+  "direccion": "Av. Olazábal 3082",
   "barrio": "Belgrano",
   "detalle": "1 dorm., 36 m²",
   "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6548778",
   "dorm": 1,
   "precio": 650000,
-  "lat": -34.564063,
-  "lng": -58.464688
+  "lat": -34.564109,
+  "lng": -58.464732
  },
  {
   "operacion": "alquiler",
