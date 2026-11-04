@@ -460,6 +460,27 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .pop-aprox{display:block; margin-top:6px; font-size:.8rem; font-weight:600; color:#8A5A00}
 .pop-precio{display:block; margin-top:8px; font-style:normal; font-weight:800; color:var(--violet); font-size:1.02rem}
 @media (max-width:640px){ .mapfilters{padding:12px 16px} .mapfilters label{flex:1 1 140px} .mapfilters select{width:100%} .f-clear{margin-left:0} }
+
+/* Calendario mensual de visitas */
+.cal{border:1px solid var(--line); border-radius:18px; padding:14px 14px 10px; background:#fff; margin-bottom:6px}
+.cal-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px}
+.cal-head strong{font-size:1.05rem; font-weight:800; text-transform:capitalize}
+.cal-nav{width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:#fff; color:var(--ink); font:inherit; font-size:1.4rem; line-height:1; cursor:pointer}
+.cal-nav:hover:not(:disabled){background:var(--tint)}
+.cal-nav:disabled{opacity:.3; cursor:not-allowed}
+.cal-nav:focus-visible,.cal-dia:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+.cal-sem,.cal-grid{display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px}
+.cal-sem{text-align:center; margin-bottom:4px; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.cal-dia{position:relative; aspect-ratio:1; min-height:40px; border:0; border-radius:12px; background:transparent; color:var(--ink); font:inherit; font-weight:700; cursor:pointer}
+.cal-dia:hover:not(:disabled){background:var(--tint)}
+.cal-dia.hoy{box-shadow:inset 0 0 0 1px var(--violet)}
+.cal-dia.off{color:#BDB6C6; font-weight:500; cursor:not-allowed}
+.cal-dia.full{color:#BDB6C6; text-decoration:line-through}
+.cal-dia[aria-pressed="true"]{background:var(--violet); color:#fff; text-decoration:none}
+.cal-dia.has::after{content:''; position:absolute; left:50%; bottom:5px; width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--violet)}
+.cal-dia[aria-pressed="true"].has::after{background:#fff}
+.cal-ley{margin:8px 0 0; font-size:.84rem}
+.dia-sel{margin:10px 0 4px; font-size:1.02rem; font-weight:800}
 </style>
 </head>
 <body>
@@ -601,10 +622,20 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
         </div>
         <div class="vcard">
           <h3>1. Elegí un día</h3>
-          <div class="days" id="days" role="group" aria-label="Días disponibles"></div>
+          <div class="cal" id="cal">
+            <div class="cal-head">
+              <button type="button" class="cal-nav" id="cal-prev" aria-label="Mes anterior">‹</button>
+              <strong id="cal-mes" aria-live="polite"></strong>
+              <button type="button" class="cal-nav" id="cal-next" aria-label="Mes siguiente">›</button>
+            </div>
+            <div class="cal-sem" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+            <div class="cal-grid" id="days" role="group" aria-label="Días disponibles"></div>
+            <p class="help cal-ley">Los días en gris no tienen horarios disponibles.</p>
+          </div>
           <h3>2. Marcá los horarios que te sirven</h3>
           <p class="help">Cada visita dura 15 minutos. Podés marcar varios horarios y de distintos días.</p>
           <p class="help" id="legend" hidden><b>Los horarios en gris no están disponibles</b> (ya reservados o fuera de plazo).</p>
+          <p class="dia-sel" id="dia-sel" aria-live="polite"></p>
           <div class="slots" id="slots" role="group" aria-label="Horarios disponibles"></div>
           <ul class="picked" id="picked" aria-live="polite"></ul>
           <label class="consent"><input type="checkbox" id="v-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
@@ -960,7 +991,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
     var PASO = 15;               // duración de cada visita, en minutos
     // Horario de atención por día de la semana (0 = domingo), en minutos desde las 00:00: [apertura, cierre]
     var HORARIOS = {1:[600,1080], 2:[600,1080], 3:[600,1080], 4:[600,1080], 5:[600,1080], 6:[600,780]};
-    var DIAS_ADELANTE = 21;      // cuántos días hacia adelante se muestran
+    var DIAS_ADELANTE = 30;      // cuántos días hacia adelante se muestran
     var AVISO_PREVIO_H = 3;      // no se ofrecen turnos con menos de 3 horas de anticipación
     var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime(); // fin de semana largo
     var NUM = '5491140827284';
@@ -1015,27 +1046,48 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 
     var sel = {};          // key -> minutos elegidos
     var current = days.length ? days[0].key : null;
+    var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var hoyClave = t.y + '-' + pad(t.m) + '-' + pad(t.d);
+    var ultimo = new Date(Date.UTC(t.y, t.m - 1, t.d + DIAS_ADELANTE));
+    var minMes = t.y * 12 + (t.m - 1), maxMes = ultimo.getUTCFullYear() * 12 + ultimo.getUTCMonth();
+    var vistaMes = current ? (+current.slice(0, 4)) * 12 + (+current.slice(5, 7) - 1) : minMes;
+    var elDiaSel = document.getElementById('dia-sel'), elMes = document.getElementById('cal-mes'),
+        calPrev = document.getElementById('cal-prev'), calNext = document.getElementById('cal-next');
+    calPrev.addEventListener('click', function(){ if (vistaMes > minMes) { vistaMes--; renderDays(); } });
+    calNext.addEventListener('click', function(){ if (vistaMes < maxMes) { vistaMes++; renderDays(); } });
 
     function find(k){ for (var i = 0; i < days.length; i++) if (days[i].key === k) return days[i]; }
     function count(k){ return (sel[k] || []).length; }
 
     function renderDays(){
       elDays.innerHTML = '';
-      days.forEach(function(day){
+      var y = Math.floor(vistaMes / 12), mes = vistaMes % 12;
+      elMes.textContent = MESES[mes] + ' ' + y;
+      calPrev.disabled = vistaMes <= minMes; calNext.disabled = vistaMes >= maxMes;
+      var offset = (new Date(Date.UTC(y, mes, 1)).getUTCDay() + 6) % 7;      // la semana empieza el lunes
+      var total = new Date(Date.UTC(y, mes + 1, 0)).getUTCDate();
+      for (var i = 0; i < offset; i++) elDays.appendChild(document.createElement('span'));
+      for (var d = 1; d <= total; d++) {
+        var clave = y + '-' + pad(mes + 1) + '-' + pad(d), day = find(clave);
         var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'day' + (count(day.key) ? ' has' : '') + (day.free ? '' : ' full');
-        b.setAttribute('aria-pressed', day.key === current ? 'true' : 'false');
-        b.setAttribute('aria-label', DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m + (day.free ? '' : ', sin horarios disponibles'));
-        b.innerHTML = '<small>' + DIA[day.wd] + '</small><b>' + day.d + '</b><i></i>';
-        b.addEventListener('click', function(){ current = day.key; renderDays(); renderSlots(); });
+        b.type = 'button'; b.textContent = d; b.className = 'cal-dia' + (clave === hoyClave ? ' hoy' : '');
+        var largo = DIA_LARGO[new Date(Date.UTC(y, mes, d)).getUTCDay()] + ' ' + d + ' de ' + MESES[mes];
+        if (!day) { b.disabled = true; b.className += ' off'; b.setAttribute('aria-label', largo + ', no disponible'); }
+        else {
+          if (!day.free) b.className += ' full';
+          if (count(clave)) b.className += ' has';
+          b.setAttribute('aria-pressed', clave === current ? 'true' : 'false');
+          b.setAttribute('aria-label', largo + (day.free ? '' : ', sin horarios disponibles'));
+          (function(k){ b.addEventListener('click', function(){ current = k; renderDays(); renderSlots(); }); })(clave);
+        }
         elDays.appendChild(b);
-      });
+      }
     }
     function renderSlots(){
       elSlots.innerHTML = '';
       var day = find(current), anyOff = false;
-      if (!day) { elLegend.hidden = true; return; }
+      if (!day) { elLegend.hidden = true; if (elDiaSel) elDiaSel.textContent = ''; return; }
+      if (elDiaSel) { var txt = DIA_LARGO[day.wd] + ' ' + day.d + ' de ' + MESES[day.m - 1]; elDiaSel.textContent = txt.charAt(0).toUpperCase() + txt.slice(1); }
       if (!day.free) {
         var p = document.createElement('p'); p.className = 'help';
         p.textContent = 'Este día ya no tiene horarios disponibles. Probá con otro día.';
