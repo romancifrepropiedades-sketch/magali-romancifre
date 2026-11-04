@@ -286,6 +286,62 @@ footer .container{align-items:flex-start}
 }
 .fab:hover{transform:translateY(-2px)}
 @media (prefers-reduced-motion: reduce){*{transition:none !important; scroll-behavior:auto !important}}
+
+/* ===== Celular: mejor distribución ===== */
+@media (max-width:860px){
+  .hero{padding:40px 0 92px}
+  .hero .container{
+    grid-template-columns:minmax(0,1fr) 142px; gap:0 6px;
+    grid-template-areas:"eyebrow stage" "title stage" "lead lead" "cta cta" "hours hours";
+    align-items:start;
+  }
+  .hero-copy{display:contents}
+  .hero .eyebrow{grid-area:eyebrow; align-self:end; margin-bottom:6px}
+  .hero h1{grid-area:title; align-self:start}
+  .hero .lead{grid-area:lead; margin-top:34px; max-width:none}
+  .hero .cta-row{grid-area:cta; margin-top:24px}
+  .hero .hours{grid-area:hours; margin-top:22px}
+  .stage{grid-area:stage; width:150px; margin:20px -8px -44px 0; justify-self:end; align-self:start}
+}
+@media (max-width:640px){
+  section{padding:48px 0}
+  .sec-head{margin-bottom:22px}
+  .hero .cta-row .btn{flex:1 1 100%}
+  .notice-wrap{margin-top:-44px}
+
+  /* Accesos: grilla 2 x 2 compacta */
+  .tiles{grid-template-columns:1fr 1fr; gap:12px}
+  .tile{padding:16px; gap:8px; border-radius:18px}
+  .tile .ico{width:42px; height:42px; border-radius:13px}
+  .tile .ico svg{width:22px; height:22px}
+  .tile h3{font-size:1rem; line-height:1.25; margin-top:2px}
+  .tile p{display:none}
+  .tile .go{font-size:.88rem; padding-top:2px}
+
+  /* Agregamos valor: carrusel horizontal */
+  .vgrid{display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding-left:20px;
+    margin:26px -20px 0; padding:0 20px 8px; scrollbar-width:none}
+  .vgrid::-webkit-scrollbar{display:none}
+  .vitem{flex:0 0 80%; scroll-snap-align:start; padding:22px}
+  .vitem svg{width:38px; height:38px}
+  .vitem h3{font-size:1.02rem; margin-top:14px}
+  .valor .cta{margin-top:22px}
+  .valor .cta .btn{width:100%}
+
+  /* Tasación: panel más corto */
+  .tpanel{padding:22px}
+  .steps{display:none}
+  .checks{margin-top:18px; gap:10px}
+
+  /* Contacto y reseñas */
+  .contact .cta-row, .contact .cta-row .btn, .review > .btn{width:100%}
+  .review{padding:24px}
+
+  /* Botón flotante: solo el ícono, para no tapar el contenido */
+  .fab{padding:0; width:56px; height:56px; justify-content:center}
+  .fab-txt{display:none}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
+}
 </style>
 </head>
 <body>
@@ -616,7 +672,7 @@ footer .container{align-items:flex-start}
 
 <a class="fab" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener" aria-label="Hablar con Magali por WhatsApp">
   <svg class="ico-wa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 9.2c.3 2.2 2.4 4.3 4.8 5.2l1.3-1.3-1.9-1-.8.6a4 4 0 0 1-1.7-1.7l.6-.8-1-1.9L9 9.2z" fill="currentColor" stroke="none"/></svg>
-  Hablar con Magali
+  <span class="fab-txt">Hablar con Magali</span>
 </a>
 
 <script>
@@ -1008,7 +1064,8 @@ footer .container{align-items:flex-start}
     if (!('IntersectionObserver' in window)) return;
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var vh = window.innerHeight || 800;
-    var els = document.querySelectorAll('.tile, .vitem, .vcard, .stat, .review, .contact, .tpanel, .sec-head');
+    var movil = (window.innerWidth || 800) <= 640;
+    var els = document.querySelectorAll(movil ? '.vcard, .review, .contact, .tpanel, .sec-head' : '.tile, .vitem, .vcard, .stat, .review, .contact, .tpanel, .sec-head');
     var io = new IntersectionObserver(function(en){
       en.forEach(function(x){
         if (!x.isIntersecting) return;
