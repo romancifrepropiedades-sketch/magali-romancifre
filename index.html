@@ -342,14 +342,59 @@ footer .container{align-items:flex-start}
   .fab-txt{display:none}
   body{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
 }
+
+/* ===== Menú de la barra ===== */
+section[id], #aviso, #hero{scroll-margin-top:84px}
+.bar .container{justify-content:flex-start; gap:20px}
+.bar-actions{display:flex; align-items:center; gap:10px; margin-left:auto}
+.menu{display:flex; align-items:center; gap:2px; margin-left:auto}
+.menu + .bar-actions{margin-left:0}
+.menu a{padding:9px 14px; border-radius:999px; text-decoration:none; font-weight:600; font-size:.95rem; color:var(--ink); transition:background .15s ease, color .15s ease}
+.menu a:hover{background:var(--tint); color:var(--violet)}
+.menu a.on{background:var(--tint); color:var(--violet)}
+.menu a:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+.burger{display:none; width:44px; height:44px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; padding:0; flex-direction:column; align-items:center; justify-content:center; gap:5px}
+.burger span{display:block; width:20px; height:2px; background:var(--ink); border-radius:2px; transition:transform .2s ease, opacity .2s ease}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.burger:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+@media (max-width:960px){
+  .burger{display:flex}
+  .bar .container{justify-content:space-between}
+  .menu{display:none; position:absolute; left:0; right:0; top:100%; margin:0; flex-direction:column; align-items:stretch; gap:0;
+    background:#fff; border-bottom:1px solid var(--line); box-shadow:0 18px 30px rgba(30,17,40,.12);
+    padding:6px max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px))}
+  .menu.open{display:flex}
+  .menu a{padding:15px 4px; border-radius:0; border-bottom:1px solid var(--line); font-size:1.05rem}
+  .menu a:last-child{border-bottom:0}
+  .menu a:hover,.menu a.on{background:transparent}
+  .bar-actions{margin-left:0}
+}
+@media (max-width:480px){
+  .bar .container{gap:10px}
+  .bar-actions .btn{display:none}
+  .logo{height:40px}
+}
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="container">
-    <a href="#" aria-label="ROMÁN CIFRE Propiedades"><img class="logo" src="logo.webp" width="465" height="126" alt="Román Cifre Propiedades"></a>
-    <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribime</a>
+    <a class="brand" href="#" aria-label="ROMÁN CIFRE Propiedades, inicio"><img class="logo" src="logo.webp" width="465" height="126" alt="Román Cifre Propiedades"></a>
+    <nav class="menu" id="menu" aria-label="Principal">
+      <a href="#que-buscas">Alquileres</a>
+      <a href="#visita">Visitas</a>
+      <a href="#condiciones">Condiciones</a>
+      <a href="#agregamos-valor">Servicios</a>
+      <a href="#tasacion">Tasaciones</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <div class="bar-actions">
+      <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribime</a>
+      <button class="burger" id="burger" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+    </div>
   </div>
 </header>
 
@@ -642,7 +687,7 @@ footer .container{align-items:flex-start}
     </div>
   </section>
 
-  <section>
+  <section id="contacto">
     <div class="container">
       <div class="contact">
         <div>
@@ -1077,6 +1122,37 @@ footer .container{align-items:flex-start}
       if (els[i].getBoundingClientRect().top < vh) continue;   // lo que ya se ve al cargar no se anima
       els[i].classList.add('rv'); io.observe(els[i]);
     }
+  })();
+
+  // Menú de la barra: se abre y cierra en el celular, y resalta la sección que se está viendo.
+  (function(){
+    var burger = document.getElementById('burger'), menu = document.getElementById('menu');
+    if (!burger || !menu) return;
+    function setOpen(o){
+      menu.classList.toggle('open', o);
+      burger.setAttribute('aria-expanded', o ? 'true' : 'false');
+      burger.setAttribute('aria-label', o ? 'Cerrar menú' : 'Abrir menú');
+    }
+    burger.addEventListener('click', function(){ setOpen(!menu.classList.contains('open')); });
+    menu.addEventListener('click', function(e){ if (e.target.tagName === 'A') setOpen(false); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setOpen(false); });
+    document.addEventListener('click', function(e){ if (!menu.contains(e.target) && !burger.contains(e.target)) setOpen(false); });
+    window.addEventListener('resize', function(){ if (window.innerWidth > 960) setOpen(false); });
+
+    if (!('IntersectionObserver' in window)) return;
+    var links = menu.querySelectorAll('a'), map = {};
+    for (var i = 0; i < links.length; i++) {
+      var id = links[i].getAttribute('href').slice(1), sec = document.getElementById(id);
+      if (sec) map[id] = links[i];
+    }
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(x){
+        if (!x.isIntersecting) return;
+        for (var k in map) map[k].classList.remove('on');
+        var a = map[x.target.id]; if (a) a.classList.add('on');
+      });
+    }, {rootMargin:'-35% 0px -60% 0px'});
+    for (var id2 in map) io.observe(document.getElementById(id2));
   })();
 </script>
 </body>
