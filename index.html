@@ -993,7 +993,9 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
     var HORARIOS = {1:[600,1080], 2:[600,1080], 3:[600,1080], 4:[600,1080], 5:[600,1080], 6:[600,780]};
     var DIAS_ADELANTE = 30;      // cuántos días hacia adelante se muestran
     var AVISO_PREVIO_H = 3;      // no se ofrecen turnos con menos de 3 horas de anticipación
-    var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime(); // fin de semana largo
+    // Fin de semana largo: sin atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00.
+    var SIN_ATENCION_DESDE = new Date('2026-11-07T13:00:00-03:00').getTime();
+    var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime();
     var NUM = '5491140827284';
     // Link CSV de la hoja de horarios ocupados. Vacío = no se leen ocupados.
     // Formato: https://docs.google.com/spreadsheets/d/ID_DE_LA_HOJA/gviz/tq?tqx=out:csv&sheet=Ocupados
@@ -1022,7 +1024,8 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       var base = {}, n = 0;
       for (var m = cfg[0]; m + PASO <= cfg[1]; m += PASO) {
         var ini = new Date(key + 'T' + fmt(m) + ':00-03:00').getTime();
-        if (ini >= ahora + AVISO_PREVIO_H * 3600000 && ini >= SIN_ATENCION_HASTA) { base[m] = true; n++; }
+        var cae = ini + PASO * 60000 > SIN_ATENCION_DESDE && ini < SIN_ATENCION_HASTA;   // el turno toca el feriado
+        if (ini >= ahora + AVISO_PREVIO_H * 3600000 && !cae) { base[m] = true; n++; }
       }
       if (n) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, open:cfg[0], close:cfg[1], base:base, avail:{}, free:0});
     }
@@ -1277,7 +1280,9 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   (function(){
     var TZ = 'America/Argentina/Buenos_Aires';
     var DIAS_ADELANTE = 14, AVISO_PREVIO_H = 3;
-    var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime(); // fin de semana largo
+    // Fin de semana largo: sin atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00.
+    var SIN_ATENCION_DESDE = new Date('2026-11-07T13:00:00-03:00').getTime();
+    var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime();
     var NUM = '5491140827284';
     // Franjas horarias para ir a tasar, en minutos desde las 00:00: [desde, hasta]
     var SEMANA = [[600,780],[780,960],[960,1080]];   // lunes a viernes: 10 a 13, 13 a 16, 16 a 18
@@ -1305,7 +1310,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       var key = dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate());
       var fr = (wd === 6 ? SABADO : SEMANA).map(function(f){
         var ini = new Date(key + 'T' + pad(hh(f[0])) + ':00:00-03:00').getTime();
-        return {f:f, ok: ini >= ahora + AVISO_PREVIO_H * 3600000 && ini >= SIN_ATENCION_HASTA};
+        return {f:f, ok: ini >= ahora + AVISO_PREVIO_H * 3600000 && !(ini >= SIN_ATENCION_DESDE && ini < SIN_ATENCION_HASTA)};
       });
       if (fr.some(function(x){ return x.ok; })) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, fr:fr});
     }
