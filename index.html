@@ -287,6 +287,10 @@ footer .container{align-items:flex-start}
             <input id="v-name" type="text" placeholder="Nombre y apellido" autocomplete="name">
           </div>
           <div class="field">
+            <label for="v-phone">Tu celular</label>
+            <input id="v-phone" type="tel" inputmode="tel" placeholder="Ej: 11 5555-1234" autocomplete="tel">
+          </div>
+          <div class="field">
             <label for="v-people">Personas que asisten</label>
             <select id="v-people"><option>1</option><option>2</option><option>3</option><option>4</option><option>5 o más</option></select>
           </div>
@@ -601,10 +605,12 @@ footer .container{align-items:flex-start}
       e.preventDefault();
       var prop = document.getElementById('v-prop').value.trim(),
           name = document.getElementById('v-name').value.trim(),
+          phone = document.getElementById('v-phone').value.trim(),
           people = document.getElementById('v-people').value;
       var picked = days.filter(function(d){ return count(d.key); });
       if (!prop) { elMsg.textContent = 'Indicá la propiedad o local que querés visitar.'; document.getElementById('v-prop').focus(); return; }
       if (!name) { elMsg.textContent = 'Escribí tu nombre.'; document.getElementById('v-name').focus(); return; }
+      if (phone.replace(/\D/g, '').length < 8) { elMsg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('v-phone').focus(); return; }
       if (!picked.length) { elMsg.textContent = 'Marcá al menos un día y horario.'; return; }
       elMsg.textContent = '';
       var lines = picked.map(function(d){
@@ -613,6 +619,7 @@ footer .container{align-items:flex-start}
       var text = 'Hola Magali, quiero coordinar una visita.\n' +
         'Propiedad: ' + prop + '\n' +
         'Nombre: ' + name + '\n' +
+        'Celular: ' + phone + '\n' +
         'Personas: ' + people + '\n' +
         'Días y horarios que me sirven (visitas de 15 min):\n' + lines.join('\n') + '\n' +
         'Quedo a la espera de tu confirmación. ¡Gracias!';
