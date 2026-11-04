@@ -2,203 +2,323 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Magali Alquileres</title>
-<meta name="description" content="Alquileres, propiedades y locales con Magali, de ROMÁN CIFRE Propiedades.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Magali · ROMÁN CIFRE Propiedades</title>
+<meta name="description" content="Alquileres, propiedades y locales con Magali, de ROMÁN CIFRE Propiedades. Condiciones de alquiler y contacto por WhatsApp.">
+<meta name="theme-color" content="#732F84">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
-/* Concepto: documento institucional. Fondo claro, tipografía sobria, filetes finos, violeta profundo como único color de marca.
-   El violeta es aproximado: se ajusta en --brand cuando se confirme el código exacto de ROMÁN CIFRE. */
+/* Identidad: violeta del logo de ROMÁN CIFRE (#732F84), blanco y grises neutros. Una sola apariencia, clara. */
 :root{
-  --bg:#F7F6FA; --surface:#FFFFFF; --ink:#16112B; --muted:#5C5873; --line:#E2DFEA;
-  --brand:#2E1A63; --brand-ink:#FFFFFF; --link:#4A2BA0;
-  --wa:#17794A; --wa-ink:#FFFFFF;
-  --notice-bg:#FBF5E6; --notice-ink:#5A4210; --notice-line:#E6D3A1;
-  --font:'Manrope','Helvetica Neue',Arial,sans-serif;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#110C1F; --surface:#1A1330; --ink:#EEEAF8; --muted:#A9A1C4; --line:#2F2749;
-    --brand:#7C5CD6; --brand-ink:#FFFFFF; --link:#B7A0F0;
-    --wa:#2BAF68; --wa-ink:#04210F;
-    --notice-bg:#2B2310; --notice-ink:#F1DDAA; --notice-line:#51411A;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#110C1F; --surface:#1A1330; --ink:#EEEAF8; --muted:#A9A1C4; --line:#2F2749;
-  --brand:#7C5CD6; --brand-ink:#FFFFFF; --link:#B7A0F0;
-  --wa:#2BAF68; --wa-ink:#04210F;
-  --notice-bg:#2B2310; --notice-ink:#F1DDAA; --notice-line:#51411A;
-  color-scheme:dark;
+  --violet:#732F84; --deep:#3F1650; --ink:#1E1128; --muted:#645C70; --line:#E7DFEC; --tint:#F5F0F8;
+  --wa:#12803F; --wa-ink:#FFFFFF;
+  --amber-bg:#FFF4DC; --amber-ink:#5E4210; --amber-line:#F0DBA6;
+  --font:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
-  background:var(--bg); color:var(--ink);
+  margin:0; background:#FFFFFF; color:var(--ink);
   font-family:var(--font); font-size:16px; line-height:1.6;
-  padding-left:max(16px, env(safe-area-inset-left, 0px));
-  padding-right:max(16px, env(safe-area-inset-right, 0px));
-  padding-block:0 56px;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px));
 }
-.wrap{max-width:920px; margin:0 auto}
-h1,h2,h3,p{margin:0}
-h1{font-size:clamp(2.6rem, 10vw, 4.4rem); font-weight:800; letter-spacing:-0.035em; line-height:1}
-h2{font-size:1.5rem; font-weight:700; letter-spacing:-0.02em; line-height:1.2; text-wrap:balance}
-.label{font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+h1,h2,h3,p,dl,dd{margin:0}
+a{color:inherit}
+.container{
+  max-width:1080px; margin:0 auto;
+  padding-left:max(20px, env(safe-area-inset-left, 0px));
+  padding-right:max(20px, env(safe-area-inset-right, 0px));
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  min-height:52px; padding:14px 24px; border-radius:999px;
+  font-weight:700; font-size:1rem; text-decoration:none; border:2px solid transparent;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,.tile:focus-visible,.tab:focus-visible,.fab:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
+.btn-wa{background:var(--wa); color:var(--wa-ink); box-shadow:0 8px 22px rgba(18,128,63,.3)}
+.btn-ghost{color:#fff; border-color:rgba(255,255,255,.55)}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.ico-wa{width:22px; height:22px; flex:none}
 
 /* Barra superior */
-.top{display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 0; border-bottom:1px solid var(--line)}
-.mark{font-weight:800; letter-spacing:.16em; text-transform:uppercase; font-size:.82rem}
-.top .label{text-align:right}
+.bar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.94); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top, 0px)}
+.bar .container{display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:68px}
+.logo{height:44px; width:auto; display:block}
+.bar .btn{min-height:42px; padding:8px 18px; font-size:.92rem}
 
 /* Portada */
-.hero{padding:56px 0 44px; display:flex; flex-direction:column; gap:18px}
-.role{font-size:1.2rem; color:var(--muted); max-width:34ch}
-.hours{display:flex; flex-wrap:wrap; gap:10px 36px; margin-top:12px}
-.hours div{display:flex; flex-direction:column; gap:2px}
-.hours strong{font-weight:700; font-variant-numeric:tabular-nums}
+.hero{
+  position:relative; overflow:hidden; color:#fff;
+  background:linear-gradient(135deg, var(--deep) 0%, #5B2370 55%, var(--violet) 100%);
+  padding:72px 0 104px;
+}
+.hero .container{position:relative; z-index:1}
+.hero-art{position:absolute; right:-10px; bottom:0; height:115%; width:auto; opacity:.13; pointer-events:none}
+.eyebrow{font-size:.78rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; opacity:.8; margin-bottom:14px}
+h1{font-size:clamp(3rem, 11vw, 5.6rem); font-weight:800; letter-spacing:-0.04em; line-height:.95}
+.lead{font-size:clamp(1.1rem, 3.4vw, 1.35rem); max-width:30ch; margin-top:18px; opacity:.92}
+.cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:32px}
+.hours{
+  display:inline-flex; flex-wrap:wrap; gap:4px 20px; margin-top:32px;
+  padding:10px 20px; border-radius:18px; font-size:.92rem;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22);
+}
+.hours b{font-weight:700}
 
 /* Aviso */
-.notice{border:1px solid var(--notice-line); background:var(--notice-bg); color:var(--notice-ink); padding:16px 18px; margin-bottom:40px; border-radius:4px}
-.notice strong{display:block; font-weight:700; margin-bottom:2px}
+.notice-wrap{position:relative; z-index:2; margin-top:-48px}
+.notice{
+  background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);
+  border-radius:16px; padding:16px 20px; box-shadow:0 14px 34px rgba(30,17,40,.1);
+}
+.notice strong{display:block; font-weight:800}
 
 /* Secciones */
-.sec{display:grid; grid-template-columns:240px minmax(0,1fr); gap:20px 48px; padding:44px 0; border-top:1px solid var(--line)}
-.sec .intro{display:flex; flex-direction:column; gap:10px}
-.sec .intro p{color:var(--muted)}
-@media (max-width:760px){.sec{grid-template-columns:1fr; padding:36px 0}}
+section{padding:72px 0}
+.alt{background:var(--tint)}
+h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03em; line-height:1.1; text-wrap:balance}
+.sub{color:var(--muted); margin-top:10px; max-width:52ch}
+.sec-head{margin-bottom:32px}
 
-/* Botones */
-.btn{
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-  min-height:56px; padding:15px 20px; border-radius:6px;
-  background:var(--brand); color:var(--brand-ink);
-  font-weight:700; font-size:1rem; text-decoration:none; letter-spacing:.005em;
+/* Accesos */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px}
+.tile{
+  display:flex; flex-direction:column; gap:10px; padding:26px; min-width:0;
+  background:#fff; border:1px solid var(--line); border-radius:22px; text-decoration:none;
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
-.btn .arrow{font-weight:500}
-.btn-wa{background:var(--wa); color:var(--wa-ink)}
-.btn:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
-.btn:active{transform:translateY(1px)}
-.stack{display:flex; flex-direction:column; gap:12px; align-self:start}
-.pair{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-self:start}
-@media (max-width:560px){.pair{grid-template-columns:1fr}}
+.tile:hover{transform:translateY(-3px); box-shadow:0 16px 36px rgba(115,47,132,.14); border-color:#D7C3E0}
+.tile .ico{width:52px; height:52px; border-radius:16px; background:var(--tint); color:var(--violet); display:grid; place-items:center}
+.tile .ico svg{width:26px; height:26px}
+.tile h3{font-size:1.2rem; font-weight:800; letter-spacing:-0.01em; margin-top:6px}
+.tile p{color:var(--muted); font-size:.96rem}
+.tile .go{margin-top:auto; padding-top:8px; color:var(--violet); font-weight:700}
 
-/* Tabla de condiciones */
-.tablewrap{min-width:0}
-table{width:100%; border-collapse:collapse; font-size:.97rem}
-th,td{text-align:left; vertical-align:top; padding:16px 14px 16px 0; border-bottom:1px solid var(--line)}
-thead th{font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); padding-top:0; border-bottom:2px solid var(--ink)}
-tbody th{font-weight:700; width:24%}
-td{width:38%}
-tbody tr:last-child th, tbody tr:last-child td{border-bottom:0}
-.dash{color:var(--muted)}
-.fine{color:var(--muted); font-size:.9rem; margin-top:16px}
-@media (max-width:700px){
-  table,thead,tbody,tr,th,td{display:block; width:auto}
-  thead{position:absolute; left:-9999px}
-  tr{padding:16px 0; border-bottom:1px solid var(--line)}
-  tbody tr:last-child{border-bottom:0}
-  th,td{border:0; padding:0}
-  tbody th{font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; width:auto}
-  td{display:grid; grid-template-columns:5.2rem minmax(0,1fr); gap:12px; padding:3px 0; width:auto}
-  td::before{content:attr(data-label); font-weight:700; font-size:.85rem; color:var(--ink)}
+/* Condiciones */
+.tabs{display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:999px; padding:5px; margin-bottom:24px}
+.tab{appearance:none; border:0; background:transparent; font:inherit; font-weight:700; color:var(--muted); padding:10px 22px; border-radius:999px; cursor:pointer}
+.tab[aria-selected="true"]{background:var(--violet); color:#fff}
+.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:12px}
+.stat{background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px}
+.stat b{display:block; font-size:clamp(1.25rem, 4.6vw, 1.8rem); font-weight:800; letter-spacing:-0.02em; color:var(--violet); line-height:1.15}
+.stat span{display:block; color:var(--muted); font-size:.88rem; margin-top:4px}
+.rows{background:#fff; border:1px solid var(--line); border-radius:22px; padding:6px 24px}
+.row{display:grid; grid-template-columns:180px minmax(0,1fr); gap:6px 24px; padding:18px 0; border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row dt{font-weight:700}
+.row dd{color:#3A3144}
+.fine{color:var(--muted); font-size:.92rem; margin-top:18px}
+.js .panel[hidden]{display:none}
+@media (max-width:640px){
+  .row{grid-template-columns:1fr}
+  .row dt{font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  .rows{padding:4px 18px}
+  .stats{grid-template-columns:1fr}
+  .stat{display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:14px 18px}
+  .stat span{margin-top:0; text-align:right}
 }
 
-footer{border-top:1px solid var(--line); padding-top:24px; color:var(--muted); font-size:.9rem; display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 24px}
-footer strong{color:var(--ink); letter-spacing:.14em; text-transform:uppercase; font-size:.78rem}
+/* Contacto */
+.contact{
+  background:linear-gradient(135deg, var(--deep), var(--violet)); color:#fff; border-radius:28px;
+  padding:clamp(28px, 6vw, 56px); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:24px;
+}
+.contact h2{max-width:16ch}
+.contact p{opacity:.9; margin-top:10px; max-width:42ch}
+.contact .cta-row{margin-top:0}
+
+/* Pie */
+footer{border-top:1px solid var(--line); padding:32px 0}
+footer .container{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px}
+footer .logo{height:36px}
+footer p{color:var(--muted); font-size:.9rem}
+
+/* Botón flotante */
+.fab{
+  position:fixed; z-index:30;
+  right:max(16px, env(safe-area-inset-right, 0px)); bottom:max(16px, env(safe-area-inset-bottom, 0px));
+  display:inline-flex; align-items:center; gap:10px; padding:15px 22px;
+  background:var(--wa); color:var(--wa-ink); border-radius:999px;
+  font-weight:700; text-decoration:none; box-shadow:0 12px 32px rgba(0,0,0,.28);
+}
+.fab:hover{transform:translateY(-2px)}
+@media (prefers-reduced-motion: reduce){*{transition:none !important; scroll-behavior:auto !important}}
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<header class="bar">
+  <div class="container">
+    <a href="#" aria-label="ROMÁN CIFRE Propiedades"><img class="logo" src="logo.jpg" width="465" height="126" alt="Román Cifre Propiedades"></a>
+    <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribime</a>
+  </div>
+</header>
 
-  <div class="top">
-    <span class="mark">ROMÁN CIFRE Propiedades</span>
-    <span class="label">Alquileres · Locales</span>
+<main>
+
+  <div class="hero">
+    <svg class="hero-art" viewBox="0 0 220 300" aria-hidden="true" fill="#fff">
+      <rect x="10" y="120" width="50" height="180" rx="10"/>
+      <rect x="75" y="20" width="60" height="280" rx="10"/>
+      <rect x="150" y="80" width="60" height="220" rx="10"/>
+    </svg>
+    <div class="container">
+      <p class="eyebrow">Asesora de alquileres · CABA</p>
+      <h1>Magali</h1>
+      <p class="lead">Propiedades y locales en alquiler, con atención personalizada.</p>
+      <div class="cta-row">
+        <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">
+          <svg class="ico-wa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 9.2c.3 2.2 2.4 4.3 4.8 5.2l1.3-1.3-1.9-1-.8.6a4 4 0 0 1-1.7-1.7l.6-.8-1-1.9L9 9.2z" fill="currentColor" stroke="none"/></svg>
+          Hablar conmigo por WhatsApp
+        </a>
+        <a class="btn btn-ghost" href="#que-buscas">Ver opciones</a>
+      </div>
+      <p class="hours"><span><b>Lunes a viernes</b> 10:00 a 18:00 h</span><span><b>Sábados</b> 10:00 a 13:00 h</span></p>
+    </div>
   </div>
 
-  <header class="hero">
-    <p class="label">Asesora comercial</p>
-    <h1>Magali</h1>
-    <p class="role">Alquiler de propiedades y locales comerciales en CABA.</p>
-    <div class="hours">
-      <div><span class="label">Lunes a viernes</span><strong>10:00 a 18:00 h</strong></div>
-      <div><span class="label">Sábados</span><strong>10:00 a 13:00 h</strong></div>
+  <div class="notice-wrap" id="aviso">
+    <div class="container">
+      <div class="notice">
+        <strong>Aviso por fin de semana largo</strong>
+        No hay atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00. Podés escribirme igual y te respondo apenas retomemos.
+      </div>
     </div>
-  </header>
-
-  <div class="notice" id="aviso">
-    <strong>Aviso por fin de semana largo</strong>
-    No hay atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00. Podés escribirme igual y te respondo apenas retomemos.
   </div>
 
-  <section class="sec">
-    <div class="intro">
-      <p class="label">Disponibilidad</p>
-      <h2>Propiedades y locales en alquiler</h2>
-      <p>Filtrá por zona, ambientes y precio.</p>
-    </div>
-    <div class="stack">
-      <a class="btn" href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades/inmuebles/alquiler" target="_blank" rel="noopener">Ver propiedades en alquiler <span class="arrow" aria-hidden="true">→</span></a>
-      <a class="btn" href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades" target="_blank" rel="noopener">Ver locales en alquiler <span class="arrow" aria-hidden="true">→</span></a>
-    </div>
-  </section>
-
-  <section class="sec">
-    <div class="intro">
-      <p class="label">Requisitos</p>
-      <h2>Condiciones de alquiler</h2>
-      <p>Pueden variar según la propiedad o el local. Te confirmo las exactas de la que te interese.</p>
-    </div>
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr><th scope="col"></th><th scope="col">Vivienda</th><th scope="col">Local comercial</th></tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">Contrato</th><td data-label="Vivienda">2 años</td><td data-label="Local">2 años</td></tr>
-          <tr><th scope="row">Actualización</th><td data-label="Vivienda">Trimestral, según IPC</td><td data-label="Local">Trimestral, según IPC</td></tr>
-          <tr><th scope="row">Garantía</th><td data-label="Vivienda">Propietaria de CABA o seguro de caución (FINAER o Garantía Ya). Con seguro, la preaprobación la gestiona el futuro inquilino.</td><td data-label="Local">Propietaria de CABA o seguro de caución (FINAER o Garantía Ya). Con seguro, la preaprobación la gestiona el futuro inquilino.</td></tr>
-          <tr><th scope="row">Ingresos</th><td data-label="Vivienda">Últimos 3 recibos de sueldo que acrediten ingresos por al menos 3 veces el valor del alquiler, o certificación de ingresos para independientes.</td><td data-label="Local">Ingresos comprobables. Monotributistas, independientes y sociedades (por ej. SRL): certificación emitida por contador público.</td></tr>
-          <tr><th scope="row">Depósito</th><td data-label="Vivienda">1 mes, en dólares, equivalente a un mes de alquiler</td><td data-label="Local">1 mes, en dólares, equivalente a un mes de alquiler</td></tr>
-          <tr><th scope="row">Adelanto</th><td data-label="Vivienda">1 mes</td><td data-label="Local">1 mes de alquiler</td></tr>
-          <tr><th scope="row">Honorarios</th><td data-label="Vivienda"><span class="dash">Consultar con la asesora</span></td><td data-label="Local">5% + IVA sobre el valor total del contrato</td></tr>
-          <tr><th scope="row">IVA</th><td data-label="Vivienda"><span class="dash">—</span></td><td data-label="Local">El alquiler es + IVA</td></tr>
-          <tr><th scope="row">Mascotas</th><td data-label="Vivienda">No se aceptan</td><td data-label="Local"><span class="dash">—</span></td></tr>
-        </tbody>
-      </table>
+  <section id="que-buscas">
+    <div class="container">
+      <div class="sec-head">
+        <h2>¿Qué estás buscando?</h2>
+        <p class="sub">Elegí una opción. Todo en un solo lugar, sin vueltas.</p>
+      </div>
+      <div class="tiles">
+        <a class="tile" href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades/inmuebles/alquiler" target="_blank" rel="noopener">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V9l6-4 6 4v12"/><path d="M15 21V12l6 3v6"/><path d="M7 21v-4h4v4M7 11h4"/></svg></span>
+          <h3>Propiedades en alquiler</h3>
+          <p>Departamentos y casas disponibles. Filtrá por zona, ambientes y precio.</p>
+          <span class="go">Ver propiedades →</span>
+        </a>
+        <a class="tile" href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades" target="_blank" rel="noopener">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v9h14v-9M10 21v-5h4v5"/></svg></span>
+          <h3>Locales en alquiler</h3>
+          <p>Espacios comerciales para tu negocio, en ubicaciones estratégicas.</p>
+          <span class="go">Ver locales →</span>
+        </a>
+        <a class="tile" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20coordinar%20una%20visita.%20Propiedad%3A%20" target="_blank" rel="noopener">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L16 13"/></svg></span>
+          <h3>Coordinar una visita</h3>
+          <p>Contame qué propiedad te interesa y tus horarios disponibles.</p>
+          <span class="go">Pedir visita →</span>
+        </a>
+      </div>
     </div>
   </section>
 
-  <section class="sec">
-    <div class="intro">
-      <p class="label">Contacto</p>
-      <h2>Coordiná una visita o hacé tu consulta</h2>
-      <p>Se abre WhatsApp con el mensaje ya escrito. Para la visita, indicame el link o código del aviso y los días y horarios en que podés.</p>
-    </div>
-    <div class="pair">
-      <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20coordinar%20una%20visita.%20Propiedad%3A%20" target="_blank" rel="noopener">Pedir una visita <span class="arrow" aria-hidden="true">→</span></a>
-      <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribirme <span class="arrow" aria-hidden="true">→</span></a>
+  <section class="alt" id="condiciones">
+    <div class="container">
+      <div class="sec-head">
+        <h2>Condiciones de alquiler</h2>
+        <p class="sub">Pueden variar según la propiedad o el local. Te confirmo las exactas de la que te interese.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Tipo de alquiler">
+        <button class="tab" role="tab" id="tab-vivienda" aria-controls="panel-vivienda" aria-selected="true" type="button">Vivienda</button>
+        <button class="tab" role="tab" id="tab-local" aria-controls="panel-local" aria-selected="false" type="button">Local comercial</button>
+      </div>
+
+      <div class="panel" id="panel-vivienda" role="tabpanel" aria-labelledby="tab-vivienda">
+        <div class="stats">
+          <div class="stat"><b>2 años</b><span>Duración del contrato</span></div>
+          <div class="stat"><b>Trimestral</b><span>Actualización según IPC</span></div>
+          <div class="stat"><b>1 mes</b><span>Depósito, en dólares</span></div>
+        </div>
+        <dl class="rows">
+          <div class="row"><dt>Garantía</dt><dd>Propietaria de CABA o seguro de caución (FINAER o Garantía Ya). Con seguro, la preaprobación la gestiona el futuro inquilino.</dd></div>
+          <div class="row"><dt>Ingresos</dt><dd>Últimos 3 recibos de sueldo que acrediten ingresos por al menos 3 veces el valor del alquiler, o certificación de ingresos para independientes.</dd></div>
+          <div class="row"><dt>Depósito</dt><dd>1 mes, en dólares, equivalente al valor de un mes de alquiler.</dd></div>
+          <div class="row"><dt>Adelanto</dt><dd>1 mes.</dd></div>
+          <div class="row"><dt>Mascotas</dt><dd>No se aceptan.</dd></div>
+          <div class="row"><dt>Honorarios</dt><dd>Consultar con la asesora.</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel" id="panel-local" role="tabpanel" aria-labelledby="tab-local">
+        <div class="stats">
+          <div class="stat"><b>2 años</b><span>Duración del contrato</span></div>
+          <div class="stat"><b>Trimestral</b><span>Actualización según IPC</span></div>
+          <div class="stat"><b>5% + IVA</b><span>Honorarios sobre el total</span></div>
+        </div>
+        <dl class="rows">
+          <div class="row"><dt>Garantía</dt><dd>Propietaria de CABA o seguro de caución (FINAER o Garantía Ya). Con seguro, la preaprobación la gestiona el futuro inquilino.</dd></div>
+          <div class="row"><dt>Ingresos</dt><dd>Comprobables. Monotributistas, independientes y sociedades (por ej. SRL): certificación de ingresos emitida por contador público.</dd></div>
+          <div class="row"><dt>Depósito</dt><dd>1 mes, en dólares, equivalente al valor de un mes de alquiler.</dd></div>
+          <div class="row"><dt>Adelanto</dt><dd>1 mes de alquiler.</dd></div>
+          <div class="row"><dt>Honorarios</dt><dd>5% + IVA sobre el valor total del contrato.</dd></div>
+          <div class="row"><dt>IVA</dt><dd>El alquiler es + IVA.</dd></div>
+        </dl>
+      </div>
     </div>
   </section>
 
-  <footer>
-    <strong>ROMÁN CIFRE Propiedades</strong>
-    <span>Av. Olazábal 2690, Ciudad Autónoma de Buenos Aires</span>
-  </footer>
+  <section>
+    <div class="container">
+      <div class="contact">
+        <div>
+          <h2>¿Hablamos?</h2>
+          <p>Contame qué buscás. Para una visita, indicame el link o código del aviso y los días y horarios en que podés.</p>
+        </div>
+        <div class="cta-row">
+          <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Escribirme por WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-</div>
+</main>
+
+<footer>
+  <div class="container">
+    <img class="logo" src="logo.jpg" width="465" height="126" alt="Román Cifre Propiedades">
+    <p>Av. Olazábal 2690, Ciudad Autónoma de Buenos Aires</p>
+  </div>
+</footer>
+
+<a class="fab" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener" aria-label="Hablar con Magali por WhatsApp">
+  <svg class="ico-wa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 9.2c.3 2.2 2.4 4.3 4.8 5.2l1.3-1.3-1.9-1-.8.6a4 4 0 0 1-1.7-1.7l.6-.8-1-1.9L9 9.2z" fill="currentColor" stroke="none"/></svg>
+  Hablar con Magali
+</a>
 
 <script>
-  // El aviso del fin de semana largo se oculta solo después del miércoles 11 de noviembre de 2026, 10:00 (hora de Argentina).
   (function(){
+    // El aviso del fin de semana largo se oculta solo después del miércoles 11 de noviembre de 2026, 10:00 (hora de Argentina).
     var fin = new Date('2026-11-11T10:00:00-03:00');
     if (Date.now() >= fin.getTime()) {
       var a = document.getElementById('aviso');
       if (a) a.hidden = true;
     }
+
+    // Pestañas Vivienda / Local comercial. Sin JavaScript se ven las dos secciones.
+    document.documentElement.className += ' js';
+    var tabs = document.querySelectorAll('.tab');
+    function show(id){
+      for (var i = 0; i < tabs.length; i++) {
+        var t = tabs[i], on = t.id === id;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        var p = document.getElementById(t.getAttribute('aria-controls'));
+        if (p) p.hidden = !on;
+      }
+    }
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener('click', function(){ show(this.id); });
+    }
+    show('tab-vivienda');
   })();
 </script>
-
 </body>
 </html>
