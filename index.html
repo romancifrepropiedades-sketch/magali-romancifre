@@ -457,6 +457,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .mapfilters select{font:inherit; font-size:.95rem; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); min-height:42px; padding:8px 34px 8px 12px; border:1px solid #CFC4D6; border-radius:12px; background:#fff}
 .mapfilters select:focus-visible{outline:3px solid rgba(115,47,132,.3); border-color:var(--violet)}
 .f-clear{margin-left:auto; border:0; background:none; font:inherit; font-size:.9rem; font-weight:700; color:var(--violet); cursor:pointer; padding:10px 4px; text-decoration:underline; text-underline-offset:3px}
+.pop-aprox{display:block; margin-top:6px; font-size:.8rem; font-weight:600; color:#8A5A00}
 .pop-precio{display:block; margin-top:8px; font-style:normal; font-weight:800; color:var(--violet); font-size:1.02rem}
 @media (max-width:640px){ .mapfilters{padding:12px 16px} .mapfilters label{flex:1 1 140px} .mapfilters select{width:100%} .f-clear{margin-left:0} }
 </style>
@@ -1417,9 +1418,9 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
     }
     // Ubicación: lat/lng del archivo si existen; si no, se busca y se recuerda en el navegador.
     function ubicar(x){
-      if (typeof x.lat === 'number' && typeof x.lng === 'number') return Promise.resolve([x.lat, x.lng]);
+      if (typeof x.lat === 'number' && typeof x.lng === 'number') return Promise.resolve({c: [x.lat, x.lng], exacta: true});
       var dir = sinPiso(x.direccion), previo = cache[dir];
-      if (previo && (previo.c || (Date.now() - previo.t) < REINTENTO)) return Promise.resolve(previo.c);
+      if (previo && (previo.c || (Date.now() - previo.t) < REINTENTO)) return Promise.resolve({c: previo.c, exacta: false});
       var base = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1';
       var formas = [
         base + VISTA + '&street=' + encodeURIComponent(dir) + '&city=' + encodeURIComponent('Buenos Aires') + '&country=Argentina',
@@ -1429,20 +1430,21 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       var i = 0;
       function probar(){
         return consulta(formas[i]).then(function(r){
-          if (r.c) { cache[dir] = {c: r.c, t: Date.now()}; guardar(); return r.c; }
+          if (r.c) { cache[dir] = {c: r.c, t: Date.now()}; guardar(); return {c: r.c, exacta: false}; }
           if (++i < formas.length) return probar();
-          cache[dir] = {c: null, t: Date.now()}; guardar(); return null;
+          cache[dir] = {c: null, t: Date.now()}; guardar(); return {c: null};
         });
       }
       return probar();
     }
 
     var mapa, items = [], entradas = [], ubicando = true;
-    function contenido(x){
+    function contenido(x, exacta){
       var d = document.createElement('div'); d.className = 'pop';
       var t = document.createElement('strong'); t.textContent = x.tipo + ' · ' + x.direccion; d.appendChild(t);
       var s = document.createElement('span'); s.textContent = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · '); d.appendChild(s);
       if (x.precio) { var pr = document.createElement('em'); pr.className = 'pop-precio'; pr.textContent = pesos(x.precio) + ' por mes'; d.appendChild(pr); }
+      if (!exacta) { var ap = document.createElement('small'); ap.className = 'pop-aprox'; ap.textContent = 'Ubicación aproximada'; d.appendChild(ap); }
       var acc = document.createElement('div'); acc.className = 'pop-acc';
       if (x.link) {
         var a = document.createElement('a'); a.className = 'pop-link'; a.href = x.link; a.target = '_blank'; a.rel = 'noopener';
@@ -1516,10 +1518,10 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       }).addTo(mapa);
       var icono = L.icon({iconUrl: 'favicon.png', iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -24], className: 'pin-img'});
       Promise.all(items.map(function(x){
-        return ubicar(x).then(function(c){
-          if (!c) return;
+        return ubicar(x).then(function(u){
+          var c = u && u.c; if (!c) return;
           var m = L.marker(c, {icon: icono, title: etiquetaProp(x), alt: etiquetaProp(x)});
-          m.bindPopup(contenido(x), {maxWidth: 260});
+          m.bindPopup(contenido(x, u.exacta), {maxWidth: 260});
           entradas.push({x: x, m: m});
           aplicar();
         });
