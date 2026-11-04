@@ -875,23 +875,41 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 <script>
   // Registro de pedidos por mail (servicio FormSubmit). El destino se puede cambiar acá.
   var MAIL_PEDIDOS = 'magali@romancifre.com.ar';
+  // Dirección de la aplicación web de Google Apps Script (agenda de visitas + recepción de pedidos).
+  // Si está vacía, los pedidos van por FormSubmit y no se lee ningún calendario.
+  var SCRIPT_URL = '';
   function registrar(asunto, datos, el){
     el.className = 'msg'; el.textContent = 'Registrando tu pedido…';
     var cuerpo = {_subject: asunto, _template: 'table', _captcha: 'false'};
     for (var k in datos) cuerpo[k] = datos[k];
     var ctrl = ('AbortController' in window) ? new AbortController() : null;
-    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 12000);
-    return fetch('https://formsubmit.co/ajax/' + MAIL_PEDIDOS, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-      body: JSON.stringify(cuerpo), signal: ctrl ? ctrl.signal : undefined
-    }).then(function(r){
-      clearTimeout(corte);
-      return r.json().catch(function(){ return {}; }).then(function(d){
-        var exito = r.ok && (d.success === true || d.success === 'true');
-        return {ok: exito, detalle: (d && d.message) ? String(d.message) : ('respuesta ' + r.status)};
+    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 15000);
+    var pedido;
+    if (SCRIPT_URL) {
+      // Google Apps Script: texto plano para evitar la consulta previa de CORS.
+      pedido = fetch(SCRIPT_URL, {
+        method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({asunto: asunto, datos: datos}), signal: ctrl ? ctrl.signal : undefined
+      }).then(function(r){
+        clearTimeout(corte);
+        return r.json().catch(function(){ return {}; }).then(function(d){
+          return {ok: r.ok && d.ok === true, detalle: (d && d.error) ? String(d.error) : ('respuesta ' + r.status)};
+        });
       });
-    }).catch(function(e){
+    } else {
+      pedido = fetch('https://formsubmit.co/ajax/' + MAIL_PEDIDOS, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        body: JSON.stringify(cuerpo), signal: ctrl ? ctrl.signal : undefined
+      }).then(function(r){
+        clearTimeout(corte);
+        return r.json().catch(function(){ return {}; }).then(function(d){
+          var exito = r.ok && (d.success === true || d.success === 'true');
+          return {ok: exito, detalle: (d && d.message) ? String(d.message) : ('respuesta ' + r.status)};
+        });
+      });
+    }
+    return pedido.catch(function(e){
       clearTimeout(corte);
       return {ok: false, detalle: (e && e.name === 'AbortError') ? 'el servicio no respondió a tiempo' : 'no se pudo conectar con el servicio'};
     }).then(function(res){
@@ -1095,7 +1113,25 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       var m = (s || '').trim().match(/^(\d{1,2}):(\d{2})/);
       return m ? (+m[1]) * 60 + (+m[2]) : null;
     }
+    // Agenda de Google Calendar a través del script: solo recibe franjas ocupadas (sin títulos ni detalles).
+    function cargarAgendaGoogle(){
+      var url = SCRIPT_URL + (SCRIPT_URL.indexOf('?') > -1 ? '&' : '?') + 'accion=agenda&t=' + Date.now();
+      fetch(url).then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); }).then(function(d){
+        if (!d || !d.ok || !d.ocupados) return;
+        var nuevo = {};
+        days.forEach(function(day){
+          var ini = new Date(day.key + 'T00:00:00-03:00').getTime(), fin = ini + 86400000;
+          d.ocupados.forEach(function(o){
+            var s = new Date(o.s).getTime(), e = new Date(o.e).getTime();
+            if (isNaN(s) || isNaN(e) || e <= ini || s >= fin) return;
+            (nuevo[day.key] = nuevo[day.key] || []).push([Math.round((Math.max(s, ini) - ini) / 60000), Math.round((Math.min(e, fin) - ini) / 60000)]);
+          });
+        });
+        busy = nuevo; refresh();
+      }).catch(function(){ /* si falla la lectura, se muestran todos los horarios y Magali confirma igual */ });
+    }
     function cargarOcupados(){
+      if (SCRIPT_URL) { cargarAgendaGoogle(); return; }
       if (!AGENDA_CSV_URL) return;
       var url = AGENDA_CSV_URL + (AGENDA_CSV_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
       fetch(url).then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.text(); }).then(function(txt){
