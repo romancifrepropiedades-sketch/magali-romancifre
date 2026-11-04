@@ -909,12 +909,15 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   // Dirección de la aplicación web de Google Apps Script (agenda de visitas + recepción de pedidos).
   // Si está vacía, los pedidos van por FormSubmit y no se lee ningún calendario.
   var SCRIPT_URL = '';
+  // FormSubmit no respondió en las pruebas: queda apagado. Los pedidos van por WhatsApp hasta conectar el script de Google.
+  var USAR_FORMSUBMIT = false;
   function registrar(asunto, datos, el){
+    if (!SCRIPT_URL && !USAR_FORMSUBMIT) { el.className = 'msg'; el.textContent = ''; return Promise.resolve({ok: true}); }
     el.className = 'msg'; el.textContent = 'Registrando tu pedido…';
     var cuerpo = {_subject: asunto, _template: 'table', _captcha: 'false'};
     for (var k in datos) cuerpo[k] = datos[k];
     var ctrl = ('AbortController' in window) ? new AbortController() : null;
-    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 15000);
+    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 8000);
     var pedido;
     if (SCRIPT_URL) {
       // Google Apps Script: texto plano para evitar la consulta previa de CORS.
