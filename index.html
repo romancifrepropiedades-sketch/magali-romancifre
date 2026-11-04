@@ -6,6 +6,9 @@
 <title>Magali · ROMÁN CIFRE Propiedades</title>
 <meta name="description" content="Magali, asesora inmobiliaria de ROMÁN CIFRE Propiedades. Alquileres, propiedades y locales, condiciones de alquiler, tasaciones sin cargo y contacto por WhatsApp.">
 <meta name="theme-color" content="#732F84">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="preload" as="image" href="esfera.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -60,10 +63,34 @@ a{color:inherit}
   padding:72px 0 104px;
 }
 .hero .container{position:relative; z-index:1}
-.hero-art{position:absolute; z-index:0; width:min(560px, 72vw); height:auto; right:-110px; top:50%; transform:translateY(-50%); pointer-events:none}
-@media (max-width:700px){
-  .hero-art{width:380px; right:-170px; top:auto; bottom:-150px; transform:none; opacity:.5}
+/* Escena 3D del isologo */
+.hero .container{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:24px 32px; align-items:center}
+.stage{position:relative; width:min(470px, 100%); aspect-ratio:1; margin:0 auto; perspective:1200px; touch-action:pan-y}
+.float{position:absolute; inset:0; transform-style:preserve-3d; animation:flotar 6.5s ease-in-out infinite}
+.orb{position:absolute; inset:7%; transform-style:preserve-3d; transform:rotateX(0deg) rotateY(0deg); will-change:transform}
+.orb img{position:absolute; inset:0; width:100%; height:100%; display:block; user-select:none; -webkit-user-drag:none; pointer-events:none}
+.orb .halo{position:absolute; inset:-16%; border-radius:50%; transform:translateZ(-140px) scale(1.12);
+  background:radial-gradient(closest-side, rgba(205,160,230,.55), rgba(205,160,230,.12) 60%, rgba(205,160,230,0) 72%)}
+.orb .ring{position:absolute; inset:-9%; border-radius:50%; border:1px solid rgba(255,255,255,.2); transform:translateZ(-70px) scale(1.07)}
+.orb .sphere{transform:translateZ(0)}
+.orb .edif{transform:translateZ(60px) scale(.9500); filter:drop-shadow(0 22px 20px rgba(24,6,44,.5))}
+.orb .gloss{position:absolute; inset:0; border-radius:50%; transform:translateZ(100px) scale(.9167); pointer-events:none;
+  background:radial-gradient(circle at var(--gx,30%) var(--gy,22%), rgba(255,255,255,.5), rgba(255,255,255,0) 36%)}
+.floor{position:absolute; left:20%; right:20%; bottom:-1%; height:7%; border-radius:50%; filter:blur(8px);
+  background:radial-gradient(closest-side, rgba(12,0,28,.55), rgba(12,0,28,0)); animation:sombra 6.5s ease-in-out infinite}
+@keyframes flotar{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes sombra{0%,100%{transform:scale(1); opacity:.9}50%{transform:scale(.84); opacity:.6}}
+@media (max-width:860px){
+  .hero .container{grid-template-columns:1fr}
+  .stage{width:min(300px, 78vw); margin-top:8px}
+  .hero{padding-bottom:120px}
 }
+@media (prefers-reduced-motion: reduce){.float,.floor{animation:none}}
+
+/* Aparición suave al hacer scroll (solo con JavaScript; sin JS todo se ve) */
+.rv{opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease}
+.rv.in{opacity:1; transform:none}
+@media (prefers-reduced-motion: reduce){.rv{opacity:1; transform:none; transition:none}}
 .eyebrow{font-size:.78rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; opacity:.8; margin-bottom:14px}
 h1{font-size:clamp(3rem, 11vw, 5.6rem); font-weight:800; letter-spacing:-0.04em; line-height:.95}
 .lead{font-size:clamp(1.1rem, 3.4vw, 1.35rem); max-width:30ch; margin-top:18px; opacity:.92}
@@ -272,32 +299,9 @@ footer .container{align-items:flex-start}
 
 <main>
 
-  <div class="hero">
-    <svg class="hero-art" viewBox="0 0 520 520" aria-hidden="true">
-      <defs>
-        <radialGradient id="sph" cx="36%" cy="28%" r="78%">
-          <stop offset="0" stop-color="#C48FD6"/><stop offset=".45" stop-color="#8E41A8"/><stop offset="1" stop-color="#4A1B60"/>
-        </radialGradient>
-        <linearGradient id="bld" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#FFFFFF" stop-opacity=".98"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".55"/>
-        </linearGradient>
-        <clipPath id="esf"><circle cx="260" cy="260" r="196"/></clipPath>
-      </defs>
-      <circle cx="260" cy="260" r="256" fill="none" stroke="#fff" stroke-opacity=".09"/>
-      <circle cx="260" cy="260" r="226" fill="none" stroke="#fff" stroke-opacity=".15"/>
-      <circle cx="260" cy="260" r="196" fill="url(#sph)"/>
-      <g clip-path="url(#esf)">
-        <rect x="140" y="268" width="72" height="240" rx="9" fill="url(#bld)" opacity=".8"/>
-        <rect x="226" y="132" width="86" height="380" rx="9" fill="url(#bld)"/>
-        <rect x="326" y="212" width="74" height="300" rx="9" fill="url(#bld)" opacity=".85"/>
-        <g stroke="#7A2F92" stroke-opacity=".28" stroke-width="5" stroke-linecap="round">
-          <path d="M246 170h46M246 204h46M246 238h46M246 272h46M246 306h46M246 340h46"/>
-          <path d="M160 304h32M160 338h32M160 372h32M344 250h34M344 284h34M344 318h34M344 352h34"/>
-        </g>
-        <ellipse cx="200" cy="130" rx="150" ry="78" fill="#fff" opacity=".12" transform="rotate(-24 200 130)"/>
-      </g>
-    </svg>
+  <div class="hero" id="hero">
     <div class="container">
+      <div class="hero-copy">
       <p class="eyebrow">Asesora inmobiliaria</p>
       <h1>Magali</h1>
       <p class="lead">Te acompaño a encontrar tu próximo hogar o local, con atención personalizada.</p>
@@ -309,6 +313,19 @@ footer .container{align-items:flex-start}
         <a class="btn btn-ghost" href="#que-buscas">Ver opciones</a>
       </div>
       <p class="hours"><span><b>Lunes a viernes</b> 10:00 a 18:00 h</span><span><b>Sábados</b> 10:00 a 13:00 h</span></p>
+      </div>
+      <div class="stage" id="stage" aria-hidden="true">
+        <div class="float">
+          <div class="orb" id="orb">
+            <div class="halo"></div>
+            <div class="ring"></div>
+            <img class="sphere" src="esfera.webp" alt="" width="900" height="900" decoding="async">
+            <img class="edif" src="edificios.webp" alt="" width="900" height="900" decoding="async">
+            <div class="gloss"></div>
+          </div>
+        </div>
+        <div class="floor"></div>
+      </div>
     </div>
   </div>
 
@@ -949,6 +966,60 @@ footer .container{align-items:flex-start}
       var w = window.open(url, '_blank', 'noopener');
       if (!w) window.location.href = url;
     });
+  })();
+
+  // Isologo en 3D: se inclina con el mouse o el dedo y, en reposo, se mece suavemente.
+  (function(){
+    var hero = document.getElementById('hero'), orb = document.getElementById('orb');
+    if (!hero || !orb) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var rx = 0, ry = 0, tx = 0, ty = 0, active = false, visible = true, running = false, t0 = performance.now();
+    function loop(now){
+      if (!visible) { running = false; return; }
+      if (!active) {                       // reposo: balanceo lento
+        var s = (now - t0) / 1000;
+        tx = Math.sin(s * 0.7) * 16; ty = Math.cos(s * 0.5) * 6;
+      }
+      rx += (ty - rx) * 0.08; ry += (tx - ry) * 0.08;
+      orb.style.transform = 'rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
+      orb.style.setProperty('--gx', (30 - ry * 1.4).toFixed(1) + '%');
+      orb.style.setProperty('--gy', (22 + rx * 1.6).toFixed(1) + '%');
+      requestAnimationFrame(loop);
+    }
+    function start(){ if (!running) { running = true; requestAnimationFrame(loop); } }
+    function aim(e){
+      var r = hero.getBoundingClientRect();
+      var nx = (e.clientX - r.left) / r.width - 0.5, ny = (e.clientY - r.top) / r.height - 0.5;
+      tx = Math.max(-1, Math.min(1, nx * 2)) * 28; ty = -Math.max(-1, Math.min(1, ny * 2)) * 20;
+      active = true;
+    }
+    hero.addEventListener('pointermove', aim);
+    hero.addEventListener('pointerdown', aim);
+    hero.addEventListener('pointerleave', function(){ active = false; t0 = performance.now(); });
+    hero.addEventListener('pointerup', function(e){ if (e.pointerType !== 'mouse') active = false; });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(en){ visible = en[0].isIntersecting; if (visible) start(); }, {threshold:0}).observe(hero);
+    }
+    start();
+  })();
+
+  // Aparición suave de los bloques al hacer scroll.
+  (function(){
+    if (!('IntersectionObserver' in window)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var vh = window.innerHeight || 800;
+    var els = document.querySelectorAll('.tile, .vitem, .vcard, .stat, .review, .contact, .tpanel, .sec-head');
+    var io = new IntersectionObserver(function(en){
+      en.forEach(function(x){
+        if (!x.isIntersecting) return;
+        var el = x.target; el.classList.add('in'); io.unobserve(el);
+        setTimeout(function(){ el.classList.remove('rv', 'in'); }, 900);
+      });
+    }, {threshold:0.12, rootMargin:'0px 0px -6% 0px'});
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].getBoundingClientRect().top < vh) continue;   // lo que ya se ve al cargar no se anima
+      els[i].classList.add('rv'); io.observe(els[i]);
+    }
   })();
 </script>
 </body>
