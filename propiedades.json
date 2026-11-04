@@ -1,100 +1,42 @@
 [
  {
   "operacion": "alquiler",
-  "tipo": "Departamento",
-  "direccion": "Amenabar 1600",
-  "barrio": "Belgrano"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Departamento",
-  "direccion": "Avenida Del Libertador 6200",
-  "barrio": "Belgrano"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Avenida Del Libertador 6200",
-  "barrio": "Belgrano"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Departamento",
-  "direccion": "Dr. Rómulo Naón 2300",
-  "barrio": "Belgrano"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Departamento",
-  "direccion": "Juramento 2700",
-  "barrio": "Belgrano"
- },
- {
-  "operacion": "alquiler",
   "tipo": "Local",
-  "direccion": "Olazabal 2100",
-  "barrio": "Belgrano"
+  "direccion": "Olazábal 2100",
+  "barrio": "Belgrano",
+  "detalle": "55 m²",
+  "link": "https://propiedades.adinco.net/aviso/local-alquiler-belgrano-belgrano-capital-federal--6532842"
  },
  {
   "operacion": "alquiler",
   "tipo": "Departamento",
-  "direccion": "Olazábal 2900",
-  "barrio": "Belgrano"
+  "direccion": "Olazábal 3100",
+  "barrio": "Belgrano",
+  "detalle": "1 dorm., 36 m²",
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6548778"
+ },
+ {
+  "operacion": "alquiler",
+  "tipo": "Departamento",
+  "direccion": "Quesada 2100, 2°",
+  "barrio": "Belgrano",
+  "detalle": "2 dorm., 56 m²",
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-2dorm-1bano--6548746"
+ },
+ {
+  "operacion": "alquiler",
+  "tipo": "Departamento",
+  "direccion": "Vidal 2500",
+  "barrio": "Belgrano",
+  "detalle": "3 dorm., 80 m²",
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-3dorm-3banos--6543443"
  },
  {
   "operacion": "alquiler",
   "tipo": "Departamento",
   "direccion": "Virrey Loreto 2400",
-  "barrio": "Belgrano"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Alsina 700",
-  "barrio": "Centro / Microcentro"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Juan Domingo Peron 300",
-  "barrio": "Centro / Microcentro"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Galpón",
-  "direccion": "Bouchard 3400",
-  "barrio": "General San Martín"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Galpón",
-  "direccion": "Mendoza 2700",
-  "barrio": "General San Martín"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Alsina 700",
-  "barrio": "Monserrat"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Bernardo De Irigoyen 200",
-  "barrio": "Monserrat",
-  "m2": "120 m²"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Bernardo De Irigoyen 200",
-  "barrio": "Monserrat",
-  "m2": "160 m²"
- },
- {
-  "operacion": "alquiler",
-  "tipo": "Oficina",
-  "direccion": "Ituzaingo 300",
-  "barrio": "San Isidro"
+  "barrio": "Belgrano",
+  "detalle": "1 dorm., 45 m²",
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6531904"
  }
 ]

@@ -996,6 +996,10 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       if (!selProp.hidden && selProp.value && selProp.value !== 'otra') return selProp.options[selProp.selectedIndex].text;
       return inProp.value.trim();
     }
+    function linkSeleccionado(){
+      if (!selProp.hidden && selProp.value && selProp.value !== 'otra') return selProp.options[selProp.selectedIndex].getAttribute('data-link') || '';
+      return '';
+    }
     selProp.addEventListener('change', function(){ elMsg.textContent = ''; mostrarOtra(); });
     fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); }).then(function(lista){
       if (!lista || !lista.length) return;
@@ -1006,7 +1010,8 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
         var og = document.createElement('optgroup'); og.label = nombres[op];
         items.forEach(function(x){
           var o = document.createElement('option');
-          o.textContent = x.tipo + ' · ' + x.direccion + (x.barrio ? ' · ' + x.barrio : '') + (x.m2 ? ' (' + x.m2 + ')' : '');
+          o.textContent = x.tipo + ' · ' + x.direccion + (x.barrio ? ' · ' + x.barrio : '') + (x.detalle ? ' (' + x.detalle + ')' : (x.m2 ? ' (' + x.m2 + ')' : ''));
+          if (x.link) o.setAttribute('data-link', x.link);
           og.appendChild(o);
         });
         selProp.insertBefore(og, selProp.querySelector('option[value="otra"]'));
@@ -1033,6 +1038,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       });
       var text = 'Hola Magali, quiero coordinar una visita.\n' +
         'Propiedad: ' + prop + '\n' +
+        (linkSeleccionado() ? 'Aviso: ' + linkSeleccionado() + '\n' : '') +
         'Nombre: ' + name + '\n' +
         'Celular: ' + phone + '\n' +
         'Personas: ' + people + '\n' +
@@ -1042,7 +1048,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
       var w = window.open('', '_blank'), sb = form.querySelector('button[type=submit]');
       sb.disabled = true;
       registrar('Nueva solicitud de visita - ' + name, {
-        'Propiedad o local': prop, 'Nombre': name, 'Celular': phone, 'Personas': people,
+        'Propiedad o local': prop, 'Link del aviso': linkSeleccionado() || '-', 'Nombre': name, 'Celular': phone, 'Personas': people,
         'Días y horarios (visitas de 15 min)': lines.join('\n'),
         'Aceptó el aviso de privacidad': 'Sí'
       }, elMsg).then(function(){ sb.disabled = false; abrirWhatsApp(w, url); });
