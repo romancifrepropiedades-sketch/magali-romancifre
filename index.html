@@ -450,15 +450,15 @@ body{padding-bottom:0}
 footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 @media (max-width:640px){ footer{padding-bottom:calc(88px + env(safe-area-inset-bottom, 0px))} }
 
-/* Lista de propiedades bajo el mapa */
-.plist{list-style:none; margin:0; padding:0; border-top:1px solid var(--line); display:grid; grid-template-columns:1fr 1fr}
-@media (max-width:760px){.plist{grid-template-columns:1fr}}
-.plist li{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:6px 12px; padding:14px 20px; border-bottom:1px solid var(--line)}
-.pl-n strong{display:block; font-size:.95rem}
-.pl-n span{display:block; color:var(--muted); font-size:.85rem}
-.pl-a{display:flex; flex-wrap:wrap; gap:4px 14px}
-.pl-a a{font-size:.88rem; font-weight:700; color:var(--violet); text-decoration:none; white-space:nowrap}
-.pl-a a:hover{text-decoration:underline}
+/* Filtros del mapa */
+.mapfilters{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 14px; padding:14px 20px; background:var(--tint); border-bottom:1px solid var(--line)}
+.mapfilters[hidden], .mapfilters label[hidden]{display:none}
+.mapfilters label{display:flex; flex-direction:column; gap:4px; font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.mapfilters select{font:inherit; font-size:.95rem; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); min-height:42px; padding:8px 34px 8px 12px; border:1px solid #CFC4D6; border-radius:12px; background:#fff}
+.mapfilters select:focus-visible{outline:3px solid rgba(115,47,132,.3); border-color:var(--violet)}
+.f-clear{margin-left:auto; border:0; background:none; font:inherit; font-size:.9rem; font-weight:700; color:var(--violet); cursor:pointer; padding:10px 4px; text-decoration:underline; text-underline-offset:3px}
+.pop-precio{display:block; margin-top:8px; font-style:normal; font-weight:800; color:var(--violet); font-size:1.02rem}
+@media (max-width:640px){ .mapfilters{padding:12px 16px} .mapfilters label{flex:1 1 140px} .mapfilters select{width:100%} .f-clear{margin-left:0} }
 </style>
 </head>
 <body>
@@ -566,9 +566,14 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       </div>
       <div class="mapbox" id="prop-map-box" hidden>
         <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita</span></div>
+        <div class="mapfilters" id="map-filters" hidden>
+          <label>Tipo<select id="f-tipo"><option value="">Todos</option></select></label>
+          <label>Dormitorios<select id="f-dorm"><option value="">Todos</option></select></label>
+          <label>Precio por mes<select id="f-precio"><option value="">Cualquiera</option></select></label>
+          <button type="button" class="f-clear" id="f-clear">Limpiar filtros</button>
+        </div>
         <div id="prop-map" class="map" role="region" aria-label="Mapa de las propiedades en alquiler"></div>
-        <p class="help mapnote" id="map-note">Ubicando propiedades…</p>
-        <ul class="plist" id="prop-list" aria-label="Propiedades disponibles"></ul>
+        <p class="help mapnote" id="map-note" aria-live="polite">Ubicando propiedades…</p>
       </div>
       <form class="visit" id="visit-form" novalidate>
         <div class="vcard">
@@ -1385,30 +1390,32 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
     for (var id2 in map) io.observe(document.getElementById(id2));
   })();
 
-  // Mapa de propiedades: pines con el isologo; al tocar uno se ve el aviso de Adinco o se elige para la visita.
-  // El mapa se muestra siempre; las propiedades que no se logran ubicar quedan en la lista de abajo con su enlace a Google Maps.
+  // Mapa de propiedades: pines con el isologo; se pueden filtrar por tipo, dormitorios y precio.
+  // Al tocar un pin se ve el aviso de Adinco o se elige la propiedad para la visita.
   (function(){
     var caja = document.getElementById('prop-map-box');
     if (!caja || typeof L === 'undefined') return;
-    var nota = document.getElementById('map-note'), lista = document.getElementById('prop-list');
+    var nota = document.getElementById('map-note'), filtros = document.getElementById('map-filters');
+    var fT = document.getElementById('f-tipo'), fD = document.getElementById('f-dorm'), fP = document.getElementById('f-precio');
     var CLAVE = 'rcGeo2', REINTENTO = 6 * 3600 * 1000, cache = {};
     try { cache = JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch (e) { cache = {}; }
     function guardar(){ try { localStorage.setItem(CLAVE, JSON.stringify(cache)); } catch (e) {} }
     function sinPiso(d){ return d.replace(/,?\s*\d+\s*°.*$/, ''); }
     var CIUDAD = 'Ciudad Autónoma de Buenos Aires, Argentina';
     var VISTA = '&countrycodes=ar&bounded=1&viewbox=-58.54,-34.51,-58.33,-34.71';
+    function pesos(n){ return '$ ' + Number(n).toLocaleString('es-AR'); }
 
     var fila = Promise.resolve();
     function consulta(url){
       var mia = fila.then(function(){
         return fetch(url, {headers: {'Accept': 'application/json'}}).then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-          .then(function(res){ return {ok: true, c: (res && res[0]) ? [parseFloat(res[0].lat), parseFloat(res[0].lon)] : null}; })
-          .catch(function(){ return {ok: false, c: null}; });
+          .then(function(res){ return {c: (res && res[0]) ? [parseFloat(res[0].lat), parseFloat(res[0].lon)] : null}; })
+          .catch(function(){ return {c: null}; });
       });
       fila = mia.then(function(){ return new Promise(function(ok){ setTimeout(ok, 1100); }); });   // 1 consulta por segundo
       return mia;
     }
-    // Ubicación: lat/lng del archivo si existen; si no, se busca (dos formas) y se recuerda en el navegador.
+    // Ubicación: lat/lng del archivo si existen; si no, se busca y se recuerda en el navegador.
     function ubicar(x){
       if (typeof x.lat === 'number' && typeof x.lng === 'number') return Promise.resolve([x.lat, x.lng]);
       var dir = sinPiso(x.direccion), previo = cache[dir];
@@ -1430,19 +1437,17 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       return probar();
     }
 
-    var mapa;
-    function enGoogle(x){
-      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(sinPiso(x.direccion) + ', ' + (x.barrio ? x.barrio + ', ' : '') + CIUDAD);
-    }
-    function enlace(txt, href, clase){
-      var a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = txt; if (clase) a.className = clase; return a;
-    }
+    var mapa, items = [], entradas = [], ubicando = true;
     function contenido(x){
       var d = document.createElement('div'); d.className = 'pop';
       var t = document.createElement('strong'); t.textContent = x.tipo + ' · ' + x.direccion; d.appendChild(t);
       var s = document.createElement('span'); s.textContent = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · '); d.appendChild(s);
+      if (x.precio) { var pr = document.createElement('em'); pr.className = 'pop-precio'; pr.textContent = pesos(x.precio) + ' por mes'; d.appendChild(pr); }
       var acc = document.createElement('div'); acc.className = 'pop-acc';
-      if (x.link) acc.appendChild(enlace('Ver publicación en Adinco', x.link, 'pop-link'));
+      if (x.link) {
+        var a = document.createElement('a'); a.className = 'pop-link'; a.href = x.link; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = 'Ver publicación en Adinco'; acc.appendChild(a);
+      }
       var b = document.createElement('button'); b.type = 'button'; b.className = 'pop-btn'; b.textContent = 'Elegir para mi visita';
       b.addEventListener('click', function(){ elegir(x); }); acc.appendChild(b);
       d.appendChild(acc); return d;
@@ -1456,45 +1461,69 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       if (mapa) mapa.closePopup();
       document.getElementById('v-name').scrollIntoView({behavior: 'smooth', block: 'center'});
     }
-    function dibujarLista(items){
+
+    // --- Filtros ---
+    function opcion(sel, valor, texto){ var o = document.createElement('option'); o.value = valor; o.textContent = texto; sel.appendChild(o); }
+    function llenarFiltros(){
+      var tipos = [], dorms = [], precios = [];
       items.forEach(function(x){
-        var li = document.createElement('li');
-        var n = document.createElement('div'); n.className = 'pl-n';
-        var b = document.createElement('strong'); b.textContent = x.tipo + ' · ' + x.direccion; n.appendChild(b);
-        var sp = document.createElement('span'); sp.textContent = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · '); n.appendChild(sp);
-        li.appendChild(n);
-        var ac = document.createElement('div'); ac.className = 'pl-a';
-        ac.appendChild(enlace('Ver en Google Maps', enGoogle(x)));
-        if (x.link) ac.appendChild(enlace('Ver publicación', x.link));
-        li.appendChild(ac); lista.appendChild(li);
+        if (tipos.indexOf(x.tipo) < 0) tipos.push(x.tipo);
+        if (typeof x.dorm === 'number' && dorms.indexOf(x.dorm) < 0) dorms.push(x.dorm);
+        if (x.precio) precios.push(x.precio);
       });
+      tipos.sort().forEach(function(v){ opcion(fT, v, v); });
+      dorms.sort(function(a, b){ return a - b; }).forEach(function(v){ opcion(fD, String(v), v + (v === 1 ? ' dormitorio' : ' dormitorios')); });
+      if (precios.length > 1) {
+        var min = Math.min.apply(null, precios), max = Math.max.apply(null, precios);
+        [500000, 750000, 1000000, 1250000, 1500000, 2000000, 2500000, 3000000, 4000000, 5000000, 7500000, 10000000]
+          .filter(function(v){ return v >= min && v < max; })
+          .forEach(function(v){ opcion(fP, String(v), 'Hasta ' + pesos(v)); });
+      }
+      fT.parentNode.hidden = tipos.length < 2;
+      fD.parentNode.hidden = dorms.length < 2;
+      fP.parentNode.hidden = fP.options.length < 2;
+      filtros.hidden = fT.parentNode.hidden && fD.parentNode.hidden && fP.parentNode.hidden;
     }
-    function iniciar(items){
-      if (!items || !items.length) { caja.hidden = true; return; }
-      caja.hidden = false;
-      dibujarLista(items);
+    function coincide(x){
+      if (fT.value && x.tipo !== fT.value) return false;
+      if (fD.value && String(x.dorm) !== fD.value) return false;
+      if (fP.value && !(x.precio && x.precio <= Number(fP.value))) return false;
+      return true;
+    }
+    function aplicar(){
+      var visibles = [];
+      entradas.forEach(function(en){
+        if (coincide(en.x)) { if (!mapa.hasLayer(en.m)) en.m.addTo(mapa); visibles.push(en.m); }
+        else if (mapa.hasLayer(en.m)) en.m.remove();
+      });
+      mapa.closePopup();
+      if (visibles.length) mapa.fitBounds(L.featureGroup(visibles).getBounds().pad(0.3), {maxZoom: 16});
+      if (ubicando) return;
+      var coinciden = items.filter(coincide).length, sinPin = items.filter(function(x){ return coincide(x) && !entradas.some(function(en){ return en.x === x; }); }).length;
+      var txt = coinciden === 0 ? 'No hay propiedades con esos filtros.' : (coinciden === 1 ? '1 propiedad' : coinciden + ' propiedades') + (coinciden === items.length ? '' : ' de ' + items.length);
+      if (sinPin > 0) txt += ' · ' + sinPin + (sinPin === 1 ? ' no se pudo ubicar en el mapa; elegila en el formulario de visita.' : ' no se pudieron ubicar en el mapa; elegilas en el formulario de visita.');
+      nota.textContent = txt;
+    }
+    [fT, fD, fP].forEach(function(s){ s.addEventListener('change', aplicar); });
+    document.getElementById('f-clear').addEventListener('click', function(){ fT.value = ''; fD.value = ''; fP.value = ''; aplicar(); });
+
+    function iniciar(lista){
+      if (!lista || !lista.length) { caja.hidden = true; return; }
+      items = lista; caja.hidden = false; llenarFiltros();
       mapa = L.map('prop-map', {scrollWheelZoom: false}).setView([-34.5627, -58.4577], 14);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
       }).addTo(mapa);
       var icono = L.icon({iconUrl: 'favicon.png', iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -24], className: 'pin-img'});
-      var puestos = [];
       Promise.all(items.map(function(x){
         return ubicar(x).then(function(c){
           if (!c) return;
-          var m = L.marker(c, {icon: icono, title: etiquetaProp(x), alt: etiquetaProp(x)}).addTo(mapa);
+          var m = L.marker(c, {icon: icono, title: etiquetaProp(x), alt: etiquetaProp(x)});
           m.bindPopup(contenido(x), {maxWidth: 260});
-          puestos.push(m);
-          mapa.fitBounds(L.featureGroup(puestos).getBounds().pad(0.3), {maxZoom: 16});
+          entradas.push({x: x, m: m});
+          aplicar();
         });
-      })).then(function(){
-        var faltan = items.length - puestos.length;
-        if (faltan <= 0) { nota.hidden = true; return; }
-        nota.hidden = false;
-        nota.textContent = puestos.length
-          ? faltan + (faltan === 1 ? ' propiedad no se pudo ubicar en el mapa: ' : ' propiedades no se pudieron ubicar en el mapa: ') + 'abrila desde la lista con Google Maps.'
-          : 'No pudimos ubicar las propiedades en el mapa. Podés verlas en Google Maps desde la lista.';
-      });
+      })).then(function(){ ubicando = false; aplicar(); });
     }
     fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); }).then(iniciar).catch(function(){ caja.hidden = true; });
   })();

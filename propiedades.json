@@ -5,7 +5,8 @@
   "direccion": "Olazábal 2100",
   "barrio": "Belgrano",
   "detalle": "55 m²",
-  "link": "https://propiedades.adinco.net/aviso/local-alquiler-belgrano-belgrano-capital-federal--6532842"
+  "link": "https://propiedades.adinco.net/aviso/local-alquiler-belgrano-belgrano-capital-federal--6532842",
+  "precio": 2500000
  },
  {
   "operacion": "alquiler",
@@ -13,7 +14,9 @@
   "direccion": "Olazábal 3100",
   "barrio": "Belgrano",
   "detalle": "1 dorm., 36 m²",
-  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6548778"
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6548778",
+  "dorm": 1,
+  "precio": 650000
  },
  {
   "operacion": "alquiler",
@@ -21,7 +24,9 @@
   "direccion": "Quesada 2100, 2°",
   "barrio": "Belgrano",
   "detalle": "2 dorm., 56 m²",
-  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-2dorm-1bano--6548746"
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-2dorm-1bano--6548746",
+  "dorm": 2,
+  "precio": 1050000
  },
  {
   "operacion": "alquiler",
@@ -29,7 +34,9 @@
   "direccion": "Vidal 2500",
   "barrio": "Belgrano",
   "detalle": "3 dorm., 80 m²",
-  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-3dorm-3banos--6543443"
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-3dorm-3banos--6543443",
+  "dorm": 3,
+  "precio": 1500000
  },
  {
   "operacion": "alquiler",
@@ -37,6 +44,8 @@
   "direccion": "Virrey Loreto 2400",
   "barrio": "Belgrano",
   "detalle": "1 dorm., 45 m²",
-  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6531904"
+  "link": "https://propiedades.adinco.net/aviso/departamento-alquiler-belgrano-belgrano-capital-federal-1dorm-1bano--6531904",
+  "dorm": 1,
+  "precio": 750000
  }
 ]
