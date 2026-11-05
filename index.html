@@ -364,7 +364,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
 .burger[aria-expanded="true"] span:nth-child(2){opacity:0}
 .burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 .burger:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
-@media (max-width:960px){
+@media (max-width:1100px){
   .burger{display:flex}
   .bar .container{justify-content:space-between}
   .menu{display:none; position:absolute; left:0; right:0; top:100%; margin:0; flex-direction:column; align-items:stretch; gap:0;
@@ -443,7 +443,6 @@ footer .f-col p{margin:0 0 12px; color:var(--ink); font-size:.95rem; line-height
 .f-col a:hover{color:var(--violet); text-decoration:underline}
 .f-bottom{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 20px; margin-top:36px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:.88rem}
 .f-bottom a{color:var(--muted); font-weight:600}
-@media (max-width:1100px) and (min-width:961px){ .menu a{padding:9px 10px; font-size:.9rem} }
 
 /* Pie sin franja blanca: el espacio del botón flotante queda dentro del pie */
 body{padding-bottom:0}
@@ -525,6 +524,25 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .t-fr .frow > b{min-width:0; flex-basis:100%}
 .t-fr[hidden], #t-fr-vacio[hidden]{display:none}
 @media (max-width:560px){ .t-agenda{grid-template-columns:1fr} }
+
+/* ===== Preguntas frecuentes ===== */
+.faq-grid{display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr); gap:32px 56px; align-items:start}
+.faq-intro{position:sticky; top:96px}
+.faq-intro .sub{margin:12px 0 22px}
+@media (max-width:860px){ .faq-grid{grid-template-columns:1fr} .faq-intro{position:static} }
+.faq-grupo{margin:28px 0 12px; font-size:.74rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.faq-grupo:first-child{margin-top:0}
+.qa{background:#fff; border:1px solid var(--line); border-radius:16px; margin-bottom:10px; overflow:hidden}
+.qa[open]{border-color:#D7C3E0; box-shadow:0 10px 24px rgba(115,47,132,.08)}
+.qa summary{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; font-weight:700; cursor:pointer; list-style:none}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:'+'; flex:none; font-size:1.5rem; font-weight:500; line-height:1; color:var(--violet)}
+.qa[open] summary::after{content:'–'}
+.qa summary:focus-visible{outline:3px solid var(--ink); outline-offset:-3px}
+.qa-r{padding:0 20px 18px; color:#3A3144}
+.qa-r p{margin:0 0 10px}
+.qa-r p:last-child{margin-bottom:0}
+.qa-r a{color:var(--violet); font-weight:700}
 </style>
 </head>
 <body>
@@ -538,6 +556,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       <a href="#condiciones">Condiciones</a>
       <a href="#agregamos-valor">Servicios</a>
       <a href="#tasacion">Tasaciones</a>
+      <a href="#preguntas">Preguntas</a>
       <a href="#contacto">Contacto</a>
       <a href="#sucursales">Sucursales</a>
     </nav>
@@ -873,6 +892,32 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
     </div>
   </section>
 
+  <section class="alt" id="preguntas">
+    <div class="container">
+      <div class="faq-grid">
+        <div class="faq-intro">
+          <h2>Preguntas frecuentes</h2>
+          <p class="sub">Lo que más nos consultan antes de alquilar o de tasar. Si tu duda no está acá, escribile a Magali.</p>
+          <a class="btn btn-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Preguntarle a Magali</a>
+        </div>
+        <div class="faq">
+        <h3 class="faq-grupo">Alquilar</h3>
+        <details class="qa" open><summary>¿Qué requisitos piden para alquilar una vivienda?</summary><div class="qa-r"><p>Garantía propietaria de CABA o seguro de caución, ingresos de al menos 3 veces el valor del alquiler, 1 mes de depósito en dólares y 1 mes de adelanto.</p><p>Las condiciones pueden variar según la propiedad. Mirá el detalle en <a href="#condiciones">Condiciones de alquiler</a>.</p></div></details>
+        <details class="qa"><summary>¿Qué garantías aceptan?</summary><div class="qa-r"><p>Garantía propietaria de CABA, o seguro de caución a través de <strong>FINAER</strong> o <strong>Garantía Ya</strong>.</p><p>Si elegís el seguro de caución, la preaprobación la tenés que gestionar vos como futuro inquilino.</p></div></details>
+        <details class="qa"><summary>¿Cuánto tengo que pagar para ingresar?</summary><div class="qa-r"><p><strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, en dólares, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.</p><p><strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.</p></div></details>
+        <details class="qa"><summary>¿Cuánto dura el contrato y cómo se actualiza?</summary><div class="qa-r"><p><strong>Vivienda:</strong> 2 años. <strong>Local comercial:</strong> 3 años.</p><p>En ambos casos el alquiler se actualiza cada tres meses según el IPC (Índice de Precios al Consumidor).</p></div></details>
+        <details class="qa"><summary>¿Cómo demuestro mis ingresos?</summary><div class="qa-r"><p><strong>Vivienda:</strong> con los últimos 3 recibos de sueldo, que acrediten ingresos por al menos 3 veces el valor del alquiler. Si sos trabajador independiente, con una certificación de ingresos.</p><p><strong>Local comercial:</strong> con ingresos comprobables. Si sos monotributista, independiente o una sociedad (por ejemplo, una SRL), con una certificación de ingresos emitida por contador público.</p></div></details>
+        <details class="qa"><summary>¿Se aceptan mascotas?</summary><div class="qa-r"><p>En las viviendas, no se aceptan mascotas.</p></div></details>
+        <h3 class="faq-grupo">Visitas y tasaciones</h3>
+        <details class="qa"><summary>¿Cómo coordino una visita?</summary><div class="qa-r"><p>Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos. Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.</p><p>No es una reserva automática. Podés hacerlo desde <a href="#visita">Coordiná tu visita</a>.</p></div></details>
+        <details class="qa"><summary>¿En qué horario atienden?</summary><div class="qa-r"><p>Magali atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h. Fuera de ese horario podés dejar tu consulta por WhatsApp y te responde apenas retoma la atención.</p></div></details>
+        <details class="qa"><summary>¿Cuánto cuesta una tasación y cuánto tarda?</summary><div class="qa-r"><p>La tasación es <strong>sin cargo</strong> y se hace <strong>en 24 hs</strong>, con un informe profesional firmado por un matriculado.</p><p>Completá el formulario en <a href="#tasacion">Tasá tu propiedad</a> y elegí cuándo podemos ir a verla.</p></div></details>
+        <details class="qa"><summary>¿Qué servicios tienen para propietarios?</summary><div class="qa-r"><p>Análisis de mercado con big data, puesta en valor con un arquitecto, tour virtual 360° con tecnología RICOH y MATTERPORT, fotografía inmobiliaria profesional, asesoría integral con convenio con Escribanía y asesoría contable, y publicidad digital para posicionar tu unidad al tope del ranking de los portales.</p><p>Más información en <a href="#agregamos-valor">Agregamos valor a tu inmueble</a>.</p></div></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="resenas">
     <div class="container">
       <div class="review">
@@ -953,6 +998,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
         <a href="#que-buscas">Alquileres</a>
         <a href="#visita">Coordinar una visita</a>
         <a href="#tasacion">Tasaciones</a>
+        <a href="#preguntas">Preguntas frecuentes</a>
         <a href="#sucursales">Sucursales</a>
       </div>
     </div>
@@ -1556,7 +1602,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
     menu.addEventListener('click', function(e){ if (e.target.tagName === 'A') setOpen(false); });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setOpen(false); });
     document.addEventListener('click', function(e){ if (!menu.contains(e.target) && !burger.contains(e.target)) setOpen(false); });
-    window.addEventListener('resize', function(){ if (window.innerWidth > 960) setOpen(false); });
+    window.addEventListener('resize', function(){ if (window.innerWidth > 1100) setOpen(false); });
 
     if (!('IntersectionObserver' in window)) return;
     var links = menu.querySelectorAll('a'), map = {};
