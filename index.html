@@ -694,11 +694,11 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         <p class="sub">Elegí los días y horarios en que podés. Magali recibe tu pedido por WhatsApp y te confirma la visita.</p>
       </div>
       <div class="mapbox" id="prop-map-box" hidden>
-        <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita. Los precios son el alquiler mensual, más expensas.</span></div>
+        <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita. Los precios son el alquiler mensual, más expensas (en locales, también más IVA).</span></div>
         <div class="mapfilters" id="map-filters" hidden>
           <label>Tipo<select id="f-tipo"><option value="">Todos</option></select></label>
           <label>Dormitorios<select id="f-dorm"><option value="">Todos</option></select></label>
-          <label>Alquiler por mes (+ expensas)<select id="f-precio"><option value="">Cualquiera</option></select></label>
+          <label>Alquiler por mes (+ expensas; locales + IVA)<select id="f-precio"><option value="">Cualquiera</option></select></label>
           <button type="button" class="f-clear" id="f-clear">Limpiar filtros</button>
         </div>
         <div id="prop-map" class="map" role="region" aria-label="Mapa de las propiedades en alquiler"></div>
@@ -1731,7 +1731,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       var d = document.createElement('div'); d.className = 'pop';
       var t = document.createElement('strong'); t.textContent = x.tipo + ' · ' + x.direccion; d.appendChild(t);
       var s = document.createElement('span'); s.textContent = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · '); d.appendChild(s);
-      if (x.precio) { var pr = document.createElement('em'); pr.className = 'pop-precio'; pr.textContent = pesos(x.precio) + ' por mes + expensas'; d.appendChild(pr);
+      if (x.precio) { var pr = document.createElement('em'); pr.className = 'pop-precio'; pr.textContent = pesos(x.precio) + ' por mes' + (x.tipo === 'Local' ? ' + IVA' : '') + ' + expensas'; d.appendChild(pr);
         if (x.expensas) { var ex = document.createElement('small'); ex.className = 'pop-exp'; ex.textContent = 'Expensas: ' + pesos(x.expensas) + ' por mes'; d.appendChild(ex); } }
       if (!exacta) { var ap = document.createElement('small'); ap.className = 'pop-aprox'; ap.textContent = 'Ubicación aproximada'; d.appendChild(ap); }
       var acc = document.createElement('div'); acc.className = 'pop-acc';
@@ -1896,10 +1896,10 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       return cargarPropiedades().then(function(l){
         if (!l || !l.length) return [{p: 'Podés ver las propiedades disponibles en el mapa de <a href="#visita">Coordiná tu visita</a>, o en el <a href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades/inmuebles/alquiler" target="_blank" rel="noopener">listado de Argenprop</a>.'}];
         var items = l.map(function(x){
-          var det = [x.detalle || x.m2, x.precio ? '$ ' + Number(x.precio).toLocaleString('es-AR') + ' por mes + expensas' + (x.expensas ? ' (expensas: $ ' + Number(x.expensas).toLocaleString('es-AR') + ')' : '') : ''].filter(Boolean).join(' · ');
+          var det = [x.detalle || x.m2, x.precio ? '$ ' + Number(x.precio).toLocaleString('es-AR') + ' por mes' + (x.tipo === 'Local' ? ' + IVA' : '') + ' + expensas' + (x.expensas ? ' (expensas: $ ' + Number(x.expensas).toLocaleString('es-AR') + ')' : '') : ''].filter(Boolean).join(' · ');
           return '<strong>' + esc(x.tipo) + ' · ' + esc(x.direccion) + '</strong>' + (det ? '<br>' + esc(det) : '') + (x.link ? '<br><a href="' + esc(x.link) + '" target="_blank" rel="noopener">Ver publicación</a>' : '');
         });
-        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Los precios son el alquiler mensual y se suman las expensas. Pueden cambiar. Si querés saber más de una, tocala y preguntame lo que quieras (expensas, cochera, mascotas…):'}, {bt: l.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', 'Quiero saber de ' + x.direccion); respProp(x, null, 'Quiero saber de ' + x.direccion); }]; })}, {p: 'También las ves en el mapa de <a href="#visita">Coordiná tu visita</a>, con filtros.'}];
+        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Los precios son el alquiler mensual y se suman las expensas; en los locales, también el IVA. Pueden cambiar. Si querés saber más de una, tocala y preguntame lo que quieras (expensas, cochera, mascotas…):'}, {bt: l.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', 'Quiero saber de ' + x.direccion); respProp(x, null, 'Quiero saber de ' + x.direccion); }]; })}, {p: 'También las ves en el mapa de <a href="#visita">Coordiná tu visita</a>, con filtros.'}];
       });
     }
 
@@ -1910,7 +1910,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       {id:'garantias', chip:'Garantías', kw:['garantia|3','garantias|3','caucion|3','finaer|3','seguro de caucion|3','seguro|1','propietaria|1','inhibicion|3','dominio|2','informe|1','informes|1','fiador|2'],
        r:[{p:'Aceptamos garantía propietaria de CABA, o seguro de caución a través de <strong>FINAER</strong> o <strong>Garantía Ya</strong>.'},{p:'Si elegís el seguro de caución, la preaprobación la gestionás vos como futuro inquilino. Si la garantía es propietaria, el inquilino abona los pedidos de informes de dominio e inhibición.'}]},
       {id:'costos', chip:'Cuánto pagar para ingresar', kw:['pagar|3','pago|2','ingresar|2','adelanto|3','deposito|3','honorarios|3','comision|3','costo|2','costos|2','efectivo|2','dolares|2','dolar|2','billete|2','billetes|2','firma|1','cuanto necesito|3'],
-       r:[{p:'<strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.'},{p:'<strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.'},{p:'El valor publicado es el del alquiler mensual y a eso se suman las expensas de cada unidad.'},{p:'El depósito se abona siempre en efectivo, en billetes de dólar, al momento de la firma. Con garantía propietaria, también se abonan los pedidos de informes de dominio e inhibición.'}]},
+       r:[{p:'<strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.'},{p:'<strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.'},{p:'El valor publicado es el del alquiler mensual y a eso se suman las expensas de cada unidad. En los locales, el alquiler es además + IVA.'},{p:'El depósito se abona siempre en efectivo, en billetes de dólar, al momento de la firma. Con garantía propietaria, también se abonan los pedidos de informes de dominio e inhibición.'}]},
       {id:'contrato', chip:'Contrato y actualización', kw:['contrato|3','duracion|3','dura|2','actualiza|3','actualizacion|3','ipc|3','aumento|3','aumenta|3','ajuste|3','trimestral|3','anos|1'],
        r:[{p:'<strong>Vivienda:</strong> contrato por 2 años. <strong>Local comercial:</strong> 3 años.'},{p:'En ambos casos el alquiler se actualiza cada tres meses según el IPC (Índice de Precios al Consumidor).'}]},
       {id:'ingresos', chip:'Cómo demostrar ingresos', kw:['ingresos|3','ingreso|2','recibo|3','recibos|3','sueldo|3','independiente|3','monotributo|3','monotributista|3','certificacion|3','contador|3','dependencia|2','tres veces|3','3 veces|3','sociedad|2','srl|2'],
@@ -1972,7 +1972,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     function dato(key){ return function(x){ return fmt(x[key]); }; }
     var ATRIBUTOS = [
       {id:'precio', label:'Alquiler', chip:'Precio', kw:['precio|3','precios|3','cuesta|3','cuanto sale|4','cuanto cuesta|4','cuanto es|2','valor|2','vale|3','monto|2'],
-       val:function(x){ return x.precio ? dinero(x.precio) + ' por mes, más expensas' + (x.expensas && typeof x.expensas === 'number' ? ' (expensas: ' + dinero(x.expensas) + ' por mes)' : '') : null; }},
+       val:function(x){ return x.precio ? dinero(x.precio) + ' por mes, más ' + (x.tipo === 'Local' ? 'IVA y ' : '') + 'expensas' + (x.expensas && typeof x.expensas === 'number' ? ' (expensas: ' + dinero(x.expensas) + ' por mes)' : '') : null; }},
       {id:'expensas', label:'Expensas', chip:'Expensas', kw:['expensa|3','expensas|3'],
        val:function(x){ if (!x.expensas) return null; return (typeof x.expensas === 'number' ? dinero(x.expensas) + ' por mes' : String(x.expensas)) + ' (se suman al alquiler)'; }},
       {id:'superficie', label:'Superficie', chip:'Superficie', kw:['metros|3','m2|3','superficie|3','tamano|3','metraje|3','cuantos metros|4','grande|2'],
@@ -2087,9 +2087,9 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         bloquesR = [{p: 'Hoy no tengo una propiedad que cumpla con lo que buscás (' + esc(desc) + '). Son las que tengo disponibles:'}, botones(lista), {p: 'Si querés, dejale tu búsqueda a Magali y te avisa cuando entre algo así.'}, consulta];
       } else {
         var lineas = res.map(function(x){
-          var det = [x.detalle || x.m2, x.precio ? dinero(x.precio) + ' por mes + expensas' : ''].filter(Boolean).join(' · ');
+          var det = [x.detalle || x.m2, x.precio ? dinero(x.precio) + ' por mes' + (x.tipo === 'Local' ? ' + IVA' : '') + ' + expensas' : ''].filter(Boolean).join(' · ');
           var fs = cr.feats.map(function(f){ var v = x[KEYS[f]]; if (v === undefined || v === null || v === '') { faltan = true; return esc(BUSCABLES[f]) + ': a confirmar'; } return esc(BUSCABLES[f]) + ': ' + esc(fmt(v)); });
-          return '<strong>' + esc(etiq(x)) + '</strong><br>' + esc(det).replace(/ por mes \+ expensas/, ' por mes + expensas') + (fs.length ? '<br>' + fs.join('<br>') : '');
+          return '<strong>' + esc(etiq(x)) + '</strong><br>' + esc(det) + (fs.length ? '<br>' + fs.join('<br>') : '');
         });
         bloquesR = [{p: 'Con lo que buscás (' + esc(desc) + ') tengo ' + (res.length === 1 ? '1 opción' : res.length + ' opciones') + ':'}, {ul: lineas}];
         if (faltan) bloquesR.push({p: 'De algunas todavía no tengo cargado ese dato: Magali te lo confirma.'});
