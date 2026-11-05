@@ -1983,7 +1983,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     var HOR = {1:[600,1080], 2:[600,1080], 3:[600,1080], 4:[600,1080], 5:[600,1080], 6:[600,780]};   // minutos desde las 00:00
     var FERIADO_DESDE = Date.parse('2026-11-07T13:00:00-03:00'), FERIADO_HASTA = Date.parse('2026-11-11T10:00:00-03:00');
     function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-    function norm(s){ return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+    function norm(s){ return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b(q|k)\b/g, 'que').replace(/\bkiero\b/g, 'quiero').replace(/\b(xq|pq)\b/g, 'porque'); }
     function pad(n){ return n < 10 ? '0' + n : '' + n; }
     function waLink(texto){ return 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(texto); }
 
@@ -2040,31 +2040,31 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
 
     // --- Temas y respuestas (mismo contenido que las preguntas frecuentes) ---
     var TEMAS = [
-      {id:'requisitos', chip:'Requisitos', kw:['requisito|3','requisitos|3','piden|2','papeles|2','documentacion|2','necesito|1','condiciones|2','como alquilar|3','alquilar una vivienda|3'],
+      {id:'requisitos', chip:'Requisitos', kw:['requisito|3','requisitos|3','piden|3','papeles|2','documentacion|2','necesito|1','condiciones|2','como alquilar|3','alquilar una vivienda|3','que piden|4','que necesito|4','necesito para alquilar|4','que papeles|4','que llevo|3','que tengo que llevar|4','proceso|3','pasos|3','como es el proceso|4','que se necesita|4','que hace falta|4'],
        r:[{p:'Para alquilar una <strong>vivienda</strong>: garantía propietaria de CABA o seguro de caución, ingresos de al menos 3 veces el valor del alquiler, 1 mes de depósito y 1 mes de adelanto. El depósito se abona en efectivo, en billetes de dólar, al momento de la firma.'},{p:'Las condiciones pueden variar según la propiedad. Mirá el detalle en <a href="#condiciones">Condiciones de alquiler</a>.'}]},
-      {id:'garantias', chip:'Garantías', kw:['garantia|3','garantias|3','caucion|3','finaer|3','seguro de caucion|3','seguro|1','propietaria|1','inhibicion|3','dominio|2','informe|1','informes|1','fiador|2'],
+      {id:'garantias', chip:'Garantías', kw:['garantia|3','garantias|3','caucion|3','finaer|3','seguro de caucion|3','seguro|1','propietaria|1','inhibicion|3','dominio|2','informe|1','informes|1','fiador|2','garante|3','garantes|3','sin garante|4','sin garantia|4','provincia|2','familiar|2'],
        r:[{p:'Aceptamos garantía propietaria de CABA, o seguro de caución a través de <strong>FINAER</strong> o <strong>Garantía Ya</strong>.'},{p:'Si elegís el seguro de caución, la preaprobación la gestionás vos como futuro inquilino. Si la garantía es propietaria, el inquilino abona los pedidos de informes de dominio e inhibición.'}]},
-      {id:'costos', chip:'Cuánto pagar para ingresar', kw:['pagar|3','pago|2','ingresar|2','adelanto|3','deposito|3','honorarios|3','comision|3','costo|2','costos|2','efectivo|2','dolares|2','dolar|2','billete|2','billetes|2','firma|1','cuanto necesito|3'],
+      {id:'costos', chip:'Cuánto pagar para ingresar', kw:['pagar|3','pago|2','ingresar|2','adelanto|3','deposito|3','honorarios|3','comision|3','costo|2','costos|2','efectivo|2','dolares|2','dolar|2','billete|2','billetes|2','firma|1','cuanto necesito|3','gastos|3','gasto|3','que gastos|4','cuanto hay que pagar|4','entrar|2','cobran|2'],
        r:[{p:'<strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.'},{p:'<strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.'},{p:'El valor publicado es el del alquiler mensual y a eso se suman las expensas de cada unidad. En los locales, el alquiler es además + IVA.'},{p:'El depósito se abona siempre en efectivo, en billetes de dólar, al momento de la firma. Con garantía propietaria, también se abonan los pedidos de informes de dominio e inhibición.'}]},
       {id:'contrato', chip:'Contrato y actualización', kw:['contrato|3','duracion|3','dura|2','actualiza|3','actualizacion|3','ipc|3','aumento|3','aumenta|3','ajuste|3','trimestral|3','anos|1'],
        r:[{p:'<strong>Vivienda:</strong> contrato por 2 años. <strong>Local comercial:</strong> 3 años.'},{p:'En ambos casos el alquiler se actualiza cada tres meses según el IPC (Índice de Precios al Consumidor).'}]},
-      {id:'ingresos', chip:'Cómo demostrar ingresos', kw:['ingresos|3','ingreso|2','recibo|3','recibos|3','sueldo|3','independiente|3','monotributo|3','monotributista|3','certificacion|3','contador|3','dependencia|2','tres veces|3','3 veces|3','sociedad|2','srl|2'],
+      {id:'ingresos', chip:'Cómo demostrar ingresos', kw:['ingresos|3','ingreso|2','recibo|5','recibos|5','sueldo|3','independiente|3','monotributo|3','monotributista|3','certificacion|3','contador|3','dependencia|2','tres veces|3','3 veces|3','sociedad|2','srl|2','autonomo|3','autonoma|3','autonomos|3','en negro|4','informal|3','relacion de dependencia|4','cuanto tengo que ganar|5','ganar|3','gano|3'],
        r:[{p:'<strong>Vivienda:</strong> con los últimos 3 recibos de sueldo, que acrediten ingresos por al menos 3 veces el valor del alquiler. Si sos trabajador independiente, con una certificación de ingresos.'},{p:'<strong>Local comercial:</strong> con ingresos comprobables. Si sos monotributista, independiente o una sociedad (por ejemplo, una SRL), con una certificación de ingresos emitida por contador público.'}]},
       {id:'mascotas', chip:'Mascotas', kw:['mascota|3','mascotas|3','perro|3','perros|3','gato|3','gatos|3','animal|2','animales|2'],
        r:[{p:'En las viviendas no se aceptan mascotas.'}]},
       {id:'local', chip:'Alquilar un local', kw:['local|3','locales|3','comercial|3','comercio|3','negocio|3','rubro|3','iva|2'],
        r:[{p:'Para <strong>locales comerciales</strong>: contrato por 3 años, actualización trimestral por IPC, garantía propietaria o seguro de caución, 1 mes de depósito (en efectivo, en billetes de dólar, al firmar) y 1 mes de adelanto.'},{p:'Los honorarios son del 5% + IVA sobre el valor total del contrato y el alquiler es + IVA. Si sos monotributista, independiente o sociedad, se pide certificación de ingresos de contador público. Detalle en <a href="#condiciones">Condiciones de alquiler</a>.'}]},
-      {id:'visitas', chip:'Coordinar una visita', kw:['visita|3','visitas|3','visitar|3','conocer|2','coordinar|3','agendar|3','turno|3','cita|2','recorrer|2','ir a ver|3','quiero ver|3'],
+      {id:'visitas', chip:'Coordinar una visita', kw:['visita|3','visitas|3','visitar|3','conocer|3','coordinar|3','agendar|3','turno|3','cita|2','recorrer|2','ir a ver|3','quiero ver|3','conocer la propiedad|4','ver la propiedad|4','ver un departamento|4','ver el departamento|4','puedo ir a ver|4'],
        r:[{p:'Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos. Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.'},{p:'No es una reserva automática. Lo hacés en <a href="#visita">Coordiná tu visita</a>.'}]},
       {id:'horarios', chip:'Horarios de atención', kw:['horario|3','horarios|3','atienden|3','atencion|3','atender|2','abren|3','abierto|3','cerrado|3','feriado|3','fin de semana|3','sabado|2','domingo|2','que hora|3'],
        r:function(){ var ts = Date.now(), a = proximaApertura(ts); return [{p:'Magali atiende de <strong>lunes a viernes de 10 a 18 h</strong> y <strong>sábados de 10 a 13 h</strong>.'},{p: atendiendo(ts) ? 'Ahora está atendiendo: podés escribirle por WhatsApp.' : 'Ahora estamos fuera de horario' + (a ? ': retoma ' + cuando(a, ts) + '.' : '.') + ' Podés dejar tu consulta por WhatsApp y te responde apenas vuelva.'}]; }},
-      {id:'tasacion', chip:'Tasación', kw:['tasacion|3','tasar|3','tasarme|3','valuacion|3','valuar|3','cuanto vale|3','cuanto sale mi|3','vender mi|2','matriculado|3','informe profesional|3'],
+      {id:'tasacion', chip:'Tasación', kw:['tasacion|3','tasar|3','tasarme|3','valuacion|3','valuar|3','cuanto vale|3','cuanto sale mi|3','vender mi|4','matriculado|3','informe profesional|3','tasan|3','tasaciones|3','vender|3','vendo|3','cuanto puedo pedir|5','cuanto pedir|4','gratis|2','sin cargo|3','cuanto vale mi|4'],
        r:[{p:'La tasación es <strong>sin cargo</strong> y se hace <strong>en 24 hs</strong>, con un informe profesional firmado por un matriculado.'},{p:'Completá el formulario en <a href="#tasacion">Tasá tu propiedad</a> y elegí cuándo podemos ir a verla.'}]},
-      {id:'servicios', chip:'Servicios para propietarios', kw:['servicios|3','servicio|2','propietario|3','propietarios|3','publicar|3','fotografia|3','fotos|2','360|3','tour|3','matterport|3','ricoh|3','publicidad|3','arquitecto|3','escribania|3','big data|3','market|2','puesta en valor|3'],
+      {id:'servicios', chip:'Servicios para propietarios', kw:['servicios|3','servicio|2','propietario|3','propietarios|3','publicar|3','fotografia|3','fotos|2','360|3','tour|3','matterport|3','ricoh|3','publicidad|3','arquitecto|3','escribania|3','big data|3','market|2','puesta en valor|3','mi propiedad|4','mi departamento|3','mi casa|3','mi inmueble|4','mi local|3','alquilar mi|4','publican|3','publicacion|2','como publican|4','tengo una propiedad|4','soy propietario|4','soy propietaria|4'],
        r:[{p:'Para propietarios: análisis de mercado con big data, puesta en valor con un arquitecto, tour virtual 360° con tecnología RICOH y MATTERPORT, fotografía inmobiliaria profesional, asesoría integral con convenio con Escribanía y asesoría contable, y publicidad digital para posicionar tu unidad al tope del ranking de los portales.'},{p:'Más en <a href="#agregamos-valor">Agregamos valor a tu inmueble</a>.'}]},
       {id:'propiedades', chip:'Propiedades disponibles', kw:['propiedades|3','propiedad|2','disponible|3','disponibles|3','departamento|2','departamentos|2','depto|2','deptos|2','alquileres|2','tienen|1','lista|1','precio|2','precios|2','dormitorio|2','dormitorios|2','ambientes|2','que hay|3','oficina|1'],
        r:respPropiedades},
-      {id:'sucursales', chip:'Sucursales', kw:['sucursal|3','sucursales|3','direccion|3','donde estan|3','ubicacion|3','belgrano|2','colegiales|3','como llegar|3','mapa|2','oficinas|2'],
+      {id:'sucursales', chip:'Sucursales', kw:['sucursal|3','sucursales|3','direccion|3','donde estan|3','ubicacion|3','belgrano|2','colegiales|3','como llegar|3','mapa|2','oficinas|2','donde queda|4','queda|2','como llego|4','llego|3','inmobiliaria|1'],
        r:[{p:'<strong>Sucursal Belgrano:</strong> Av. Olazábal 2690.<br><strong>Sucursal Colegiales:</strong> Ciudad de la Paz 1384.'},{p:'Mirá el mapa y cómo llegar en <a href="#sucursales">Nuestras sucursales</a>.'}]},
       {id:'privacidad', chip:'Mis datos', kw:['privacidad|3','datos|2','personales|3','informacion personal|3'],
        r:[{p:'Usamos tus datos solo para responder tu consulta y coordinar la visita o la tasación. Este chat no guarda lo que escribís: solo le llega a Magali si vos tocás «Que me contacte Magali» y aceptás enviar tus datos. Más en el <a href="privacidad.html">aviso de privacidad</a>.'}]},
@@ -2074,6 +2074,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
        r:function(){ return [{p:'Claro. ' + estado() + ' Podés escribirle directamente por WhatsApp:'},{a:['Hablar por WhatsApp con Magali', waLink('Hola Magali, quiero hablar con vos.')]},{p:'O dejame tus datos y Magali te escribe ella:'},{bt:[['Que me contacte Magali', pedirContacto]]}]; }},
       {id:'contactame', chip:null, kw:['contacten|4','contacte|4','contactenme|4','contactame|4','me contacten|5','me llamen|5','llamen|3','llamame|3','que me llamen|5','me escriban|5','escriban|3','dejar mis datos|5','dejo mis datos|5','dejar mi telefono|5','dejar mi numero|5'],
        r:function(){ return [{p:'Con gusto: dejame tu nombre y celular y le paso tu consulta a Magali, con lo que hablamos.'},{bt:[['Dejar mis datos', mostrarContacto]]}]; }},
+      {id:'derivar', chip:null, kw:['pintar|4','pintura|4','abl|4','impuestos|3','rescindir|5','rescision|5','rescindo|5','romper el contrato|6','estudiantes|4','extranjeros|4','extranjero|4','venden|4','comprar|4','compra|3','comision a propietarios|8','honorarios a propietarios|8','cobran a propietarios|8','comision al propietario|8','reparaciones|4','arreglos|3','mejoras|3','reformas|4','sublocar|5','subalquilar|5','renovar|4','renovacion|4','prorroga|4','obras|3'],
+       r:[]},
       {id:'saludo', chip:null, kw:['hola|3','buenas|3','buen dia|3','buenos dias|3','buenas tardes|3','buenas noches|3','hey|2'],
        r:function(){ return [{p:'¡Hola! Soy Nina, la asistente virtual de Magali. ' + estado() + ' Elegí un tema o escribime tu pregunta.'}]; }},
       {id:'gracias', chip:null, kw:['gracias|3','genial|2','perfecto|2','excelente|2','buenisimo|2','listo|1'],
@@ -2082,18 +2084,45 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     var PRINCIPALES = ['requisitos','garantias','costos','visitas','propiedades','tasacion','horarios'];
     function tema(id){ for (var i = 0; i < TEMAS.length; i++) if (TEMAS[i].id === id) return TEMAS[i]; }
 
+    // ¿Difieren en una sola letra (de más, de menos o cambiada)? Sirve para errores de tipeo: "requicitos", "depocito".
+    function distancia1(a, b){
+      if (Math.abs(a.length - b.length) > 1) return false;
+      var i = 0; while (i < a.length && i < b.length && a.charAt(i) === b.charAt(i)) i++;
+      if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1);
+      return a.length > b.length ? a.slice(i + 1) === b.slice(i) : b.slice(i + 1) === a.slice(i);
+    }
+    // Además de una letra de más, de menos o cambiada, acepta dos letras seguidas intercambiadas ("ambinetes").
+    function parecida(a, b){
+      if (distancia1(a, b)) return true;
+      if (a.length !== b.length) return false;
+      var i = 0; while (i < a.length && a.charAt(i) === b.charAt(i)) i++;
+      return i < a.length - 1 && a.charAt(i) === b.charAt(i + 1) && a.charAt(i + 1) === b.charAt(i) && a.slice(i + 2) === b.slice(i + 2);
+    }
+    // Corrige errores de tipeo en las palabras que se usan para buscar ("domitorios" → "dormitorios").
+    var VOCAB = ['dormitorio','dormitorios','ambiente','ambientes','habitacion','habitaciones','monoambiente','departamento','departamentos','cochera','terraza','ascensor','propiedad','propiedades','amoblado','luminoso','balcon'];
+    function corregir(tx){
+      return tx.split(' ').map(function(tk){
+        if (tk.length < 6 || VOCAB.indexOf(tk) > -1) return tk;
+        for (var i = 0; i < VOCAB.length; i++) if (VOCAB[i].length >= 6 && parecida(tk, VOCAB[i])) return VOCAB[i];
+        return tk;
+      }).join(' ');
+    }
     function puntuarLista(tx, lista, minimo){
       var tokens = tx.split(' '), mejor = null, puntos = 0;
       lista.forEach(function(tm){
-        var s = 0;
+        var frases = 0, porPalabra = {};   // cada palabra del mensaje cuenta una sola vez, con su mejor coincidencia
         tm.kw.forEach(function(k){
           var pr = k.split('|'), w = +pr[1] || 1, kw = pr[0];
-          if (kw.indexOf(' ') > -1) { if (tx.indexOf(kw) > -1) s += w + 1; return; }
+          if (kw.indexOf(' ') > -1) { if (tx.indexOf(kw) > -1) frases += w + 1; return; }
           for (var i = 0; i < tokens.length; i++) {
             var tk = tokens[i];
-            if (tk === kw || (tk.length >= 5 && kw.length >= 5 && (tk.indexOf(kw) === 0 || kw.indexOf(tk) === 0))) { s += w; break; }
+            if (tk === kw || (tk.length >= 5 && kw.length >= 5 && (tk.indexOf(kw) === 0 || kw.indexOf(tk) === 0)) || (tk.length >= 6 && kw.length >= 6 && parecida(tk, kw))) {
+              if (!porPalabra[i] || porPalabra[i] < w) porPalabra[i] = w;
+              break;
+            }
           }
         });
+        var s = frases; for (var q in porPalabra) s += porPalabra[q];
         if (s > puntos) { puntos = s; mejor = tm; }
       });
       return puntos >= minimo ? mejor : null;
@@ -2361,7 +2390,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       if (directo && directo.prop) return respProp(directo.prop, directo.attr, texto);
       if (forzado) return responderConTema(forzado);
       return cargarPropiedades().then(function(l){
-        var lista = l || [], tx = norm(texto), tokens = tx.split(' ');
+        var lista = l || [], tx = corregir(norm(texto)), tokens = tx.split(' ');
         var a = puntuarLista(tx.replace(RE_AMB, ' ').replace(RE_DORM, ' ').replace(/\bmonoambiente\w*/g, ' ').replace(/\s+/g, ' ').trim(), ATRIBUTOS, 2), tm = puntuar(tx);
         var cr = lista.length ? criterios(texto, tx) : null, deUna = /\b(el de|la de|ese|esa|este|esta)\b/.test(tx);
         var det = lista.length ? detectarProp(tx, lista) : null;
@@ -2382,6 +2411,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           if (ultima && tokens.length <= 8 && !(tm && tm.id === 'propiedades')) return respProp(ultima, a, texto);
         }
         if (tm && tm.id === 'local' && hayLocal) respBusqueda(lista, {feats: [], tipo: 'Local', fuerte: true}, texto);   // primero el local disponible, después las condiciones
+        if (tm && tm.id === 'derivar') return sinRespuesta(texto);   // tema que todavía no se le enseñó: lo contesta Magali
         if (tm) return responderConTema(tm);
         if (a && lista.length) return preguntarCual(lista, a, texto);
         sinRespuesta(texto);
