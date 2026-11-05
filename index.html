@@ -516,6 +516,15 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   .vfoot{grid-template-columns:1fr; grid-template-areas:"c" "m" "b" "n"; padding:18px}
   .vfoot .btn-wa{width:100%; min-width:0; margin-top:8px}
 }
+
+/* Calendario de tasación */
+.t-agenda{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start}
+.t-agenda .cal{margin-bottom:0}
+.t-fr .help{margin:4px 0 0}
+.t-fr .frow{padding:10px 0}
+.t-fr .frow > b{min-width:0; flex-basis:100%}
+.t-fr[hidden], #t-fr-vacio[hidden]{display:none}
+@media (max-width:560px){ .t-agenda{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -837,8 +846,22 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 
           <h3>¿Cuándo podemos ir a tasar?</h3>
           <p class="help">Elegí los días en que te queda cómodo y marcá la franja horaria de cada uno.</p>
-          <div class="days" id="t-days" role="group" aria-label="Días disponibles para tasar"></div>
-          <div id="t-franjas"></div>
+          <div class="t-agenda">
+            <div class="cal" id="t-cal">
+              <div class="cal-head">
+                <button type="button" class="cal-nav" id="t-cal-prev" aria-label="Mes anterior">‹</button>
+                <strong id="t-cal-mes" aria-live="polite"></strong>
+                <button type="button" class="cal-nav" id="t-cal-next" aria-label="Mes siguiente">›</button>
+              </div>
+              <div class="cal-sem" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+              <div class="cal-grid" id="t-days" role="group" aria-label="Días disponibles para tasar"></div>
+              <p class="help cal-ley">Los días en gris no están disponibles.</p>
+            </div>
+            <div class="t-fr">
+              <p class="help" id="t-fr-vacio">Tocá uno o más días en el calendario y marcá la franja horaria de cada uno.</p>
+              <div id="t-franjas"></div>
+            </div>
+          </div>
 
           <label class="consent"><input type="checkbox" id="t-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
           <p class="msg" id="t-msg" role="alert"></p>
@@ -1325,7 +1348,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   // Tasación: el cliente completa los datos del inmueble y su disponibilidad, y el pedido se envía a Magali por WhatsApp.
   (function(){
     var TZ = 'America/Argentina/Buenos_Aires';
-    var DIAS_ADELANTE = 14, AVISO_PREVIO_H = 3;
+    var DIAS_ADELANTE = 30, AVISO_PREVIO_H = 3;
     // Fin de semana largo: sin atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00.
     var SIN_ATENCION_DESDE = new Date('2026-11-07T13:00:00-03:00').getTime();
     var SIN_ATENCION_HASTA = new Date('2026-11-11T10:00:00-03:00').getTime();
@@ -1363,25 +1386,46 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 
     var on = {};    // día elegido: key -> true
     var sel = {};   // key -> índices de franjas elegidas
+    var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var hoyClave = t0.y + '-' + pad(t0.m) + '-' + pad(t0.d);
+    var ult = new Date(Date.UTC(t0.y, t0.m - 1, t0.d + DIAS_ADELANTE));
+    var minMes = t0.y * 12 + (t0.m - 1), maxMes = ult.getUTCFullYear() * 12 + ult.getUTCMonth();
+    var vistaMes = days.length ? (+days[0].key.slice(0, 4)) * 12 + (+days[0].key.slice(5, 7) - 1) : minMes;
+    var elMes = document.getElementById('t-cal-mes'), calPrev = document.getElementById('t-cal-prev'),
+        calNext = document.getElementById('t-cal-next'), elVacio = document.getElementById('t-fr-vacio');
+    calPrev.addEventListener('click', function(){ if (vistaMes > minMes) { vistaMes--; renderDays(); } });
+    calNext.addEventListener('click', function(){ if (vistaMes < maxMes) { vistaMes++; renderDays(); } });
     function find(k){ for (var i = 0; i < days.length; i++) if (days[i].key === k) return days[i]; }
 
     function renderDays(){
       elDays.innerHTML = '';
-      days.forEach(function(day){
+      var y = Math.floor(vistaMes / 12), mes = vistaMes % 12;
+      elMes.textContent = MESES[mes] + ' ' + y;
+      calPrev.disabled = vistaMes <= minMes; calNext.disabled = vistaMes >= maxMes;
+      var offset = (new Date(Date.UTC(y, mes, 1)).getUTCDay() + 6) % 7;      // la semana empieza el lunes
+      var total = new Date(Date.UTC(y, mes + 1, 0)).getUTCDate();
+      for (var i = 0; i < offset; i++) elDays.appendChild(document.createElement('span'));
+      for (var d = 1; d <= total; d++) {
+        var clave = y + '-' + pad(mes + 1) + '-' + pad(d), day = find(clave);
         var b = document.createElement('button');
-        b.type = 'button'; b.className = 'day';
-        b.setAttribute('aria-pressed', on[day.key] ? 'true' : 'false');
-        b.setAttribute('aria-label', DIA_LARGO[day.wd] + ' ' + day.d + '/' + day.m);
-        b.innerHTML = '<small>' + DIA[day.wd] + '</small><b>' + day.d + '</b><i></i>';
-        b.addEventListener('click', function(){
-          if (on[day.key]) { delete on[day.key]; delete sel[day.key]; } else on[day.key] = true;
-          msg.textContent = ''; renderDays(); renderFr();
-        });
+        b.type = 'button'; b.textContent = d; b.className = 'cal-dia' + (clave === hoyClave ? ' hoy' : '');
+        var largo = DIA_LARGO[new Date(Date.UTC(y, mes, d)).getUTCDay()] + ' ' + d + ' de ' + MESES[mes];
+        if (!day) { b.disabled = true; b.className += ' off'; b.setAttribute('aria-label', largo + ', no disponible'); }
+        else {
+          if ((sel[clave] || []).length) b.className += ' has';
+          b.setAttribute('aria-pressed', on[clave] ? 'true' : 'false');
+          b.setAttribute('aria-label', largo);
+          (function(k){ b.addEventListener('click', function(){
+            if (on[k]) { delete on[k]; delete sel[k]; } else on[k] = true;
+            msg.textContent = ''; renderDays(); renderFr();
+          }); })(clave);
+        }
         elDays.appendChild(b);
-      });
+      }
     }
     function renderFr(){
       elFr.innerHTML = '';
+      if (elVacio) elVacio.hidden = days.some(function(d){ return on[d.key]; });
       days.forEach(function(day){
         if (!on[day.key]) return;
         var row = document.createElement('div'); row.className = 'frow';
@@ -1396,7 +1440,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
             var a = sel[day.key] || [], p = a.indexOf(ix);
             if (p > -1) a.splice(p, 1); else a.push(ix);
             a.sort(function(m, n){ return m - n; });
-            sel[day.key] = a; msg.textContent = ''; renderFr();
+            sel[day.key] = a; msg.textContent = ''; renderFr(); renderDays();
           });
           box.appendChild(b);
         });
