@@ -481,6 +481,41 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .cal-dia[aria-pressed="true"].has::after{background:#fff}
 .cal-ley{margin:8px 0 0; font-size:.84rem}
 .dia-sel{margin:10px 0 4px; font-size:1.02rem; font-weight:800}
+
+/* ===== Visitas: tres columnas (datos, calendario, horarios) y franja de envío ===== */
+.visit{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr) minmax(0,1.05fr); gap:20px; align-items:stretch}
+.visit .vcard{display:flex; flex-direction:column}
+.visit .vcard h3{margin:0 0 14px; font-size:1.05rem; font-weight:800}
+.vc-datos .field:last-child{margin-bottom:0}
+.vc-cal .cal{margin-bottom:0}
+.vc-hor .help{margin:0 0 6px}
+.vc-hor .dia-sel{margin:8px 0 8px}
+.vc-hor .hour{grid-template-columns:40px repeat(4, minmax(0,1fr)); gap:5px}
+.vc-hor .slot{padding:9px 0; font-size:.86rem}
+.cal-sem,.cal-grid{gap:3px}
+.cal-dia{min-height:38px}
+.vfoot{grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"c b" "m b" "n n"; gap:6px 28px; align-items:center;
+  background:#fff; border:1px solid var(--line); border-radius:22px; padding:20px 28px}
+.vfoot .consent{grid-area:c; margin:0}
+.vfoot .msg{grid-area:m; margin:0; min-height:1.3em}
+.vfoot .btn-wa{grid-area:b; width:auto; min-width:300px; margin:0}
+.vfoot .vnote{grid-area:n; margin:6px 0 0}
+.vfoot noscript{grid-column:1 / -1}
+/* Tablet: datos arriba en dos columnas; calendario y horarios lado a lado */
+@media (max-width:980px){
+  .visit{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .visit .vc-datos{grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; gap:0 16px}
+  .visit .vc-datos h3, .visit .vc-datos .vf-prop{grid-column:1 / -1}
+}
+/* Celular: una sola columna */
+@media (max-width:700px){
+  .visit{grid-template-columns:1fr}
+  .visit .vc-datos{display:flex}
+  .vc-cal .cal{max-width:440px}
+  .vc-hor .slots{max-width:520px}
+  .vfoot{grid-template-columns:1fr; grid-template-areas:"c" "m" "b" "n"; padding:18px}
+  .vfoot .btn-wa{width:100%; min-width:0; margin-top:8px}
+}
 </style>
 </head>
 <body>
@@ -598,8 +633,9 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
         <p class="help mapnote" id="map-note" aria-live="polite">Ubicando propiedades…</p>
       </div>
       <form class="visit" id="visit-form" novalidate>
-        <div class="vcard">
-          <div class="field">
+        <div class="vcard vc-datos">
+          <h3>Tus datos</h3>
+          <div class="field vf-prop">
             <label for="v-prop" id="v-lab">Propiedad o local</label>
             <select id="v-sel" hidden>
               <option value="">Elegí una propiedad…</option>
@@ -620,8 +656,9 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
             <select id="v-people"><option>1</option><option>2</option><option>3</option><option>4</option><option>5 o más</option></select>
           </div>
         </div>
-        <div class="vcard">
-          <h3>1. Elegí un día</h3>
+
+        <div class="vcard vc-cal">
+          <h3>1. Elegí el día</h3>
           <div class="cal" id="cal">
             <div class="cal-head">
               <button type="button" class="cal-nav" id="cal-prev" aria-label="Mes anterior">‹</button>
@@ -632,16 +669,22 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
             <div class="cal-grid" id="days" role="group" aria-label="Días disponibles"></div>
             <p class="help cal-ley">Los días en gris no tienen horarios disponibles.</p>
           </div>
-          <h3>2. Marcá los horarios que te sirven</h3>
+        </div>
+
+        <div class="vcard vc-hor">
+          <h3>2. Elegí los horarios</h3>
           <p class="help">Cada visita dura 15 minutos. Podés marcar varios horarios y de distintos días.</p>
           <p class="help" id="legend" hidden><b>Los horarios en gris no están disponibles</b> (ya reservados o fuera de plazo).</p>
           <p class="dia-sel" id="dia-sel" aria-live="polite"></p>
           <div class="slots" id="slots" role="group" aria-label="Horarios disponibles"></div>
           <ul class="picked" id="picked" aria-live="polite"></ul>
+        </div>
+
+        <div class="vfoot">
           <label class="consent"><input type="checkbox" id="v-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
           <p class="msg" id="msg" role="alert"></p>
           <button class="btn btn-wa" type="submit">Enviar pedido por WhatsApp</button>
-          <p class="help" style="margin-top:10px">No es una reserva automática: Magali te confirma o te propone otro horario. Atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
+          <p class="help vnote">No es una reserva automática: Magali te confirma o te propone otro horario. Atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
           <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20coordinar%20una%20visita" target="_blank" rel="noopener">Pedir una visita por WhatsApp</a></p></noscript>
         </div>
       </form>
