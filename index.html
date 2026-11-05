@@ -2051,7 +2051,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       m = /(hasta|menos de|maximo|max|presupuesto de|no mas de)\s*\$?\s*([\d.]+)\s*(mil|millon|millones)?/i.exec(String(texto).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
       if (m) { var n = +m[2].replace(/\./g, ''); if (m[3] === 'mil') n *= 1000; else if (m[3]) n *= 1000000; else if (n < 10000) n *= 1000; if (n >= 100000) cr.max = n; }
       Object.keys(BUSCABLES).forEach(function(id){ if (puntuarLista(tx, [atributo(id)], 2)) cr.feats.push(id); });
-      var verbo = /\b(busco|buscando|busca|necesito|necesitamos|buscamos)\b/.test(tx);
+      var verbo = /\b(busco|buscando|busca|necesito|necesitamos|buscamos|quiero|queria|quisiera|quisieramos|tienen|tenes|tenemos|hay|alguno|alguna|disponible|disponibles)\b/.test(tx);
       cr.fuerte = !!(cr.amb || cr.dorm || cr.max || (verbo && (cr.feats.length || cr.tipo)));
       return cr.fuerte ? cr : null;
     }
@@ -2179,12 +2179,15 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         var det = lista.length ? detectarProp(tx, lista) : null;
         if (det && det.uno && (a || !tm)) return respProp(det.uno, a, texto);
         if (det && det.varias && (a || !tm)) return preguntarCual(det.varias, a, texto);
-        if (cr && !deUna && !(det && det.uno)) return respBusqueda(lista, cr, texto);
+        if (tm && /\b(local|locales)\b/.test(tx) && !/\b(sucursal|sucursales)\b/.test(tx) && ['requisitos','costos','contrato','ingresos'].indexOf(tm.id) > -1) tm = tema('local');   // pide condiciones de un local
+        var hayLocal = lista.some(function(x){ return x.tipo === 'Local'; });
+        if (cr && !deUna && !(det && det.uno)) { respBusqueda(lista, cr, texto); if (tm && tm.id === 'local') return responderConTema(tm); return; }
         if (a && lista.length) {
           var pista = porPista(tx, lista);
           if (pista) return respProp(pista, a, texto);
           if (ultima && tokens.length <= 8 && !(tm && tm.id === 'propiedades')) return respProp(ultima, a, texto);
         }
+        if (tm && tm.id === 'local' && hayLocal) respBusqueda(lista, {feats: [], tipo: 'Local', fuerte: true}, texto);   // primero el local disponible, después las condiciones
         if (tm) return responderConTema(tm);
         if (a && lista.length) return preguntarCual(lista, a, texto);
         sinRespuesta(texto);
