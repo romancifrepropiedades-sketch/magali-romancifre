@@ -543,6 +543,48 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .qa-r p{margin:0 0 10px}
 .qa-r p:last-child{margin-bottom:0}
 .qa-r a{color:var(--violet); font-weight:700}
+
+/* ===== Nina: asistente virtual ===== */
+button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
+.nina{position:fixed; z-index:40; padding:0; gap:0;
+  right:max(16px, env(safe-area-inset-right, 0px)); bottom:calc(88px + env(safe-area-inset-bottom, 0px));
+  width:min(380px, calc(100vw - 32px)); max-height:min(600px, calc(100vh - 130px));
+  display:flex; flex-direction:column; overflow:hidden;
+  background:#fff; border:1px solid var(--line); border-radius:22px; box-shadow:0 24px 60px rgba(30,17,40,.3)}
+.nina[hidden]{display:none}
+.nina-head{display:flex; align-items:center; gap:12px; padding:14px 16px; color:#fff; background:linear-gradient(135deg, var(--deep), var(--violet))}
+.nina-head img{width:40px; height:40px; border-radius:50%; background:#fff; border:2px solid rgba(255,255,255,.85); flex:none}
+.nina-head div{flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.25}
+.nina-head strong{font-size:1.05rem; font-weight:800}
+.nina-head span{font-size:.82rem; opacity:.9}
+.nina-x{border:0; background:rgba(255,255,255,.18); color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.3rem; line-height:1; cursor:pointer}
+.nina-x:hover{background:rgba(255,255,255,.3)}
+.nina-head,.nina-chips,.nina-form,.nina-wa{flex:none}
+.nina-msgs{flex:1 1 auto; min-height:160px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#FAF8FC}
+.nm{max-width:88%; padding:11px 14px; border-radius:16px; font-size:.94rem; line-height:1.45; overflow-wrap:anywhere}
+.nm p{margin:0 0 8px}
+.nm p:last-child{margin-bottom:0}
+.nm ul{margin:0 0 8px; padding-left:18px}
+.nm li{margin-bottom:10px}
+.nm a{color:var(--violet); font-weight:700}
+.nm small{color:var(--muted)}
+.nm.bot{align-self:flex-start; background:#fff; border:1px solid var(--line); border-bottom-left-radius:4px}
+.nm.yo{align-self:flex-end; background:var(--violet); color:#fff; border-bottom-right-radius:4px}
+.nm-esc{color:var(--muted); font-style:italic}
+.nina-btn{display:block; margin-top:6px; padding:10px 14px; border-radius:999px; background:var(--wa); color:#fff !important; text-align:center; text-decoration:none; font-weight:700}
+.nina-chips{display:flex; gap:8px; overflow-x:auto; padding:10px 14px; border-top:1px solid var(--line); background:#fff; scrollbar-width:thin}
+.nina-chips button{flex:none; padding:8px 14px; border-radius:999px; border:1px solid #CFC4D6; background:#fff; color:var(--violet); font:inherit; font-size:.86rem; font-weight:700; cursor:pointer; white-space:nowrap}
+.nina-chips button:hover{background:var(--tint); border-color:var(--violet)}
+.nina-form{display:flex; gap:8px; padding:10px 14px; border-top:1px solid var(--line); background:#fff}
+.nina-form input{flex:1; min-width:0; font:inherit; font-size:.95rem; padding:11px 14px; border:1px solid #CFC4D6; border-radius:999px}
+.nina-form input:focus{outline:3px solid rgba(115,47,132,.3); border-color:var(--violet)}
+.nina-form button{flex:none; width:44px; border:0; border-radius:50%; background:var(--violet); color:#fff; font-size:1rem; cursor:pointer}
+.nina-wa{display:block; padding:12px 14px; text-align:center; text-decoration:none; font-weight:700; font-size:.92rem; color:var(--wa); border-top:1px solid var(--line); background:#fff}
+.nina-wa:hover{background:var(--tint)}
+.nina-chips button:focus-visible,.nina-form button:focus-visible,.nina-x:focus-visible,.nina-wa:focus-visible{outline:3px solid var(--ink); outline-offset:-3px}
+@media (max-width:640px){
+  .nina{left:max(12px, env(safe-area-inset-left, 0px)); right:max(12px, env(safe-area-inset-right, 0px)); width:auto; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); max-height:calc(100vh - 110px)}
+}
 </style>
 </head>
 <body>
@@ -1009,10 +1051,25 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   </div>
 </footer>
 
-<a class="fab" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener" aria-label="Hablar con Magali por WhatsApp">
+<button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="nina" aria-label="Hablar con Nina bot: abrir el chat con la asistente virtual de Magali">
   <svg class="ico-wa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 9.2c.3 2.2 2.4 4.3 4.8 5.2l1.3-1.3-1.9-1-.8.6a4 4 0 0 1-1.7-1.7l.6-.8-1-1.9L9 9.2z" fill="currentColor" stroke="none"/></svg>
-  <span class="fab-txt">Hablar con Magali</span>
-</a>
+  <span class="fab-txt">Hablar con Nina bot</span>
+</button>
+
+<section class="nina" id="nina" role="dialog" aria-label="Chat con Nina, asistente virtual de Magali" hidden>
+  <header class="nina-head">
+    <img src="favicon.png" alt="" width="40" height="40">
+    <div><strong>Nina</strong><span>Asistente virtual de Magali</span></div>
+    <button type="button" class="nina-x" id="nina-x" aria-label="Cerrar el chat">×</button>
+  </header>
+  <div class="nina-msgs" id="nina-msgs" aria-live="polite"></div>
+  <div class="nina-chips" id="nina-chips"></div>
+  <form class="nina-form" id="nina-form" autocomplete="off">
+    <input id="nina-in" type="text" maxlength="200" placeholder="Escribí tu pregunta…" aria-label="Escribí tu pregunta para Nina">
+    <button type="submit" aria-label="Enviar pregunta">➤</button>
+  </form>
+  <a class="nina-wa" id="nina-wa" href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20tengo%20una%20consulta" target="_blank" rel="noopener">Hablar por WhatsApp con Magali</a>
+</section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -1772,6 +1829,200 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
       ver.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dir);
     }
     for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', function(){ elegir(this); });
+  })();
+
+  // Nina: asistente virtual con respuestas predefinidas. Funciona en el navegador: no envía ni guarda lo que se escribe.
+  (function(){
+    var panel = document.getElementById('nina'), fab = document.getElementById('fab');
+    if (!panel || !fab) return;
+    var msgs = document.getElementById('nina-msgs'), chips = document.getElementById('nina-chips'),
+        form = document.getElementById('nina-form'), inp = document.getElementById('nina-in'),
+        wa = document.getElementById('nina-wa');
+    var NUM = '5491140827284';
+    var DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    var HOR = {1:[600,1080], 2:[600,1080], 3:[600,1080], 4:[600,1080], 5:[600,1080], 6:[600,780]};   // minutos desde las 00:00
+    var FERIADO_DESDE = Date.parse('2026-11-07T13:00:00-03:00'), FERIADO_HASTA = Date.parse('2026-11-11T10:00:00-03:00');
+    function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function norm(s){ return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+    function pad(n){ return n < 10 ? '0' + n : '' + n; }
+    function waLink(texto){ return 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(texto); }
+
+    // --- Horario de atención (hora de Argentina, sin horario de verano) ---
+    function atendiendo(ts){
+      var d = new Date(ts - 3 * 3600000), h = HOR[d.getUTCDay()];
+      if (!h || (ts >= FERIADO_DESDE && ts < FERIADO_HASTA)) return false;
+      var m = d.getUTCHours() * 60 + d.getUTCMinutes();
+      return m >= h[0] && m < h[1];
+    }
+    function proximaApertura(ts){
+      var base = new Date(ts - 3 * 3600000); base.setUTCHours(0, 0, 0, 0);
+      for (var i = 0; i <= 14; i++) {
+        var dia = base.getTime() + i * 86400000, h = HOR[new Date(dia).getUTCDay()];
+        if (!h) continue;
+        var abre = dia + h[0] * 60000 + 3 * 3600000;
+        if (abre <= ts || (abre >= FERIADO_DESDE && abre < FERIADO_HASTA)) continue;
+        return abre;
+      }
+      return null;
+    }
+    function cuando(abre, ts){
+      var f = new Date(abre - 3 * 3600000), hoy = new Date(ts - 3 * 3600000);
+      var dif = Math.round((Date.UTC(f.getUTCFullYear(), f.getUTCMonth(), f.getUTCDate()) - Date.UTC(hoy.getUTCFullYear(), hoy.getUTCMonth(), hoy.getUTCDate())) / 86400000);
+      var hora = pad(f.getUTCHours()) + ':' + pad(f.getUTCMinutes());
+      if (dif === 0) return 'hoy a las ' + hora;
+      if (dif === 1) return 'mañana a las ' + hora;
+      return 'el ' + DIAS[f.getUTCDay()] + ' ' + f.getUTCDate() + '/' + (f.getUTCMonth() + 1) + ' a las ' + hora;
+    }
+    function estado(){
+      var ts = Date.now();
+      if (atendiendo(ts)) return 'Magali está atendiendo ahora.';
+      var a = proximaApertura(ts);
+      return 'Ahora estamos fuera de horario' + (a ? ': Magali retoma ' + cuando(a, ts) + '.' : '.');
+    }
+
+    // --- Propiedades (las mismas que muestra la página) ---
+    var propiedades = null;
+    function cargarPropiedades(){
+      if (propiedades) return Promise.resolve(propiedades);
+      return fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); })
+        .then(function(l){ propiedades = l; return l; }).catch(function(){ return null; });
+    }
+    function respPropiedades(){
+      return cargarPropiedades().then(function(l){
+        if (!l || !l.length) return [{p: 'Podés ver las propiedades disponibles en el mapa de <a href="#visita">Coordiná tu visita</a>, o en el <a href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades/inmuebles/alquiler" target="_blank" rel="noopener">listado de Argenprop</a>.'}];
+        var items = l.map(function(x){
+          var det = [x.detalle || x.m2, x.precio ? '$ ' + Number(x.precio).toLocaleString('es-AR') + ' por mes' : ''].filter(Boolean).join(' · ');
+          return '<strong>' + esc(x.tipo) + ' · ' + esc(x.direccion) + '</strong>' + (det ? '<br>' + esc(det) : '') + (x.link ? '<br><a href="' + esc(x.link) + '" target="_blank" rel="noopener">Ver publicación</a>' : '');
+        });
+        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Las ves en el mapa, con filtros por tipo, dormitorios y precio, en <a href="#visita">Coordiná tu visita</a>. Los precios son por mes y pueden cambiar.'}];
+      });
+    }
+
+    // --- Temas y respuestas (mismo contenido que las preguntas frecuentes) ---
+    var TEMAS = [
+      {id:'requisitos', chip:'Requisitos', kw:['requisito|3','requisitos|3','piden|2','papeles|2','documentacion|2','necesito|1','condiciones|2','como alquilar|3','alquilar una vivienda|3'],
+       r:[{p:'Para alquilar una <strong>vivienda</strong>: garantía propietaria de CABA o seguro de caución, ingresos de al menos 3 veces el valor del alquiler, 1 mes de depósito y 1 mes de adelanto. El depósito se abona en efectivo, en billetes de dólar, al momento de la firma.'},{p:'Las condiciones pueden variar según la propiedad. Mirá el detalle en <a href="#condiciones">Condiciones de alquiler</a>.'}]},
+      {id:'garantias', chip:'Garantías', kw:['garantia|3','garantias|3','caucion|3','finaer|3','seguro de caucion|3','seguro|1','propietaria|1','inhibicion|3','dominio|2','informe|1','informes|1','fiador|2'],
+       r:[{p:'Aceptamos garantía propietaria de CABA, o seguro de caución a través de <strong>FINAER</strong> o <strong>Garantía Ya</strong>.'},{p:'Si elegís el seguro de caución, la preaprobación la gestionás vos como futuro inquilino. Si la garantía es propietaria, el inquilino abona los pedidos de informes de dominio e inhibición.'}]},
+      {id:'costos', chip:'Cuánto pagar para ingresar', kw:['pagar|3','pago|2','ingresar|2','adelanto|3','deposito|3','honorarios|3','comision|3','costo|2','costos|2','efectivo|2','dolares|2','dolar|2','billete|2','billetes|2','firma|1','cuanto necesito|3'],
+       r:[{p:'<strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.'},{p:'<strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.'},{p:'El depósito se abona siempre en efectivo, en billetes de dólar, al momento de la firma. Con garantía propietaria, también se abonan los pedidos de informes de dominio e inhibición.'}]},
+      {id:'contrato', chip:'Contrato y actualización', kw:['contrato|3','duracion|3','dura|2','actualiza|3','actualizacion|3','ipc|3','aumento|3','aumenta|3','ajuste|3','trimestral|3','anos|1'],
+       r:[{p:'<strong>Vivienda:</strong> contrato por 2 años. <strong>Local comercial:</strong> 3 años.'},{p:'En ambos casos el alquiler se actualiza cada tres meses según el IPC (Índice de Precios al Consumidor).'}]},
+      {id:'ingresos', chip:'Cómo demostrar ingresos', kw:['ingresos|3','ingreso|2','recibo|3','recibos|3','sueldo|3','independiente|3','monotributo|3','monotributista|3','certificacion|3','contador|3','dependencia|2','tres veces|3','3 veces|3','sociedad|2','srl|2'],
+       r:[{p:'<strong>Vivienda:</strong> con los últimos 3 recibos de sueldo, que acrediten ingresos por al menos 3 veces el valor del alquiler. Si sos trabajador independiente, con una certificación de ingresos.'},{p:'<strong>Local comercial:</strong> con ingresos comprobables. Si sos monotributista, independiente o una sociedad (por ejemplo, una SRL), con una certificación de ingresos emitida por contador público.'}]},
+      {id:'mascotas', chip:'Mascotas', kw:['mascota|3','mascotas|3','perro|3','perros|3','gato|3','gatos|3','animal|2','animales|2'],
+       r:[{p:'En las viviendas no se aceptan mascotas.'}]},
+      {id:'local', chip:'Alquilar un local', kw:['local|3','locales|3','comercial|3','comercio|3','negocio|3','rubro|3','iva|2'],
+       r:[{p:'Para <strong>locales comerciales</strong>: contrato por 3 años, actualización trimestral por IPC, garantía propietaria o seguro de caución, 1 mes de depósito (en efectivo, en billetes de dólar, al firmar) y 1 mes de adelanto.'},{p:'Los honorarios son del 5% + IVA sobre el valor total del contrato y el alquiler es + IVA. Si sos monotributista, independiente o sociedad, se pide certificación de ingresos de contador público. Detalle en <a href="#condiciones">Condiciones de alquiler</a>.'}]},
+      {id:'visitas', chip:'Coordinar una visita', kw:['visita|3','visitas|3','visitar|3','conocer|2','coordinar|3','agendar|3','turno|3','cita|2','recorrer|2','ir a ver|3','quiero ver|3'],
+       r:[{p:'Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos. Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.'},{p:'No es una reserva automática. Lo hacés en <a href="#visita">Coordiná tu visita</a>.'}]},
+      {id:'horarios', chip:'Horarios de atención', kw:['horario|3','horarios|3','atienden|3','atencion|3','atender|2','abren|3','abierto|3','cerrado|3','feriado|3','fin de semana|3','sabado|2','domingo|2','que hora|3'],
+       r:function(){ var ts = Date.now(), a = proximaApertura(ts); return [{p:'Magali atiende de <strong>lunes a viernes de 10 a 18 h</strong> y <strong>sábados de 10 a 13 h</strong>.'},{p: atendiendo(ts) ? 'Ahora está atendiendo: podés escribirle por WhatsApp.' : 'Ahora estamos fuera de horario' + (a ? ': retoma ' + cuando(a, ts) + '.' : '.') + ' Podés dejar tu consulta por WhatsApp y te responde apenas vuelva.'}]; }},
+      {id:'tasacion', chip:'Tasación', kw:['tasacion|3','tasar|3','tasarme|3','valuacion|3','valuar|3','cuanto vale|3','cuanto sale mi|3','vender mi|2','matriculado|3','informe profesional|3'],
+       r:[{p:'La tasación es <strong>sin cargo</strong> y se hace <strong>en 24 hs</strong>, con un informe profesional firmado por un matriculado.'},{p:'Completá el formulario en <a href="#tasacion">Tasá tu propiedad</a> y elegí cuándo podemos ir a verla.'}]},
+      {id:'servicios', chip:'Servicios para propietarios', kw:['servicios|3','servicio|2','propietario|3','propietarios|3','publicar|3','fotografia|3','fotos|2','360|3','tour|3','matterport|3','ricoh|3','publicidad|3','arquitecto|3','escribania|3','big data|3','market|2','puesta en valor|3'],
+       r:[{p:'Para propietarios: análisis de mercado con big data, puesta en valor con un arquitecto, tour virtual 360° con tecnología RICOH y MATTERPORT, fotografía inmobiliaria profesional, asesoría integral con convenio con Escribanía y asesoría contable, y publicidad digital para posicionar tu unidad al tope del ranking de los portales.'},{p:'Más en <a href="#agregamos-valor">Agregamos valor a tu inmueble</a>.'}]},
+      {id:'propiedades', chip:'Propiedades disponibles', kw:['propiedades|3','propiedad|2','disponible|3','disponibles|3','departamento|2','departamentos|2','depto|2','deptos|2','alquileres|2','tienen|1','lista|1','precio|2','precios|2','dormitorio|2','dormitorios|2','ambientes|2','que hay|3','oficina|1'],
+       r:respPropiedades},
+      {id:'sucursales', chip:'Sucursales', kw:['sucursal|3','sucursales|3','direccion|3','donde estan|3','ubicacion|3','belgrano|2','colegiales|3','como llegar|3','mapa|2','oficinas|2'],
+       r:[{p:'<strong>Sucursal Belgrano:</strong> Av. Olazábal 2690.<br><strong>Sucursal Colegiales:</strong> Ciudad de la Paz 1384.'},{p:'Mirá el mapa y cómo llegar en <a href="#sucursales">Nuestras sucursales</a>.'}]},
+      {id:'privacidad', chip:'Mis datos', kw:['privacidad|3','datos|2','personales|3','informacion personal|3'],
+       r:[{p:'Usamos tus datos solo para responder tu consulta y coordinar la visita o la tasación. Este chat no guarda ni envía lo que escribís. Más en el <a href="privacidad.html">aviso de privacidad</a>.'}]},
+      {id:'contacto', chip:'Contacto', kw:['contacto|3','mail|3','correo|3','email|3','instagram|3','telefono|3','celular|2','llamar|3','numero|2'],
+       r:[{p:'Podés escribirle a Magali por WhatsApp, o por mail a <a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a>. También estamos en <a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram</a>.'}]},
+      {id:'humano', chip:null, kw:['persona|3','humano|3','asesora|3','magali|3','hablar con|3','atienda|2','agente|3','alguien|2','hablar|2'],
+       r:function(){ return [{p:'Claro. ' + estado() + ' Podés escribirle directamente por WhatsApp:'},{a:['Hablar por WhatsApp con Magali', waLink('Hola Magali, quiero hablar con vos.')]}]; }},
+      {id:'saludo', chip:null, kw:['hola|3','buenas|3','buen dia|3','buenos dias|3','buenas tardes|3','buenas noches|3','hey|2'],
+       r:function(){ return [{p:'¡Hola! Soy Nina, la asistente virtual de Magali. ' + estado() + ' Elegí un tema o escribime tu pregunta.'}]; }},
+      {id:'gracias', chip:null, kw:['gracias|3','genial|2','perfecto|2','excelente|2','buenisimo|2','listo|1'],
+       r:[{p:'¡De nada! Si necesitás algo más, estoy acá. Y si querés hablar con Magali, escribile por WhatsApp.'}]}
+    ];
+    var PRINCIPALES = ['requisitos','garantias','costos','visitas','propiedades','tasacion','horarios'];
+    function tema(id){ for (var i = 0; i < TEMAS.length; i++) if (TEMAS[i].id === id) return TEMAS[i]; }
+
+    function puntuar(tx){
+      var tokens = tx.split(' '), mejor = null, puntos = 0;
+      TEMAS.forEach(function(tm){
+        var s = 0;
+        tm.kw.forEach(function(k){
+          var pr = k.split('|'), w = +pr[1] || 1, kw = pr[0];
+          if (kw.indexOf(' ') > -1) { if (tx.indexOf(kw) > -1) s += w + 1; return; }
+          for (var i = 0; i < tokens.length; i++) {
+            var tk = tokens[i];
+            if (tk === kw || (tk.length >= 5 && kw.length >= 5 && (tk.indexOf(kw) === 0 || kw.indexOf(tk) === 0))) { s += w; break; }
+          }
+        });
+        if (s > puntos) { puntos = s; mejor = tm; }
+      });
+      return puntos >= 2 ? mejor : null;
+    }
+
+    // --- Interfaz ---
+    function bloques(arr){
+      var d = document.createElement('div');
+      arr.forEach(function(b){
+        if (b.p) { var p = document.createElement('p'); p.innerHTML = b.p; d.appendChild(p); }
+        else if (b.ul) { var u = document.createElement('ul'); b.ul.forEach(function(h){ var li = document.createElement('li'); li.innerHTML = h; u.appendChild(li); }); d.appendChild(u); }
+        else if (b.a) { var a = document.createElement('a'); a.className = 'nina-btn'; a.href = b.a[1]; a.target = '_blank'; a.rel = 'noopener'; a.textContent = b.a[0]; d.appendChild(a); }
+      });
+      return d;
+    }
+    function agregar(clase, contenido){
+      var m = document.createElement('div'); m.className = 'nm ' + clase;
+      if (typeof contenido === 'string') m.textContent = contenido; else m.appendChild(contenido);
+      msgs.appendChild(m); msgs.scrollTop = msgs.scrollHeight; return m;
+    }
+    function responderConTema(tm){
+      var r = typeof tm.r === 'function' ? tm.r() : tm.r;
+      return Promise.resolve(r).then(function(arr){ agregar('bot', bloques(arr)); });
+    }
+    function sinRespuesta(pregunta){
+      agregar('bot', bloques([
+        {p: 'No tengo esa información. Magali te la confirma: escribile por WhatsApp y le llega tu pregunta.'},
+        {a: ['Preguntarle a Magali', waLink('Hola Magali, le pregunté a Nina: "' + pregunta + '" y no tenía la respuesta.')]}
+      ]));
+    }
+    function pintarChips(){
+      chips.innerHTML = '';
+      PRINCIPALES.forEach(function(id){
+        var tm = tema(id), b = document.createElement('button'); b.type = 'button'; b.textContent = tm.chip;
+        b.addEventListener('click', function(){ preguntar(tm.chip, tm); });
+        chips.appendChild(b);
+      });
+    }
+    function preguntar(texto, forzado){
+      agregar('yo', texto);
+      var tm = forzado || puntuar(norm(texto));
+      var espera = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 350;
+      var escribiendo = agregar('bot nm-esc', 'Nina está escribiendo…');
+      setTimeout(function(){
+        escribiendo.remove();
+        if (tm) responderConTema(tm); else sinRespuesta(texto);
+      }, espera);
+    }
+    var iniciado = false;
+    function abrir(){
+      panel.hidden = false; fab.setAttribute('aria-expanded', 'true');
+      if (!iniciado) {
+        iniciado = true; pintarChips();
+        agregar('bot', bloques([{p: '¡Hola! Soy <strong>Nina</strong>, la asistente virtual de Magali. ' + esc(estado()) + ' Elegí un tema o escribime tu pregunta.'}, {p: '<small>Soy un asistente virtual: la información es orientativa y Magali confirma los detalles.</small>'}]));
+      }
+      setTimeout(function(){ inp.focus(); }, 50);
+    }
+    function cerrar(){ panel.hidden = true; fab.setAttribute('aria-expanded', 'false'); fab.focus(); }
+    fab.addEventListener('click', function(){ if (panel.hidden) abrir(); else cerrar(); });
+    document.getElementById('nina-x').addEventListener('click', cerrar);
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !panel.hidden) cerrar(); });
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var txt = inp.value.trim(); if (!txt) return;
+      inp.value = ''; preguntar(txt, null);
+    });
+    // Al tocar un enlace interno dentro del chat, se cierra para ver la sección.
+    msgs.addEventListener('click', function(e){
+      var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+      if (a) { panel.hidden = true; fab.setAttribute('aria-expanded', 'false'); }
+    });
   })();
 </script>
 </body>
