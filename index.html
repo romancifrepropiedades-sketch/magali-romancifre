@@ -1600,7 +1600,9 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     if (!days.length) elDays.innerHTML = '<p class="help">No hay días disponibles por ahora. Enviá tu pedido y coordinamos por WhatsApp.</p>';
     renderDays(); renderFr();
 
-    // Agenda de Magali: una franja queda en gris si, con lo que ya tiene programado, no queda al menos 1 hora libre para ir a tasar.
+    // Las tasaciones NO leen la agenda de Magali: puede ir otro asesor. Si algún día se quiere que las franjas respeten una agenda,
+    // poner TASACION_USA_AGENDA en true (una franja queda en gris si no queda al menos 1 hora libre).
+    var TASACION_USA_AGENDA = false;
     var TASACION_MIN = 60;
     function libreEnFranja(ocup, f){
       var iv = ocup.map(function(o){ return [Math.max(o[0], f[0]), Math.min(o[1], f[1])]; })
@@ -1627,7 +1629,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       Object.keys(sel).forEach(function(k){ var d = find(k); if (d) sel[k] = sel[k].filter(function(ix){ return d.fr[ix].ok; }); });
       renderDays(); renderFr();
     }
-    if (SCRIPT_URL) {
+    if (TASACION_USA_AGENDA && SCRIPT_URL) {
       fetch(SCRIPT_URL + (SCRIPT_URL.indexOf('?') > -1 ? '&' : '?') + 'accion=agenda&t=' + Date.now())
         .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
         .then(function(d){ if (d && d.ok && d.ocupados) aplicarAgenda(d.ocupados); })
