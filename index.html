@@ -286,10 +286,10 @@ footer .container{align-items:flex-start}
   position:fixed; z-index:30;
   right:max(16px, env(safe-area-inset-right, 0px)); bottom:max(16px, env(safe-area-inset-bottom, 0px));
   display:inline-flex; align-items:center; gap:10px; padding:15px 22px;
-  background:var(--wa); color:var(--wa-ink); border-radius:999px;
-  font-weight:700; text-decoration:none; box-shadow:0 12px 32px rgba(0,0,0,.28);
+  background:var(--violet); color:#fff; border-radius:999px;
+  font-weight:700; text-decoration:none; box-shadow:0 0 0 3px #fff, 0 12px 32px rgba(0,0,0,.28);
 }
-.fab:hover{transform:translateY(-2px)}
+.fab:hover{transform:translateY(-2px); background:var(--deep)}
 @media (prefers-reduced-motion: reduce){*{transition:none !important; scroll-behavior:auto !important}}
 
 /* ===== Celular: mejor distribución ===== */
@@ -573,6 +573,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
 .nm.yo{align-self:flex-end; background:var(--violet); color:#fff; border-bottom-right-radius:4px}
 .nm-esc{color:var(--muted); font-style:italic}
 .nina-btn{display:block; margin-top:6px; padding:10px 14px; border-radius:999px; background:var(--wa); color:#fff !important; text-align:center; text-decoration:none; font-weight:700}
+.nina-btn.alt{background:#fff; color:var(--violet) !important; border:1px solid var(--violet); font:inherit; font-weight:700; font-size:.86rem; padding:8px 12px; width:100%; cursor:pointer}
 .nina-chips{display:flex; gap:8px; overflow-x:auto; padding:10px 14px; border-top:1px solid var(--line); background:#fff; scrollbar-width:thin}
 .nina-chips button{flex:none; padding:8px 14px; border-radius:999px; border:1px solid #CFC4D6; background:#fff; color:var(--violet); font:inherit; font-size:.86rem; font-weight:700; cursor:pointer; white-space:nowrap}
 .nina-chips button:hover{background:var(--tint); border-color:var(--violet)}
@@ -1740,6 +1741,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       }
       var b = document.createElement('button'); b.type = 'button'; b.className = 'pop-btn'; b.textContent = 'Elegir para mi visita';
       b.addEventListener('click', function(){ elegir(x); }); acc.appendChild(b);
+      var bn = document.createElement('button'); bn.type = 'button'; bn.className = 'pop-btn'; bn.textContent = 'Preguntale a Nina';
+      bn.addEventListener('click', function(){ if (mapa) mapa.closePopup(); if (window.ninaProp) window.ninaProp(x.direccion); }); acc.appendChild(bn);
       d.appendChild(acc); return d;
     }
     function elegir(x){
@@ -1896,7 +1899,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           var det = [x.detalle || x.m2, x.precio ? '$ ' + Number(x.precio).toLocaleString('es-AR') + ' por mes + expensas' + (x.expensas ? ' (expensas: $ ' + Number(x.expensas).toLocaleString('es-AR') + ')' : '') : ''].filter(Boolean).join(' · ');
           return '<strong>' + esc(x.tipo) + ' · ' + esc(x.direccion) + '</strong>' + (det ? '<br>' + esc(det) : '') + (x.link ? '<br><a href="' + esc(x.link) + '" target="_blank" rel="noopener">Ver publicación</a>' : '');
         });
-        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Las ves en el mapa, con filtros por tipo, dormitorios y precio, en <a href="#visita">Coordiná tu visita</a>. Los precios son el alquiler mensual y se suman las expensas. Pueden cambiar.'}];
+        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Los precios son el alquiler mensual y se suman las expensas. Pueden cambiar. Si querés saber más de una, tocala y preguntame lo que quieras (expensas, cochera, mascotas…):'}, {bt: l.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', 'Quiero saber de ' + x.direccion); respProp(x, null, 'Quiero saber de ' + x.direccion); }]; })}, {p: 'También las ves en el mapa de <a href="#visita">Coordiná tu visita</a>, con filtros.'}];
       });
     }
 
@@ -1942,9 +1945,9 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     var PRINCIPALES = ['requisitos','garantias','costos','visitas','propiedades','tasacion','horarios'];
     function tema(id){ for (var i = 0; i < TEMAS.length; i++) if (TEMAS[i].id === id) return TEMAS[i]; }
 
-    function puntuar(tx){
+    function puntuarLista(tx, lista, minimo){
       var tokens = tx.split(' '), mejor = null, puntos = 0;
-      TEMAS.forEach(function(tm){
+      lista.forEach(function(tm){
         var s = 0;
         tm.kw.forEach(function(k){
           var pr = k.split('|'), w = +pr[1] || 1, kw = pr[0];
@@ -1956,7 +1959,108 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         });
         if (s > puntos) { puntos = s; mejor = tm; }
       });
-      return puntos >= 2 ? mejor : null;
+      return puntos >= minimo ? mejor : null;
+    }
+    function puntuar(tx){ return puntuarLista(tx, TEMAS, 2); }
+
+    // --- Datos de cada propiedad (salen de propiedades.json) ---
+    var ultima = null;   // última propiedad de la que se habló: sirve para preguntas de seguimiento
+    var STOP = ['avenida','calle','piso','dpto','depto','departamento','local','pasaje'];
+    function etiq(x){ return x.tipo + ' · ' + x.direccion; }
+    function dinero(n){ return '$ ' + Number(n).toLocaleString('es-AR'); }
+    function fmt(v){ if (v === true) return 'Sí'; if (v === false) return 'No'; if (v === null || v === undefined || v === '') return null; return String(v); }
+    function dato(key){ return function(x){ return fmt(x[key]); }; }
+    var ATRIBUTOS = [
+      {id:'precio', label:'Alquiler', chip:'Precio', kw:['precio|3','precios|3','cuesta|3','cuanto sale|4','cuanto cuesta|4','cuanto es|2','valor|2','vale|3','monto|2'],
+       val:function(x){ return x.precio ? dinero(x.precio) + ' por mes, más expensas' + (x.expensas && typeof x.expensas === 'number' ? ' (expensas: ' + dinero(x.expensas) + ' por mes)' : '') : null; }},
+      {id:'expensas', label:'Expensas', chip:'Expensas', kw:['expensa|3','expensas|3'],
+       val:function(x){ if (!x.expensas) return null; return (typeof x.expensas === 'number' ? dinero(x.expensas) + ' por mes' : String(x.expensas)) + ' (se suman al alquiler)'; }},
+      {id:'superficie', label:'Superficie', chip:'Superficie', kw:['metros|3','m2|3','superficie|3','tamano|3','metraje|3','cuantos metros|4','grande|2'],
+       val:function(x){ if (x.m2) return fmt(x.m2); var m = /(\d+)\s*m²/i.exec(x.detalle || ''); return m ? m[1] + ' m²' : null; }},
+      {id:'ambientes', label:'Ambientes', chip:'Ambientes', kw:['ambientes|3','ambiente|3','dormitorios|3','dormitorio|3','dorm|3','habitaciones|3','habitacion|3','cuartos|3','cuarto|2'],
+       val:function(x){ var a = []; if (x.ambientes) a.push(x.ambientes + ' ambientes'); if (x.dorm) a.push(x.dorm + (x.dorm == 1 ? ' dormitorio' : ' dormitorios')); return a.length ? a.join(', ') : null; }},
+      {id:'banos', label:'Baños', chip:'Baños', kw:['bano|3','banos|3'], val:dato('banos')},
+      {id:'cochera', label:'Cochera', chip:'Cochera', kw:['cochera|3','cocheras|3','garage|3','garaje|3','estacionamiento|3','guardar el auto|4'], val:dato('cochera')},
+      {id:'balcon', label:'Balcón, terraza o patio', chip:'Balcón o patio', kw:['balcon|3','terraza|3','patio|3','jardin|3','parrilla|3','quincho|3','espacio exterior|4'], val:dato('balcon')},
+      {id:'piso', label:'Piso', chip:'Piso', kw:['piso|3','planta|2','que piso|4','altura|2'], val:dato('piso')},
+      {id:'ascensor', label:'Ascensor', chip:'Ascensor', kw:['ascensor|3','escalera|2','escaleras|2'], val:dato('ascensor')},
+      {id:'luz', label:'Luminosidad y orientación', chip:'Luminosidad', kw:['luminoso|3','luminosa|3','luz|2','sol|2','orientacion|3','frente|2','contrafrente|3','ventanas|2','ventilacion|2','oscuro|2'], val:dato('luminosidad')},
+      {id:'antiguedad', label:'Antigüedad', chip:'Antigüedad', kw:['antiguedad|3','antiguo|2','estrenar|3','a estrenar|3','construccion|2'], val:dato('antiguedad')},
+      {id:'amoblado', label:'Amoblado y equipamiento', chip:'Amoblado', kw:['amoblado|3','amueblado|3','muebles|3','equipado|3','cocina|2','heladera|3','lavarropas|2','vacio|2'], val:dato('amoblado')},
+      {id:'aire', label:'Aire acondicionado', chip:'Aire acondicionado', kw:['aire|3','acondicionado|3','split|3'], val:dato('aire')},
+      {id:'calefaccion', label:'Calefacción', chip:'Calefacción', kw:['calefaccion|3','calefactor|3','estufa|2','gas|2','radiador|2','losa radiante|4'], val:dato('calefaccion')},
+      {id:'servicios', label:'Servicios', chip:'Servicios', kw:['servicios|3','incluye|2','incluido|3','incluidos|3','agua|2','internet|2','abl|3','impuestos|3'], val:dato('servicios')},
+      {id:'uso', label:'Uso y habilitación', chip:'Uso y habilitación', kw:['rubro|3','rubros|3','habilitacion|3','habilitado|3','actividad|3','gastronomia|3','uso|2','vidriera|3','salida de humo|4','consultorio|3','apto|2'], val:dato('uso')},
+      {id:'mascotas', label:'Mascotas', chip:'Mascotas', kw:['mascota|3','mascotas|3','perro|3','perros|3','gato|3','gatos|3'],
+       val:function(x){ return fmt(x.mascotas) || (x.tipo !== 'Local' ? 'No se aceptan mascotas' : null); }},
+      {id:'disponibilidad', label:'Disponibilidad', chip:'Disponibilidad', kw:['disponible|3','disponibilidad|3','libre|2','mudar|3','mudarme|3','entrega|3','ocupada|3','ocupado|3','desocupada|3','alquilada|3','alquilado|3'], val:dato('disponibilidad')},
+      {id:'visita', label:'Coordinar visita', chip:'Coordinar visita', kw:['visita|3','visitar|3','visitas|3','conocer|3','coordinar|3','recorrer|3','ir a ver|4','quiero ver|4','agendar|3'], val:function(){ return null; }}
+    ];
+    function atributo(id){ for (var i = 0; i < ATRIBUTOS.length; i++) if (ATRIBUTOS[i].id === id) return ATRIBUTOS[i]; }
+
+    // Reconoce de qué propiedad se habla: por número de puerta, por la calle, o por una pista (local, departamento, cantidad de dormitorios)
+    function palabrasCalle(x){ return norm(x.direccion).split(' ').filter(function(w){ return w.length >= 4 && !/^\d+$/.test(w) && STOP.indexOf(w) < 0; }); }
+    function numeroCasa(x){ var m = norm(x.direccion).match(/\b\d{3,5}\b/); return m ? m[0] : ''; }
+    function refinar(tx, tokens, c){
+      var f = c, t;
+      if (tokens.indexOf('local') > -1 || tokens.indexOf('locales') > -1) { t = f.filter(function(x){ return x.tipo === 'Local'; }); if (t.length) f = t; }
+      else if (/\b(departamento|departamentos|depto|deptos|dpto|depa|depas)\b/.test(tx)) { t = f.filter(function(x){ return x.tipo === 'Departamento'; }); if (t.length) f = t; }
+      var m = /\b(\d) (dorm|dormitorio|dormitorios)\b/.exec(tx);
+      if (m) { t = f.filter(function(x){ return x.dorm == +m[1]; }); if (t.length) f = t; }
+      return f;
+    }
+    function detectarProp(tx, l){
+      var tokens = tx.split(' ');
+      var numeros = tokens.filter(function(w){ return /^\d{3,5}$/.test(w); });
+      var porNum = l.filter(function(x){ var n = numeroCasa(x); return n && numeros.indexOf(n) > -1; });
+      if (porNum.length === 1) return {uno: porNum[0]};
+      if (numeros.length) return null;   // menciona otra numeración (por ej. una sucursal): no es una de las propiedades
+      var c = l.filter(function(x){ return palabrasCalle(x).some(function(w){ return tokens.some(function(tk){ return tk === w || (tk.length >= 5 && w.length >= 5 && (tk.indexOf(w) === 0 || w.indexOf(tk) === 0)); }); }); });
+      if (c.length > 1) c = refinar(tx, tokens, c);
+      return c.length === 1 ? {uno: c[0]} : (c.length > 1 ? {varias: c} : null);
+    }
+    function porPista(tx, l){
+      var c = refinar(tx, tx.split(' '), l);
+      return c.length === 1 && c.length < l.length ? c[0] : null;
+    }
+    function extraDe(x, tx){
+      var tokens = tx.split(' '), lista = x.extra || [];
+      for (var i = 0; i < lista.length; i++) {
+        var ks = String(lista[i].kw || '').split(',');
+        for (var j = 0; j < ks.length; j++) {
+          var k = norm(ks[j]); if (!k) continue;
+          if (k.indexOf(' ') > -1 ? tx.indexOf(k) > -1 : tokens.indexOf(k) > -1) return lista[i].a;
+        }
+      }
+      return null;
+    }
+    function titulo(x){ return '<strong>' + esc(etiq(x)) + '</strong>'; }
+    function resumenProp(x){
+      var det = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · ');
+      var res = [{p: titulo(x) + (det ? '<br>' + esc(det) : '')}];
+      var lineas = [];
+      ['precio','expensas','banos','piso','cochera','balcon','ascensor','luz','antiguedad','amoblado','aire','calefaccion','servicios','uso','mascotas','disponibilidad'].forEach(function(id){
+        var a = atributo(id), v = a.val(x); if (v) lineas.push('<strong>' + esc(a.label) + ':</strong> ' + esc(v));
+      });
+      if (lineas.length) res.push({ul: lineas});
+      if (x.link) res.push({p: '<a href="' + esc(x.link) + '" target="_blank" rel="noopener">Ver publicación completa</a>'});
+      res.push({p: 'Preguntame lo que quieras de esta propiedad, o coordiná una visita.'});
+      return res;
+    }
+    function respProp(x, a, pregunta){
+      var tx = norm(pregunta), res;
+      var extra = extraDe(x, tx);
+      if (extra) res = [{p: titulo(x) + '<br>' + esc(extra)}];
+      else if (a && a.id === 'visita') res = [{p: 'Para visitar <strong>' + esc(etiq(x)) + '</strong>, escribile a Magali con la propiedad ya indicada, o pedí tu horario desde <a href="#visita">Coordiná tu visita</a>.'}, {a: ['Pedir visita por WhatsApp', waLink('Hola Magali, quiero coordinar una visita. Propiedad: ' + etiq(x) + (x.link ? ' ' + x.link : ''))]}];
+      else if (a) {
+        var v = a.val(x);
+        res = v ? [{p: titulo(x) + '<br>' + esc(a.label) + ': ' + esc(v)}]
+                : [{p: 'De <strong>' + esc(etiq(x)) + '</strong> no tengo cargado ese dato. Magali te lo confirma:'}, {a: ['Consultarle a Magali', waLink('Hola Magali, le pregunté a Nina por ' + etiq(x) + ': "' + pregunta + '" y no tenía el dato.')]}];
+      } else res = resumenProp(x);
+      agregar('bot', bloques(res)); ultima = x; pintarChipsProp(x);
+    }
+    function preguntarCual(cands, a, pregunta){
+      agregar('bot', bloques([{p: '¿De cuál propiedad?'}, {bt: cands.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', x.direccion); respProp(x, a, pregunta); }]; })}]));
     }
 
     // --- Interfaz ---
@@ -1965,6 +2069,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       arr.forEach(function(b){
         if (b.p) { var p = document.createElement('p'); p.innerHTML = b.p; d.appendChild(p); }
         else if (b.ul) { var u = document.createElement('ul'); b.ul.forEach(function(h){ var li = document.createElement('li'); li.innerHTML = h; u.appendChild(li); }); d.appendChild(u); }
+        else if (b.bt) { b.bt.forEach(function(x){ var bb = document.createElement('button'); bb.type = 'button'; bb.className = 'nina-btn alt'; bb.textContent = x[0]; bb.addEventListener('click', x[1]); d.appendChild(bb); }); }
         else if (b.a) { var a = document.createElement('a'); a.className = 'nina-btn'; a.href = b.a[1]; a.target = '_blank'; a.rel = 'noopener'; a.textContent = b.a[0]; d.appendChild(a); }
       });
       return d;
@@ -1975,6 +2080,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       msgs.appendChild(m); msgs.scrollTop = msgs.scrollHeight; return m;
     }
     function responderConTema(tm){
+      ultima = null; if (tm.id !== 'propiedades') pintarChips();
       var r = typeof tm.r === 'function' ? tm.r() : tm.r;
       return Promise.resolve(r).then(function(arr){ agregar('bot', bloques(arr)); });
     }
@@ -1992,14 +2098,40 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         chips.appendChild(b);
       });
     }
-    function preguntar(texto, forzado){
+    function pintarChipsProp(x){
+      chips.innerHTML = '';
+      function chip(txt, fn){ var b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.addEventListener('click', fn); chips.appendChild(b); }
+      ATRIBUTOS.forEach(function(a){ if (a.id !== 'precio' && a.id !== 'visita' && a.val(x)) chip(a.chip, function(){ preguntar(a.chip + ' de ' + x.direccion, null, {prop: x, attr: a}); }); });
+      chip('Coordinar visita', function(){ preguntar('Quiero visitar ' + x.direccion, null, {prop: x, attr: atributo('visita')}); });
+      chip('Otra propiedad', function(){ ultima = null; pintarChips(); preguntar('Ver otras propiedades', tema('propiedades')); });
+      chip('Volver a los temas', function(){ ultima = null; pintarChips(); });
+    }
+    function procesar(texto, forzado, directo){
+      if (directo && directo.prop) return respProp(directo.prop, directo.attr, texto);
+      if (forzado) return responderConTema(forzado);
+      return cargarPropiedades().then(function(l){
+        var lista = l || [], tx = norm(texto), tokens = tx.split(' ');
+        var a = puntuarLista(tx.replace(/\b\d (dorm|dormitorio|dormitorios)\b/g, ' ').replace(/\s+/g, ' ').trim(), ATRIBUTOS, 2), tm = puntuar(tx);
+        var det = lista.length ? detectarProp(tx, lista) : null;
+        if (det && det.uno && (a || !tm)) return respProp(det.uno, a, texto);
+        if (det && det.varias && (a || !tm)) return preguntarCual(det.varias, a, texto);
+        if (a && lista.length) {
+          var pista = porPista(tx, lista);
+          if (pista) return respProp(pista, a, texto);
+          if (ultima && tokens.length <= 8 && !(tm && tm.id === 'propiedades')) return respProp(ultima, a, texto);
+        }
+        if (tm) return responderConTema(tm);
+        if (a && lista.length) return preguntarCual(lista, a, texto);
+        sinRespuesta(texto);
+      });
+    }
+    function preguntar(texto, forzado, directo){
       agregar('yo', texto);
-      var tm = forzado || puntuar(norm(texto));
       var espera = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 350;
       var escribiendo = agregar('bot nm-esc', 'Nina está escribiendo…');
       setTimeout(function(){
         escribiendo.remove();
-        if (tm) responderConTema(tm); else sinRespuesta(texto);
+        procesar(texto, forzado, directo);
       }, espera);
     }
     var iniciado = false;
@@ -2013,6 +2145,14 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     }
     function cerrar(){ panel.hidden = true; fab.setAttribute('aria-expanded', 'false'); fab.focus(); }
     fab.addEventListener('click', function(){ if (panel.hidden) abrir(); else cerrar(); });
+    // Lo usa el mapa: abre el chat ya posicionado en una propiedad.
+    window.ninaProp = function(direccion){
+      cargarPropiedades().then(function(l){
+        var x = (l || []).filter(function(y){ return y.direccion === direccion; })[0];
+        if (panel.hidden) abrir();
+        if (x) preguntar('Quiero saber de ' + x.direccion, null, {prop: x, attr: null});
+      });
+    };
     document.getElementById('nina-x').addEventListener('click', cerrar);
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !panel.hidden) cerrar(); });
     form.addEventListener('submit', function(e){

@@ -20,7 +20,8 @@
   "dorm": 1,
   "precio": 650000,
   "lat": -34.564109,
-  "lng": -58.464732
+  "lng": -58.464732,
+  "banos": 1
  },
  {
   "operacion": "alquiler",
@@ -32,7 +33,8 @@
   "dorm": 2,
   "precio": 1050000,
   "lat": -34.55297,
-  "lng": -58.460496
+  "lng": -58.460496,
+  "banos": 1
  },
  {
   "operacion": "alquiler",
@@ -44,7 +46,8 @@
   "dorm": 3,
   "precio": 1500000,
   "lat": -34.559972,
-  "lng": -58.464254
+  "lng": -58.464254,
+  "banos": 3
  },
  {
   "operacion": "alquiler",
@@ -56,6 +59,7 @@
   "dorm": 1,
   "precio": 750000,
   "lat": -34.567887,
-  "lng": -58.450578
+  "lng": -58.450578,
+  "banos": 1
  }
 ]
