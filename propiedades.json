@@ -21,7 +21,8 @@
   "precio": 650000,
   "lat": -34.564109,
   "lng": -58.464732,
-  "banos": 1
+  "banos": 1,
+  "disponibilidad": "Disponible para ingreso inmediato"
  },
  {
   "operacion": "alquiler",
@@ -34,7 +35,8 @@
   "precio": 1050000,
   "lat": -34.55297,
   "lng": -58.460496,
-  "banos": 1
+  "banos": 1,
+  "disponibilidad": "Disponible para ingreso inmediato"
  },
  {
   "operacion": "alquiler",
@@ -47,7 +49,8 @@
   "precio": 1500000,
   "lat": -34.559972,
   "lng": -58.464254,
-  "banos": 3
+  "banos": 3,
+  "disponibilidad": "Se estima disponible a partir de diciembre"
  },
  {
   "operacion": "alquiler",
@@ -60,6 +63,7 @@
   "precio": 750000,
   "lat": -34.567887,
   "lng": -58.450578,
-  "banos": 1
+  "banos": 1,
+  "disponibilidad": "Disponible para ingreso inmediato"
  }
 ]

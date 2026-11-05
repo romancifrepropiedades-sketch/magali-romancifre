@@ -1993,7 +1993,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       {id:'uso', label:'Uso y habilitación', chip:'Uso y habilitación', kw:['rubro|3','rubros|3','habilitacion|3','habilitado|3','actividad|3','gastronomia|3','uso|2','vidriera|3','salida de humo|4','consultorio|3','apto|2'], val:dato('uso')},
       {id:'mascotas', label:'Mascotas', chip:'Mascotas', kw:['mascota|3','mascotas|3','perro|3','perros|3','gato|3','gatos|3'],
        val:function(x){ return fmt(x.mascotas) || (x.tipo !== 'Local' ? 'No se aceptan mascotas' : null); }},
-      {id:'disponibilidad', label:'Disponibilidad', chip:'Disponibilidad', kw:['disponible|3','disponibilidad|3','libre|2','mudar|3','mudarme|3','entrega|3','ocupada|3','ocupado|3','desocupada|3','alquilada|3','alquilado|3'], val:dato('disponibilidad')},
+      {id:'disponibilidad', label:'Disponibilidad', chip:'Disponibilidad', kw:['disponible|3','disponibilidad|3','a partir de cuando|4','desde cuando|4','cuando puedo|3','cuando se puede|3','cuando esta|3','ingreso inmediato|4','libre|2','mudar|3','mudarme|3','entrega|3','ocupada|3','ocupado|3','desocupada|3','alquilada|3','alquilado|3'], val:dato('disponibilidad')},
       {id:'visita', label:'Coordinar visita', chip:'Coordinar visita', kw:['visita|3','visitar|3','visitas|3','conocer|3','coordinar|3','recorrer|3','ir a ver|4','quiero ver|4','agendar|3'], val:function(){ return null; }}
     ];
     function atributo(id){ for (var i = 0; i < ATRIBUTOS.length; i++) if (ATRIBUTOS[i].id === id) return ATRIBUTOS[i]; }
@@ -2182,6 +2182,12 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         if (tm && /\b(local|locales)\b/.test(tx) && !/\b(sucursal|sucursales)\b/.test(tx) && ['requisitos','costos','contrato','ingresos'].indexOf(tm.id) > -1) tm = tema('local');   // pide condiciones de un local
         var hayLocal = lista.some(function(x){ return x.tipo === 'Local'; });
         if (cr && !deUna && !(det && det.uno)) { respBusqueda(lista, cr, texto); if (tm && tm.id === 'local') return responderConTema(tm); return; }
+        if (a && a.id === 'disponibilidad' && lista.length && /\b(cuando|partir|desde|fecha|inmediato|inmediata|ingresar|entrar|mudar|mudarme)\b/.test(tx) && !(ultima && tokens.length <= 8 && !/\b(estan|disponibles|todas|todos|propiedades|departamentos)\b/.test(tx))) {
+          var pistaD = porPista(tx, lista);
+          if (pistaD) return respProp(pistaD, a, texto);
+          agregar('bot', bloques([{p: 'Esta es la disponibilidad de cada propiedad:'}, {ul: lista.map(function(x){ return '<strong>' + esc(etiq(x)) + '</strong><br>' + esc(a.val(x) || 'A confirmar con Magali'); })}, {p: 'Los departamentos para ingreso inmediato se pueden visitar y alquilar ya. Si te interesa una, tocala para ver más:'}, {bt: lista.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', 'Quiero saber de ' + x.direccion); respProp(x, null, 'Quiero saber de ' + x.direccion); }]; })}]));
+          ultima = null; pintarChips(); return;
+        }
         if (a && lista.length) {
           var pista = porPista(tx, lista);
           if (pista) return respProp(pista, a, texto);
