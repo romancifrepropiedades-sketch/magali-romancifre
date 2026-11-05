@@ -2034,6 +2034,69 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       }
       return null;
     }
+    // --- Búsqueda: "busco un 2 ambientes con patio" ---
+    var NUMS = {un:1, uno:1, dos:2, tres:3, cuatro:4, cinco:5};
+    var RE_AMB = /\b(\d|un|uno|dos|tres|cuatro|cinco) (ambiente|ambientes|amb)\b/;
+    var RE_DORM = /\b(\d|un|uno|dos|tres|cuatro) (dorm|dormitorio|dormitorios|habitacion|habitaciones|cuarto|cuartos)\b/;
+    var BUSCABLES = {cochera:'cochera', balcon:'patio, balcón o terraza', ascensor:'ascensor', amoblado:'amoblado', aire:'aire acondicionado', calefaccion:'calefacción'};
+    var KEYS = {cochera:'cochera', balcon:'balcon', ascensor:'ascensor', amoblado:'amoblado', aire:'aire', calefaccion:'calefaccion'};
+    function numero(s){ return /^\d$/.test(s) ? +s : NUMS[s]; }
+    function criterios(texto, tx){
+      var cr = {feats: []}, m;
+      if (/\bmonoambiente/.test(tx)) cr.amb = 1;
+      if ((m = RE_AMB.exec(tx))) cr.amb = numero(m[1]);
+      if ((m = RE_DORM.exec(tx))) cr.dorm = numero(m[1]);
+      if (/\b(local|locales)\b/.test(tx)) cr.tipo = 'Local';
+      else if (/\b(departamento|departamentos|depto|deptos|dpto|depa|depas)\b/.test(tx)) cr.tipo = 'Departamento';
+      m = /(hasta|menos de|maximo|max|presupuesto de|no mas de)\s*\$?\s*([\d.]+)\s*(mil|millon|millones)?/i.exec(String(texto).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
+      if (m) { var n = +m[2].replace(/\./g, ''); if (m[3] === 'mil') n *= 1000; else if (m[3]) n *= 1000000; else if (n < 10000) n *= 1000; if (n >= 100000) cr.max = n; }
+      Object.keys(BUSCABLES).forEach(function(id){ if (puntuarLista(tx, [atributo(id)], 2)) cr.feats.push(id); });
+      var verbo = /\b(busco|buscando|busca|necesito|necesitamos|buscamos)\b/.test(tx);
+      cr.fuerte = !!(cr.amb || cr.dorm || cr.max || (verbo && (cr.feats.length || cr.tipo)));
+      return cr.fuerte ? cr : null;
+    }
+    function describir(cr){
+      var d = [];
+      if (cr.amb) d.push(cr.amb === 1 ? 'monoambiente' : cr.amb + ' ambientes');
+      if (cr.dorm) d.push(cr.dorm + (cr.dorm === 1 ? ' dormitorio' : ' dormitorios'));
+      if (cr.tipo) d.push(cr.tipo === 'Local' ? 'local' : 'departamento');
+      cr.feats.forEach(function(f){ d.push('con ' + BUSCABLES[f]); });
+      if (cr.max) d.push('hasta ' + dinero(cr.max) + ' por mes');
+      return d.join(', ');
+    }
+    function coincide(x, cr){
+      if (cr.tipo && x.tipo !== cr.tipo) return false;
+      if ((cr.amb || cr.dorm) && x.tipo === 'Local') return false;
+      if (cr.dorm && x.dorm != cr.dorm) return false;
+      if (cr.amb) {
+        if (x.ambientes) { if (+x.ambientes !== cr.amb) return false; }
+        else if (x.dorm === undefined || x.dorm !== Math.max(cr.amb - 1, 0)) return false;   // 2 ambientes = 1 dormitorio
+      }
+      if (cr.max && x.precio && x.precio > cr.max) return false;
+      for (var i = 0; i < cr.feats.length; i++) { var v = x[KEYS[cr.feats[i]]]; if (v === false || /^no\b/i.test(String(v))) return false; }
+      return true;
+    }
+    function conocidos(x, cr){ return cr.feats.filter(function(f){ var v = x[KEYS[f]]; return v !== undefined && v !== null && v !== ''; }).length; }
+    function respBusqueda(lista, cr, texto){
+      var res = lista.filter(function(x){ return coincide(x, cr); });
+      res.sort(function(a, b){ return conocidos(b, cr) - conocidos(a, cr); });
+      var desc = describir(cr), faltan = false, bloquesR;
+      var consulta = {a: ['Dejarle mi búsqueda a Magali', waLink('Hola Magali, estoy buscando: ' + texto)]};
+      function botones(l){ return {bt: l.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', 'Quiero saber de ' + x.direccion); respProp(x, null, 'Quiero saber de ' + x.direccion); }]; })}; }
+      if (!res.length) {
+        bloquesR = [{p: 'Hoy no tengo una propiedad que cumpla con lo que buscás (' + esc(desc) + '). Son las que tengo disponibles:'}, botones(lista), {p: 'Si querés, dejale tu búsqueda a Magali y te avisa cuando entre algo así.'}, consulta];
+      } else {
+        var lineas = res.map(function(x){
+          var det = [x.detalle || x.m2, x.precio ? dinero(x.precio) + ' por mes + expensas' : ''].filter(Boolean).join(' · ');
+          var fs = cr.feats.map(function(f){ var v = x[KEYS[f]]; if (v === undefined || v === null || v === '') { faltan = true; return esc(BUSCABLES[f]) + ': a confirmar'; } return esc(BUSCABLES[f]) + ': ' + esc(fmt(v)); });
+          return '<strong>' + esc(etiq(x)) + '</strong><br>' + esc(det).replace(/ por mes \+ expensas/, ' por mes + expensas') + (fs.length ? '<br>' + fs.join('<br>') : '');
+        });
+        bloquesR = [{p: 'Con lo que buscás (' + esc(desc) + ') tengo ' + (res.length === 1 ? '1 opción' : res.length + ' opciones') + ':'}, {ul: lineas}];
+        if (faltan) bloquesR.push({p: 'De algunas todavía no tengo cargado ese dato: Magali te lo confirma.'});
+        bloquesR.push({p: 'Tocá una para ver más:'}, botones(res), consulta);
+      }
+      agregar('bot', bloques(bloquesR)); ultima = null; pintarChips();
+    }
     function titulo(x){ return '<strong>' + esc(etiq(x)) + '</strong>'; }
     function resumenProp(x){
       var det = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · ');
@@ -2111,10 +2174,12 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       if (forzado) return responderConTema(forzado);
       return cargarPropiedades().then(function(l){
         var lista = l || [], tx = norm(texto), tokens = tx.split(' ');
-        var a = puntuarLista(tx.replace(/\b\d (dorm|dormitorio|dormitorios)\b/g, ' ').replace(/\s+/g, ' ').trim(), ATRIBUTOS, 2), tm = puntuar(tx);
+        var a = puntuarLista(tx.replace(RE_AMB, ' ').replace(RE_DORM, ' ').replace(/\bmonoambiente\w*/g, ' ').replace(/\s+/g, ' ').trim(), ATRIBUTOS, 2), tm = puntuar(tx);
+        var cr = lista.length ? criterios(texto, tx) : null, deUna = /\b(el de|la de|ese|esa|este|esta)\b/.test(tx);
         var det = lista.length ? detectarProp(tx, lista) : null;
         if (det && det.uno && (a || !tm)) return respProp(det.uno, a, texto);
         if (det && det.varias && (a || !tm)) return preguntarCual(det.varias, a, texto);
+        if (cr && !deUna && !(det && det.uno)) return respBusqueda(lista, cr, texto);
         if (a && lista.length) {
           var pista = porPista(tx, lista);
           if (pista) return respProp(pista, a, texto);
