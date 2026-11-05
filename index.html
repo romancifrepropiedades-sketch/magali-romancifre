@@ -2083,6 +2083,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
        r:[{p:'No tenemos alquileres temporales. Trabajamos con contratos de alquiler de vivienda por 2 años y de local comercial por 3 años.'}]},
       {id:'reformas', chip:null, kw:['pintar|4','pintura|4','pintarlo|4','pintarla|4','pintado|3','reforma|4','reformas|4','modificar|3','modificaciones|4','hacer cambios|5','hacer arreglos|5','hacer obras|5','puedo arreglar|4','mejoras|3','obra|2','cambiar la cocina|5','cambiar el piso|5'],
        r:[{p:'Sí, se pueden hacer trabajos de pintura o arreglos en el departamento, siempre que cuentes antes con la autorización del propietario.'},{p:'Cualquier modificación se acuerda antes de realizarla, especialmente si implica cambios en las instalaciones o en las características del inmueble.'}]},
+      {id:'negociable', chip:null, kw:['negociable|6','negociables|6','negociar|6','negociacion|5','rebaja|5','rebajan|5','descuento|5','mejor precio|6','bajan el precio|7','bajar el precio|7','pueden bajar|6','regatear|6','contraoferta|6','ofertar|5','oferta|3','hacer una oferta|7','hacer una propuesta|7','propuesta|2'],
+       r:[{p:'El valor publicado lo define el propietario de cada propiedad. Si querés hacer una propuesta, escribile a Magali: ella lo consulta con el propietario y te confirma.'},{a:['Consultarle a Magali', waLink('Hola Magali, quería consultar si el precio es negociable.')]}]},
       {id:'derivar', chip:null, kw:['rescindir|5','rescision|5','rescindo|5','romper el contrato|6','estudiantes|4','extranjeros|4','extranjero|4','venden|4','comprar|4','compra|3','comision a propietarios|8','honorarios a propietarios|8','cobran a propietarios|8','comision al propietario|8','reparaciones|4','arreglos|3','sublocar|5','subalquilar|5','renovar|4','renovacion|4','prorroga|4'],
        r:[]},
       {id:'saludo', chip:null, kw:['hola|3','buenas|3','buen dia|3','buenos dias|3','buenas tardes|3','buenas noches|3','hey|2'],
@@ -2157,6 +2159,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
        val:function(x){ var a = []; if (x.ambientes) a.push(x.ambientes + ' ambientes'); if (x.dorm) a.push(x.dorm + (x.dorm == 1 ? ' dormitorio' : ' dormitorios')); return a.length ? a.join(', ') : null; }},
       {id:'banos', label:'Baños', chip:'Baños', kw:['bano|3','banos|3'], val:dato('banos')},
       {id:'cochera', label:'Cochera', chip:'Cochera', kw:['cochera|3','cocheras|3','garage|3','garaje|3','estacionamiento|3','guardar el auto|4'], val:dato('cochera')},
+      {id:'baulera', label:'Baulera', chip:'Baulera', kw:['baulera|3','bauleras|3','baulero|3'], val:dato('baulera')},
       {id:'balcon', label:'Balcón, terraza o patio', chip:'Balcón o patio', kw:['balcon|3','terraza|3','patio|3','jardin|3','parrilla|3','quincho|3','espacio exterior|4'], val:dato('balcon')},
       {id:'piso', label:'Piso', chip:'Piso', kw:['piso|3','planta|2','que piso|4','altura|2'], val:dato('piso')},
       {id:'ascensor', label:'Ascensor', chip:'Ascensor', kw:['ascensor|3','escalera|2','escaleras|2'], val:dato('ascensor')},
@@ -2318,7 +2321,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       var det = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · ');
       var res = [{p: titulo(x) + (det ? '<br>' + esc(det) : '')}];
       var lineas = [];
-      ['precio','expensas','banos','piso','cochera','balcon','ascensor','luz','antiguedad','amoblado','aire','calefaccion','servicios','uso','mascotas','disponibilidad'].forEach(function(id){
+      ['precio','expensas','banos','piso','cochera','baulera','balcon','ascensor','luz','antiguedad','amoblado','aire','calefaccion','servicios','uso','mascotas','disponibilidad'].forEach(function(id){
         var a = atributo(id), v = a.val(x); if (v) lineas.push('<strong>' + esc(a.label) + ':</strong> ' + esc(v));
       });
       if (lineas.length) res.push({ul: lineas});
@@ -2326,15 +2329,25 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       res.push({p: 'Preguntame lo que quieras de esta propiedad, o coordiná una visita.'});
       return res;
     }
+    // Otros datos que se mencionan en la misma pregunta (por ejemplo "cochera o baulera").
+    function otrosAtributos(tx, a){
+      return ATRIBUTOS.filter(function(o){ return o.id !== a.id && o.id !== 'visita' && o.id !== 'precio' && puntuarLista(tx, [o], 3); }).slice(0, 3);
+    }
     function respProp(x, a, pregunta){
       var tx = norm(pregunta), res;
       var extra = extraDe(x, tx);
       if (extra) res = [{p: titulo(x) + '<br>' + esc(extra)}];
       else if (a && a.id === 'visita') res = [{p: 'Para visitar <strong>' + esc(etiq(x)) + '</strong>, escribile a Magali con la propiedad ya indicada, o pedí tu horario desde <a href="#visita">Coordiná tu visita</a>.'}, {a: ['Pedir visita por WhatsApp', waLink('Hola Magali, quiero coordinar una visita. Propiedad: ' + etiq(x) + (x.link ? ' ' + x.link : ''))]}];
       else if (a) {
-        var v = a.val(x);
-        res = v ? [{p: titulo(x) + '<br>' + esc(a.label) + ': ' + esc(v)}]
-                : (a.id === 'expensas' || a.id === 'servicios' ? [{p: 'En general, el inquilino paga las expensas ordinarias, el ABL, el impuesto inmobiliario y la luz y el gas; el propietario se hace cargo de las expensas extraordinarias.'}] : []).concat([{p: 'De <strong>' + esc(etiq(x)) + '</strong> no tengo cargado ese dato. Magali te lo confirma:'}, {a: ['Consultarle a Magali', waLink('Hola Magali, le pregunté a Nina por ' + etiq(x) + ': "' + pregunta + '" y no tenía el dato.')]}]);
+        var juntos = [a].concat(otrosAtributos(corregir(norm(pregunta)), a));
+        var filasD = juntos.map(function(at){ return {at: at, v: at.val(x)}; });
+        var conDato = filasD.filter(function(f){ return f.v; }), sinDato = filasD.filter(function(f){ return !f.v; });
+        var general = (juntos.some(function(at){ return at.id === 'expensas' || at.id === 'servicios'; }) && sinDato.length) ? [{p: 'En general, el inquilino paga las expensas ordinarias, el ABL, el impuesto inmobiliario y la luz y el gas; el propietario se hace cargo de las expensas extraordinarias.'}] : [];
+        if (!sinDato.length) res = [{p: titulo(x) + '<br>' + conDato.map(function(f){ return esc(f.at.label) + ': ' + esc(f.v); }).join('<br>')}];
+        else res = general.concat(
+          conDato.length ? [{p: titulo(x) + '<br>' + conDato.map(function(f){ return esc(f.at.label) + ': ' + esc(f.v); }).join('<br>')}] : [],
+          [{p: (conDato.length ? 'Lo demás' : 'De <strong>' + esc(etiq(x)) + '</strong>') + ' (' + sinDato.map(function(f){ return esc(f.at.label.toLowerCase()); }).join(', ') + ') no lo tengo cargado. Magali te lo confirma:'},
+           {a: ['Consultarle a Magali', waLink('Hola Magali, le pregunté a Nina por ' + etiq(x) + ': "' + pregunta + '" y no tenía el dato.')]}]);
       } else res = resumenProp(x);
       agregar('bot', bloques(res)); ultima = x; pintarChipsProp(x);
     }
@@ -2408,7 +2421,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         if (tm && /\b(local|locales)\b/.test(tx) && !/\b(sucursal|sucursales)\b/.test(tx) && ['requisitos','costos','contrato','ingresos'].indexOf(tm.id) > -1) tm = tema('local');   // pide condiciones de un local
         var hayLocal = lista.some(function(x){ return x.tipo === 'Local'; });
         if (cr && !deUna && !(det && det.uno)) { respBusqueda(lista, cr, texto); if (tm && tm.id === 'local') return responderConTema(tm); return; }
-        if (a && a.id === 'disponibilidad' && lista.length && /\b(cuando|partir|desde|fecha|inmediato|inmediata|ingresar|entrar|mudar|mudarme)\b/.test(tx) && !(ultima && tokens.length <= 8 && !/\b(estan|disponibles|todas|todos|propiedades|departamentos)\b/.test(tx))) {
+        if (a && a.id === 'disponibilidad' && lista.length && /\b(cuando|partir|desde|fecha|inmediato|inmediata|ingresar|entrar|mudar|mudarme|ocupada|ocupado|ocupadas|libre|libres|desocupada|desocupado|alquilada|alquilado|alquiladas)\b/.test(tx) && !(ultima && tokens.length <= 8 && !/\b(estan|disponibles|todas|todos|propiedades|departamentos)\b/.test(tx))) {
           var pistaD = porPista(tx, lista);
           if (pistaD) return respProp(pistaD, a, texto);
           agregar('bot', bloques([{p: 'Esta es la disponibilidad de cada propiedad:'}, {ul: lista.map(function(x){ return '<strong>' + esc(etiq(x)) + '</strong><br>' + esc(a.val(x) || 'A confirmar con Magali'); })}, {p: 'Los departamentos para ingreso inmediato se pueden visitar y alquilar ya. Si te interesa una, tocala para ver más:'}, {bt: lista.map(function(x){ return [x.direccion + ' (' + x.tipo.toLowerCase() + ')', function(){ agregar('yo', 'Quiero saber de ' + x.direccion); respProp(x, null, 'Quiero saber de ' + x.direccion); }]; })}]));
@@ -2417,7 +2430,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         if (a && lista.length) {
           var pista = porPista(tx, lista);
           if (pista) return respProp(pista, a, texto);
-          var esPolitica = /\b(quien|paga|pagan|cargo|inquilino|propietario|ordinarias|extraordinarias|incluidas|incluido|incluye|incluyen)\b/.test(tx);
+          var esPolitica = /\b(quien|cargo|inquilino|propietario|ordinarias|extraordinarias|incluidas|incluido|incluye|incluyen)\b/.test(tx);
           if (ultima && tokens.length <= 8 && !(tm && (tm.id === 'propiedades' || (tm.id === 'gastos' && esPolitica)))) return respProp(ultima, a, texto);
         }
         if (tm && tm.id === 'local' && hayLocal) respBusqueda(lista, {feats: [], tipo: 'Local', fuerte: true}, texto);   // primero el local disponible, después las condiciones
