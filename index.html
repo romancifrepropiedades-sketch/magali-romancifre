@@ -1529,8 +1529,10 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         var ini = new Date(key + 'T' + pad(hh(f[0])) + ':00:00-03:00').getTime();
         return {f:f, ok: ini >= ahora + AVISO_PREVIO_H * 3600000 && !(ini >= SIN_ATENCION_DESDE && ini < SIN_ATENCION_HASTA)};
       });
+      fr.forEach(function(x){ x.ok0 = x.ok; });
       if (fr.some(function(x){ return x.ok; })) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, fr:fr});
     }
+    var todosLosDias = days.slice();   // antes de descontar lo que ya tiene programado Magali
 
     var on = {};    // día elegido: key -> true
     var sel = {};   // key -> índices de franjas elegidas
@@ -1597,6 +1599,40 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     }
     if (!days.length) elDays.innerHTML = '<p class="help">No hay días disponibles por ahora. Enviá tu pedido y coordinamos por WhatsApp.</p>';
     renderDays(); renderFr();
+
+    // Agenda de Magali: una franja queda en gris si, con lo que ya tiene programado, no queda al menos 1 hora libre para ir a tasar.
+    var TASACION_MIN = 60;
+    function libreEnFranja(ocup, f){
+      var iv = ocup.map(function(o){ return [Math.max(o[0], f[0]), Math.min(o[1], f[1])]; })
+                   .filter(function(o){ return o[1] > o[0]; }).sort(function(a, b){ return a[0] - b[0]; });
+      var usado = 0, fin = -1;
+      iv.forEach(function(o){ var d = Math.max(o[0], fin); if (o[1] > d) usado += o[1] - d; fin = Math.max(fin, o[1]); });
+      return (f[1] - f[0]) - usado;
+    }
+    function aplicarAgenda(ocupados){
+      var porDia = {};
+      todosLosDias.forEach(function(day){
+        var ini = new Date(day.key + 'T00:00:00-03:00').getTime(), fin = ini + 86400000;
+        ocupados.forEach(function(o){
+          var s = new Date(o.s).getTime(), e = new Date(o.e).getTime();
+          if (isNaN(s) || isNaN(e) || e <= ini || s >= fin) return;
+          (porDia[day.key] = porDia[day.key] || []).push([Math.round((Math.max(s, ini) - ini) / 60000), Math.round((Math.min(e, fin) - ini) / 60000)]);
+        });
+      });
+      days = todosLosDias.filter(function(day){
+        day.fr.forEach(function(x){ x.ok = x.ok0 && libreEnFranja(porDia[day.key] || [], x.f) >= TASACION_MIN; });
+        return day.fr.some(function(x){ return x.ok; });
+      });
+      Object.keys(on).forEach(function(k){ if (!find(k)) { delete on[k]; delete sel[k]; } });
+      Object.keys(sel).forEach(function(k){ var d = find(k); if (d) sel[k] = sel[k].filter(function(ix){ return d.fr[ix].ok; }); });
+      renderDays(); renderFr();
+    }
+    if (SCRIPT_URL) {
+      fetch(SCRIPT_URL + (SCRIPT_URL.indexOf('?') > -1 ? '&' : '?') + 'accion=agenda&t=' + Date.now())
+        .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+        .then(function(d){ if (d && d.ok && d.ocupados) aplicarAgenda(d.ocupados); })
+        .catch(function(){ /* si falla la lectura, se muestran todas las franjas y Magali confirma igual */ });
+    }
 
     var enviadoFirma = '';
     function leer(){
