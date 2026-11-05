@@ -116,13 +116,22 @@ h1{font-size:clamp(3rem, 11vw, 5.6rem); font-weight:800; letter-spacing:-0.04em;
 }
 .hours b{font-weight:700}
 
-/* Aviso */
-.notice-wrap{position:relative; z-index:2; margin-top:-48px}
-.notice{
+/* Aviso: notificación que aparece, se puede cerrar y no vuelve a salir en esa visita */
+.toast-aviso{
+  position:fixed; z-index:35; top:calc(80px + env(safe-area-inset-top, 0px)); left:50%;
+  width:min(560px, calc(100vw - 32px)); display:flex; gap:14px; align-items:flex-start;
   background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);
-  border-radius:16px; padding:16px 20px; box-shadow:0 14px 34px rgba(30,17,40,.1);
+  border-radius:16px; padding:16px 48px 16px 18px; box-shadow:0 18px 44px rgba(30,17,40,.25);
+  opacity:0; transform:translate(-50%, -14px); transition:opacity .3s ease, transform .3s ease;
 }
-.notice strong{display:block; font-weight:800}
+.toast-aviso[hidden]{display:none}
+.toast-aviso.show{opacity:1; transform:translate(-50%, 0)}
+.toast-aviso .ta-ico{flex:none; width:22px; height:22px; margin-top:2px}
+.toast-aviso strong{display:block; font-weight:800; margin-bottom:2px}
+.toast-aviso p{margin:0; font-size:.95rem; line-height:1.5}
+.toast-aviso .ta-x{position:absolute; top:8px; right:8px; width:36px; height:36px; border:0; border-radius:50%; background:transparent; color:inherit; font-size:1.5rem; line-height:1; cursor:pointer}
+.toast-aviso .ta-x:hover{background:rgba(0,0,0,.08)}
+.toast-aviso .ta-x:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
 
 /* Secciones */
 section{padding:72px 0}
@@ -325,7 +334,6 @@ footer .container{align-items:flex-start}
   section{padding:48px 0}
   .sec-head{margin-bottom:22px}
   .hero .cta-row .btn{flex:1 1 100%}
-  .notice-wrap{margin-top:-44px}
 
   /* Accesos: grilla 2 x 2 compacta */
   .tiles{grid-template-columns:1fr 1fr; gap:12px}
@@ -664,15 +672,6 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           </div>
         </div>
         <div class="floor"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="notice-wrap" id="aviso">
-    <div class="container">
-      <div class="notice">
-        <strong>Aviso por fin de semana largo</strong>
-        No hay atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00. Podés escribirme igual y te respondo apenas retomemos.
       </div>
     </div>
   </div>
@@ -1078,6 +1077,12 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
   </div>
 </footer>
 
+<aside class="toast-aviso" id="aviso" role="status" aria-live="polite" hidden>
+  <svg class="ta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+  <div><strong>Aviso por fin de semana largo</strong><p>No hay atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00. Podés escribirme igual y te respondo apenas retomemos.</p></div>
+  <button type="button" class="ta-x" aria-label="Cerrar aviso">&times;</button>
+</aside>
+<noscript><p style="margin:0; padding:12px 16px; background:#FFF3D6; color:#5A4210; text-align:center">Aviso por fin de semana largo: no hay atención desde el sábado 7 a las 13:00 hasta el miércoles 11 a las 10:00.</p></noscript>
 <button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="nina" aria-label="Hablar con Nina bot: abrir el chat con la asistente virtual de Magali">
   <svg class="ico-wa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.5 8.5 0 1 1 21 11.5z"/><path d="M9 9.2c.3 2.2 2.4 4.3 4.8 5.2l1.3-1.3-1.9-1-.8.6a4 4 0 0 1-1.7-1.7l.6-.8-1-1.9L9 9.2z" fill="currentColor" stroke="none"/></svg>
   <span class="fab-txt">Hablar con Nina bot</span>
@@ -1168,12 +1173,26 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
   }
 
   (function(){
-    // El aviso del fin de semana largo se oculta solo después del miércoles 11 de noviembre de 2026, 10:00 (hora de Argentina).
-    var fin = new Date('2026-11-11T10:00:00-03:00');
-    if (Date.now() >= fin.getTime()) {
-      var a = document.getElementById('aviso');
-      if (a) a.hidden = true;
-    }
+    // Aviso del fin de semana largo: aparece como notificación (una vez por visita) y deja de salir después del miércoles 11 de noviembre de 2026, 10:00 (hora de Argentina).
+    (function(){
+      var a = document.getElementById('aviso'); if (!a) return;
+      var visto = false; try { visto = sessionStorage.getItem('rcAvisoVisto') === '1'; } catch (e) {}
+      if (Date.now() >= new Date('2026-11-11T10:00:00-03:00').getTime() || visto) return;
+      var auto;
+      var cerrar = function(){
+        clearTimeout(auto); a.classList.remove('show');
+        setTimeout(function(){ a.hidden = true; }, 300);
+        try { sessionStorage.setItem('rcAvisoVisto', '1'); } catch (e) {}
+      };
+      setTimeout(function(){
+        a.hidden = false;
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ a.classList.add('show'); }); });
+        auto = setTimeout(cerrar, 25000);
+      }, 1200);
+      a.querySelector('.ta-x').addEventListener('click', cerrar);
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !a.hidden) cerrar(); });
+      var fab = document.getElementById('fab'); if (fab) fab.addEventListener('click', function(){ if (!a.hidden) cerrar(); });
+    })();
 
     // Pestañas Vivienda / Local comercial. Sin JavaScript se ven las dos secciones.
     document.documentElement.className += ' js';
