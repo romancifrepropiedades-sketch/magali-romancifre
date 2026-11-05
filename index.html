@@ -574,6 +574,12 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
 .nm-esc{color:var(--muted); font-style:italic}
 .nina-btn{display:block; margin-top:6px; padding:10px 14px; border-radius:999px; background:var(--wa); color:#fff !important; text-align:center; text-decoration:none; font-weight:700}
 .nina-btn.alt{background:#fff; color:var(--violet) !important; border:1px solid var(--violet); font:inherit; font-weight:700; font-size:.86rem; padding:8px 12px; width:100%; cursor:pointer}
+.nina-lead label{display:block; margin-top:8px; font-size:.82rem; font-weight:700; color:var(--muted)}
+.nina-lead input[type=text],.nina-lead input[type=tel]{display:block; width:100%; margin-top:4px; font:inherit; font-size:1rem; padding:10px 12px; border:1px solid #CFC4D6; border-radius:12px; color:var(--ink)}
+.nina-lead .chk{display:flex; gap:8px; align-items:flex-start; font-weight:500; font-size:.8rem; line-height:1.4}
+.nina-lead .chk input{margin-top:3px; flex:none; width:18px; height:18px}
+.nina-lead .lead-err{margin:8px 0 0; color:#B3261E; font-weight:700; font-size:.85rem}
+.nina-lead .lead-go:disabled{opacity:.6; cursor:default}
 .nina-chips{display:flex; gap:8px; overflow-x:auto; padding:10px 14px; border-top:1px solid var(--line); background:#fff; scrollbar-width:thin}
 .nina-chips button{flex:none; padding:8px 14px; border-radius:999px; border:1px solid #CFC4D6; background:#fff; color:var(--violet); font:inherit; font-size:.86rem; font-weight:700; cursor:pointer; white-space:nowrap}
 .nina-chips button:hover{background:var(--tint); border-color:var(--violet)}
@@ -1082,6 +1088,15 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
   var SCRIPT_URL = '';
   // FormSubmit no respondió en las pruebas: queda apagado. Los pedidos van por WhatsApp hasta conectar el script de Google.
   var USAR_FORMSUBMIT = false;
+  // Para el chat de Nina: manda un contacto al script de Google (mail + hoja). Sin script publicado avisa con sinServicio.
+  window.rcEnviar = function(asunto, datos){
+    if (!SCRIPT_URL) return Promise.resolve({ok: false, sinServicio: true});
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var corte = setTimeout(function(){ if (ctrl) ctrl.abort(); }, 10000);
+    return fetch(SCRIPT_URL, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({asunto: asunto, datos: datos}), signal: ctrl ? ctrl.signal : undefined})
+      .then(function(r){ clearTimeout(corte); return r.json().catch(function(){ return {}; }).then(function(d){ return {ok: r.ok && d.ok === true}; }); })
+      .catch(function(){ clearTimeout(corte); return {ok: false}; });
+  };
   function registrar(asunto, datos, el){
     if (!SCRIPT_URL && !USAR_FORMSUBMIT) { el.className = 'msg'; el.textContent = ''; return Promise.resolve({ok: true}); }
     el.className = 'msg'; el.textContent = 'Registrando tu pedido…';
@@ -1932,11 +1947,13 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       {id:'sucursales', chip:'Sucursales', kw:['sucursal|3','sucursales|3','direccion|3','donde estan|3','ubicacion|3','belgrano|2','colegiales|3','como llegar|3','mapa|2','oficinas|2'],
        r:[{p:'<strong>Sucursal Belgrano:</strong> Av. Olazábal 2690.<br><strong>Sucursal Colegiales:</strong> Ciudad de la Paz 1384.'},{p:'Mirá el mapa y cómo llegar en <a href="#sucursales">Nuestras sucursales</a>.'}]},
       {id:'privacidad', chip:'Mis datos', kw:['privacidad|3','datos|2','personales|3','informacion personal|3'],
-       r:[{p:'Usamos tus datos solo para responder tu consulta y coordinar la visita o la tasación. Este chat no guarda ni envía lo que escribís. Más en el <a href="privacidad.html">aviso de privacidad</a>.'}]},
+       r:[{p:'Usamos tus datos solo para responder tu consulta y coordinar la visita o la tasación. Este chat no guarda lo que escribís: solo le llega a Magali si vos tocás «Que me contacte Magali» y aceptás enviar tus datos. Más en el <a href="privacidad.html">aviso de privacidad</a>.'}]},
       {id:'contacto', chip:'Contacto', kw:['contacto|3','mail|3','correo|3','email|3','instagram|3','telefono|3','celular|2','llamar|3','numero|2'],
        r:[{p:'Podés escribirle a Magali por WhatsApp, o por mail a <a href="mailto:magali@romancifre.com.ar">magali@romancifre.com.ar</a>. También estamos en <a href="https://www.instagram.com/romancifrepropiedades/" target="_blank" rel="noopener">Instagram</a>.'}]},
       {id:'humano', chip:null, kw:['persona|3','humano|3','asesora|3','magali|3','hablar con|3','atienda|2','agente|3','alguien|2','hablar|2'],
-       r:function(){ return [{p:'Claro. ' + estado() + ' Podés escribirle directamente por WhatsApp:'},{a:['Hablar por WhatsApp con Magali', waLink('Hola Magali, quiero hablar con vos.')]}]; }},
+       r:function(){ return [{p:'Claro. ' + estado() + ' Podés escribirle directamente por WhatsApp:'},{a:['Hablar por WhatsApp con Magali', waLink('Hola Magali, quiero hablar con vos.')]},{p:'O dejame tus datos y Magali te escribe ella:'},{bt:[['Que me contacte Magali', pedirContacto]]}]; }},
+      {id:'contactame', chip:null, kw:['contacten|4','contacte|4','contactenme|4','contactame|4','me contacten|5','me llamen|5','llamen|3','llamame|3','que me llamen|5','me escriban|5','escriban|3','dejar mis datos|5','dejo mis datos|5','dejar mi telefono|5','dejar mi numero|5'],
+       r:function(){ return [{p:'Con gusto: dejame tu nombre y celular y le paso tu consulta a Magali, con lo que hablamos.'},{bt:[['Dejar mis datos', mostrarContacto]]}]; }},
       {id:'saludo', chip:null, kw:['hola|3','buenas|3','buen dia|3','buenos dias|3','buenas tardes|3','buenas noches|3','hey|2'],
        r:function(){ return [{p:'¡Hola! Soy Nina, la asistente virtual de Magali. ' + estado() + ' Elegí un tema o escribime tu pregunta.'}]; }},
       {id:'gracias', chip:null, kw:['gracias|3','genial|2','perfecto|2','excelente|2','buenisimo|2','listo|1'],
@@ -1964,6 +1981,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     function puntuar(tx){ return puntuarLista(tx, TEMAS, 2); }
 
     // --- Datos de cada propiedad (salen de propiedades.json) ---
+    var hist = [], enviado = false;   // la conversación vive solo en esta pestaña; se envía únicamente si la persona lo pide
     var ultima = null;   // última propiedad de la que se habló: sirve para preguntas de seguimiento
     var STOP = ['avenida','calle','piso','dpto','depto','departamento','local','pasaje'];
     function etiq(x){ return x.tipo + ' · ' + x.direccion; }
@@ -2097,6 +2115,46 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       }
       agregar('bot', bloques(bloquesR)); ultima = null; pintarChips();
     }
+    // --- "Que me contacte Magali": deja nombre y celular, y la conversación llega a Magali (solo si la persona acepta) ---
+    function transcripcion(){ var s = hist.map(function(h){ return (h.yo ? 'Persona: ' : 'Nina: ') + h.t; }).join('\n'); return s.length > 3500 ? '…' + s.slice(-3500) : s; }
+    function preguntasPersona(){ return hist.filter(function(h){ return h.yo; }).map(function(h){ return h.t; }).join(' / ').slice(0, 350); }
+    function mostrarContacto(){
+      if (enviado) { agregar('bot', bloques([{p: 'Ya le llegó tu consulta a Magali: te va a escribir por WhatsApp.'}])); return; }
+      var d = document.createElement('div'); d.className = 'nina-lead';
+      d.innerHTML = '<p>Dejame tus datos y le paso tu consulta a Magali con lo que hablamos, así te escribe directamente.</p>' +
+        '<label>Nombre<input type="text" name="n" autocomplete="name" maxlength="80"></label>' +
+        '<label>Celular (con característica)<input type="tel" name="c" autocomplete="tel" inputmode="tel" maxlength="30" placeholder="11 1234 5678"></label>' +
+        '<label class="chk"><input type="checkbox" name="ok"><span>Acepto que Magali reciba mis datos y esta conversación para contactarme. <a href="privacidad.html" target="_blank" rel="noopener">Aviso de privacidad</a></span></label>' +
+        '<p class="lead-err" role="alert" hidden></p><button type="button" class="nina-btn alt lead-go">Enviar a Magali</button>';
+      agregar('bot nm-nohist', d);
+      var go = d.querySelector('.lead-go'), err = d.querySelector('.lead-err');
+      function falla(tx){ err.textContent = tx; err.hidden = false; msgs.scrollTop = msgs.scrollHeight; }
+      go.addEventListener('click', function(){
+        var n = d.querySelector('[name=n]').value.trim(), c = d.querySelector('[name=c]').value.trim(), ok = d.querySelector('[name=ok]').checked;
+        if (n.length < 2) return falla('Escribí tu nombre.');
+        if (c.replace(/\D/g, '').length < 8) return falla('Revisá el celular: tiene que incluir la característica.');
+        if (!ok) return falla('Para enviarlo tenés que aceptar el uso de tus datos.');
+        err.hidden = true; go.disabled = true; go.textContent = 'Enviando…';
+        var datos = {'Nombre': n, 'Celular': c, 'Propiedad consultada': ultima ? etiq(ultima) + (ultima.link ? ' ' + ultima.link : '') : '', 'Conversación': transcripcion(), 'Origen': 'Nina (chat de la página)', 'Consentimiento': 'Aceptó el aviso de privacidad'};
+        var envio = window.rcEnviar ? window.rcEnviar('Consulta desde Nina: ' + n, datos) : Promise.resolve({ok: false, sinServicio: true});
+        envio.then(function(r){
+          d.innerHTML = '';
+          if (r.ok) {
+            enviado = true;
+            d.appendChild(bloques([{p: '¡Listo, ' + esc(n) + '! Magali recibió tu consulta y te escribe por WhatsApp. ' + esc(estado())}]));
+          } else {
+            var pp = preguntasPersona();
+            d.appendChild(bloques([
+              {p: r.sinServicio ? 'Para que Magali te contacte, mandale este mensaje por WhatsApp (ya está escrito con tus datos):' : 'No pude enviarlo desde acá. Mandáselo a Magali por WhatsApp, ya está escrito con tus datos:'},
+              {a: ['Enviar a Magali por WhatsApp', waLink('Hola Magali, soy ' + n + ' (' + c + '). Hablé con Nina' + (ultima ? ' sobre ' + etiq(ultima) : '') + (pp ? ': ' + pp : '') + '. Quiero que me contacten.')]}
+            ]));
+          }
+          msgs.scrollTop = msgs.scrollHeight;
+        });
+      });
+      setTimeout(function(){ var f = d.querySelector('[name=n]'); if (f) f.focus(); }, 60);
+    }
+    function pedirContacto(){ agregar('yo nm-nohist', 'Quiero que Magali me contacte'); setTimeout(mostrarContacto, 250); }
     function titulo(x){ return '<strong>' + esc(etiq(x)) + '</strong>'; }
     function resumenProp(x){
       var det = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · ');
@@ -2137,9 +2195,16 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       });
       return d;
     }
+    function textoPlano(el){
+      var c = el.cloneNode(true);
+      [].forEach.call(c.querySelectorAll('p,li,button'), function(e){ e.appendChild(document.createTextNode(' ')); });
+      [].forEach.call(c.querySelectorAll('br'), function(e){ e.parentNode.replaceChild(document.createTextNode(' '), e); });
+      return String(c.textContent).replace(/\s+/g, ' ').trim();
+    }
     function agregar(clase, contenido){
       var m = document.createElement('div'); m.className = 'nm ' + clase;
       if (typeof contenido === 'string') m.textContent = contenido; else m.appendChild(contenido);
+      if (clase.indexOf('nm-esc') < 0 && clase.indexOf('nm-nohist') < 0) hist.push({yo: clase.split(' ')[0] === 'yo', t: textoPlano(m).slice(0, 500)});
       msgs.appendChild(m); msgs.scrollTop = msgs.scrollHeight; return m;
     }
     function responderConTema(tm){
@@ -2150,7 +2215,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     function sinRespuesta(pregunta){
       agregar('bot', bloques([
         {p: 'No tengo esa información. Magali te la confirma: escribile por WhatsApp y le llega tu pregunta.'},
-        {a: ['Preguntarle a Magali', waLink('Hola Magali, le pregunté a Nina: "' + pregunta + '" y no tenía la respuesta.')]}
+        {a: ['Preguntarle a Magali', waLink('Hola Magali, le pregunté a Nina: "' + pregunta + '" y no tenía la respuesta.')]},
+        {bt: [['Que me contacte Magali', pedirContacto]]}
       ]));
     }
     function pintarChips(){
@@ -2160,12 +2226,14 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         b.addEventListener('click', function(){ preguntar(tm.chip, tm); });
         chips.appendChild(b);
       });
+      var c = document.createElement('button'); c.type = 'button'; c.textContent = 'Que me contacte Magali'; c.addEventListener('click', pedirContacto); chips.appendChild(c);
     }
     function pintarChipsProp(x){
       chips.innerHTML = '';
       function chip(txt, fn){ var b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.addEventListener('click', fn); chips.appendChild(b); }
       ATRIBUTOS.forEach(function(a){ if (a.id !== 'precio' && a.id !== 'visita' && a.val(x)) chip(a.chip, function(){ preguntar(a.chip + ' de ' + x.direccion, null, {prop: x, attr: a}); }); });
       chip('Coordinar visita', function(){ preguntar('Quiero visitar ' + x.direccion, null, {prop: x, attr: atributo('visita')}); });
+      chip('Que me contacte Magali', pedirContacto);
       chip('Otra propiedad', function(){ ultima = null; pintarChips(); preguntar('Ver otras propiedades', tema('propiedades')); });
       chip('Volver a los temas', function(){ ultima = null; pintarChips(); });
     }
