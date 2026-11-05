@@ -454,7 +454,26 @@ footer{background:var(--tint); border-top:1px solid var(--line); padding:52px 0 
 footer .container{display:block}
 .f-grid{display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:32px 28px}
 @media (max-width:900px){.f-grid{grid-template-columns:1fr 1fr}}
-@media (max-width:520px){.f-grid{grid-template-columns:1fr}}
+/* Celular: pie ordenado en bloques fáciles de tocar */
+@media (max-width:520px){
+  footer{padding-top:34px}
+  .f-grid{grid-template-columns:1fr; gap:26px}
+  .f-brand p{max-width:none; margin:10px 0 16px}
+  .f-btn{width:100%; min-height:52px}
+  .f-col h4{margin-bottom:10px}
+  /* Sucursales: dos tarjetas lado a lado */
+  .f-col:nth-child(2){display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .f-col:nth-child(2) h4{grid-column:1 / -1; margin-bottom:0}
+  .f-col:nth-child(2) p{margin:0; background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; font-size:.92rem}
+  /* Contacto: filas completas, cómodas para el dedo */
+  .f-col:nth-child(3) a{display:flex; align-items:center; min-height:50px; margin-bottom:8px; padding:10px 14px; background:#fff; border:1px solid var(--line); border-radius:14px}
+  /* En esta página: botones chicos que se acomodan en filas */
+  .f-col:nth-child(4){display:flex; flex-wrap:wrap; gap:8px}
+  .f-col:nth-child(4) h4{width:100%; margin-bottom:2px}
+  .f-col:nth-child(4) a{display:inline-flex; align-items:center; min-height:44px; padding:8px 16px; background:#fff; border:1px solid #CFC4D6; border-radius:999px; color:var(--violet); font-size:.9rem}
+  .f-bottom{flex-direction:column; gap:6px; margin-top:26px; padding-top:16px}
+  .f-bottom a{display:inline-block; padding:12px 0; align-self:flex-start}
+}
 .f-brand .logo{height:40px}
 .f-brand p{margin:14px 0 18px; max-width:30ch; color:var(--muted); font-size:.95rem}
 .f-btn{min-height:46px; padding:10px 20px; font-size:.95rem}
@@ -552,6 +571,34 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .t-fr .frow > b{min-width:0; flex-basis:100%}
 .t-fr[hidden], #t-fr-vacio[hidden]{display:none}
 @media (max-width:560px){ .t-agenda{grid-template-columns:1fr} }
+
+/* ===== Celular: formularios compactos y fáciles de tocar ===== */
+.fbtn{min-height:44px}
+@media (max-width:900px){
+  .tpanel .steps{display:none}                     /* los pasos se ven en el propio formulario */
+  .tpanel .checks{margin-top:18px; gap:10px}
+  .tpanel{padding:22px 20px}
+}
+@media (max-width:640px){
+  .tform .fgrid{grid-template-columns:1fr 1fr; gap:0 12px}
+  .tform .fgrid.fgrid-1{grid-template-columns:1fr}
+  .tform .fgrid:not(.fgrid-1) .field:nth-child(2){grid-column:1 / -1}          /* Tipo de propiedad: ancho completo para que se lea entero */
+  .tform .fgrid:not(.fgrid-1) .field:nth-child(4){grid-column:auto}           /* Metros cuadrados junto a Ambientes */
+  .tform .field select, .tform .field input{min-width:0}
+  .tform .seg{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px}
+  .tform .chip{display:block}
+  .tform .chip span{display:flex; align-items:center; justify-content:center; text-align:center; min-height:48px; padding:6px 8px; font-size:.9rem; line-height:1.2}
+  .t-fr .fbtns{width:100%}
+  .t-fr .fbtn{flex:1 1 28%; text-align:center; padding:10px 6px}
+  .t-fr #t-fr-vacio{display:none}
+  .tform .help{font-size:.9rem}
+  .slot{min-height:44px}
+  .tform .tacts{position:static}
+  .vcard{padding:16px}
+  .cal{padding:10px}
+  .cal-dia{aspect-ratio:auto; min-height:44px}
+  .cal-nav{width:44px; height:44px}
+}
 
 /* ===== Preguntas frecuentes ===== */
 .faq-grid{display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr); gap:32px 56px; align-items:start}
@@ -920,7 +967,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           </div>
 
           <h3>Tus datos</h3>
-          <div class="fgrid">
+          <div class="fgrid fgrid-1">
             <div class="field">
               <label for="t-name">Nombre y apellido</label>
               <input id="t-name" type="text" placeholder="Tu nombre" autocomplete="name">
@@ -932,7 +979,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           </div>
 
           <h3>¿Cuándo podemos ir a tasar?</h3>
-          <p class="help">Elegí los días en que te queda cómodo y marcá la franja horaria de cada uno.</p>
+          <p class="help">Tocá los días que te quedan cómodos y elegí la franja horaria de cada uno.</p>
           <div class="t-agenda">
             <div class="cal" id="t-cal">
               <div class="cal-head">
@@ -945,7 +992,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
               <p class="help cal-ley">Los días en gris no están disponibles.</p>
             </div>
             <div class="t-fr">
-              <p class="help" id="t-fr-vacio">Tocá uno o más días en el calendario y marcá la franja horaria de cada uno.</p>
+              <p class="help" id="t-fr-vacio">Cuando elijas un día, acá aparecen sus franjas horarias.</p>
               <div id="t-franjas"></div>
             </div>
           </div>
