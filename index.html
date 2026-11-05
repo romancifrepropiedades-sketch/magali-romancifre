@@ -498,7 +498,13 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   background:#fff; border:1px solid var(--line); border-radius:22px; padding:20px 28px}
 .vfoot .consent{grid-area:c; margin:0}
 .vfoot .msg{grid-area:m; margin:0; min-height:1.3em}
-.vfoot .btn-wa{grid-area:b; width:auto; min-width:300px; margin:0}
+.btn-send{background:var(--violet); color:#fff; box-shadow:0 8px 22px rgba(115,47,132,.3)}
+.btn-send:disabled{opacity:.7; cursor:default}
+.btn-wsp{background:#fff; color:var(--wa); border:2px solid var(--wa)}
+.vacts,.tacts{display:flex; flex-direction:column; gap:10px}
+.vacts .btn,.tacts .btn{width:100%; margin:0}
+.tacts{margin-top:6px}
+.vfoot .vacts{grid-area:b; min-width:300px}
 .vfoot .vnote{grid-area:n; margin:6px 0 0}
 .vfoot noscript{grid-column:1 / -1}
 /* Tablet: datos arriba en dos columnas; calendario y horarios lado a lado */
@@ -514,7 +520,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
   .vc-cal .cal{max-width:440px}
   .vc-hor .slots{max-width:520px}
   .vfoot{grid-template-columns:1fr; grid-template-areas:"c" "m" "b" "n"; padding:18px}
-  .vfoot .btn-wa{width:100%; min-width:0; margin-top:8px}
+  .vfoot .vacts{min-width:0; margin-top:8px}
 }
 
 /* Calendario de tasación */
@@ -761,7 +767,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         <div class="vfoot">
           <label class="consent"><input type="checkbox" id="v-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
           <p class="msg" id="msg" role="alert"></p>
-          <button class="btn btn-wa" type="submit">Enviar pedido por WhatsApp</button>
+          <div class="vacts"><button class="btn btn-send" type="submit">Enviar solicitud</button><button class="btn btn-wsp" type="button" id="v-wsp">Escribir por WhatsApp</button></div>
           <p class="help vnote">No es una reserva automática: Magali te confirma o te propone otro horario. Atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h.</p>
           <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20coordinar%20una%20visita" target="_blank" rel="noopener">Pedir una visita por WhatsApp</a></p></noscript>
         </div>
@@ -934,8 +940,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
 
           <label class="consent"><input type="checkbox" id="t-ok"><span>Acepto que usen mis datos para contactarme y que se envíen a los proveedores indicados en el <a href="privacidad.html" target="_blank" rel="noopener">aviso de privacidad</a>.</span></label>
           <p class="msg" id="t-msg" role="alert"></p>
-          <button class="btn btn-wa" type="submit">Solicitar tasación por WhatsApp</button>
-          <p class="help" style="margin-top:10px">Se abre WhatsApp con tu pedido ya escrito. Solo tenés que enviarlo.</p>
+          <div class="tacts"><button class="btn btn-send" type="submit">Enviar solicitud</button><button class="btn btn-wsp" type="button" id="t-wsp">Escribir por WhatsApp</button></div>
+          <p class="help" style="margin-top:10px">«Enviar solicitud» le llega a Magali por mail y a su panel. Si preferís, escribile por WhatsApp con el pedido ya escrito.</p>
           <noscript><p class="help"><a href="https://wa.me/5491140827284?text=Hola%20Magali%2C%20quiero%20solicitar%20una%20tasaci%C3%B3n" target="_blank" rel="noopener">Solicitar tasación por WhatsApp</a></p></noscript>
         </form>
       </div>
@@ -1133,8 +1139,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       clearTimeout(corte);
       return {ok: false, detalle: (e && e.name === 'AbortError') ? 'el servicio no respondió a tiempo' : 'no se pudo conectar con el servicio'};
     }).then(function(res){
-      if (res.ok) { el.className = 'msg ok'; el.textContent = '✓ Pedido registrado. Se abre WhatsApp: enviá el mensaje para que Magali te confirme.'; }
-      else { el.className = 'msg'; el.textContent = 'No pudimos registrar el pedido por mail (' + res.detalle + '). Enviá el mensaje de WhatsApp y llega igual.'; }
+      if (res.ok) { el.className = 'msg ok'; el.textContent = '✓ Solicitud enviada. Magali la recibió y te contacta para confirmarla. Si querés, también podés escribirle por WhatsApp.'; }
+      else { el.className = 'msg'; el.textContent = 'No pudimos enviar la solicitud (' + res.detalle + '). Escribile a Magali por WhatsApp con el botón de abajo y llega igual.'; }
       return res;
     });
   }
@@ -1429,19 +1435,19 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       selProp.hidden = false; inProp.hidden = true; labProp.setAttribute('for', 'v-sel');
     }).catch(function(){ /* sin lista: queda el campo de texto */ });
 
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
+    var enviadoFirma = '';
+    function leer(){
       elMsg.className = 'msg';
       var prop = propSeleccionada(),
           name = document.getElementById('v-name').value.trim(),
           phone = document.getElementById('v-phone').value.trim(),
           people = document.getElementById('v-people').value;
       var picked = days.filter(function(d){ return count(d.key); });
-      if (!prop) { elMsg.textContent = 'Elegí o indicá la propiedad o local que querés visitar.'; (selProp.hidden ? inProp : selProp).focus(); return; }
-      if (!name) { elMsg.textContent = 'Escribí tu nombre.'; document.getElementById('v-name').focus(); return; }
-      if (phone.replace(/\D/g, '').length < 8) { elMsg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('v-phone').focus(); return; }
-      if (!picked.length) { elMsg.textContent = 'Marcá al menos un día y horario.'; return; }
-      if (!document.getElementById('v-ok').checked) { elMsg.textContent = 'Para enviar, aceptá el aviso de privacidad.'; document.getElementById('v-ok').focus(); return; }
+      if (!prop) { elMsg.textContent = 'Elegí o indicá la propiedad o local que querés visitar.'; (selProp.hidden ? inProp : selProp).focus(); return null; }
+      if (!name) { elMsg.textContent = 'Escribí tu nombre.'; document.getElementById('v-name').focus(); return null; }
+      if (phone.replace(/\D/g, '').length < 8) { elMsg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('v-phone').focus(); return null; }
+      if (!picked.length) { elMsg.textContent = 'Marcá al menos un día y horario.'; return null; }
+      if (!document.getElementById('v-ok').checked) { elMsg.textContent = 'Para enviar, aceptá el aviso de privacidad.'; document.getElementById('v-ok').focus(); return null; }
       elMsg.textContent = '';
       var lines = picked.map(function(d){
         return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(fmt).join(', ');
@@ -1454,14 +1460,36 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         'Personas: ' + people + '\n' +
         'Días y horarios que me sirven (visitas de 15 min):\n' + lines.join('\n') + '\n' +
         'Quedo a la espera de tu confirmación. ¡Gracias!';
-      var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
-      var w = window.open('', '_blank'), sb = form.querySelector('button[type=submit]');
-      sb.disabled = true;
-      registrar('Nueva solicitud de visita - ' + name, {
-        'Propiedad o local': prop, 'Link del aviso': linkSeleccionado() || '-', 'Nombre': name, 'Celular': phone, 'Personas': people,
-        'Días y horarios (visitas de 15 min)': lines.join('\n'),
-        'Aceptó el aviso de privacidad': 'Sí'
-      }, elMsg).then(function(){ sb.disabled = false; abrirWhatsApp(w, url); });
+      return {
+        asunto: 'Nueva solicitud de visita - ' + name,
+        url: 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text),
+        datos: {
+          'Propiedad o local': prop, 'Link del aviso': linkSeleccionado() || '-', 'Nombre': name, 'Celular': phone, 'Personas': people,
+          'Días y horarios (visitas de 15 min)': lines.join('\n'),
+          'Aceptó el aviso de privacidad': 'Sí'
+        }
+      };
+    }
+    var sbtn = form.querySelector('button[type=submit]'), wbtn = document.getElementById('v-wsp');
+    // «Enviar solicitud»: le llega a Magali por mail y al panel.
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var d = leer(); if (!d) return;
+      var firma = JSON.stringify(d.datos);
+      if (enviadoFirma === firma) { elMsg.className = 'msg ok'; elMsg.textContent = '✓ Esta solicitud ya fue enviada. Magali te contacta para confirmarla.'; return; }
+      sbtn.disabled = true; sbtn.textContent = 'Enviando…';
+      d.datos['Canal'] = 'Botón Enviar solicitud';
+      registrar(d.asunto, d.datos, elMsg).then(function(res){ sbtn.disabled = false; sbtn.textContent = 'Enviar solicitud'; if (res.ok) enviadoFirma = firma; });
+    });
+    // «Escribir por WhatsApp»: abre el chat con el pedido escrito. Si todavía no se envió, también lo registra para que no se pierda.
+    wbtn.addEventListener('click', function(){
+      var d = leer(); if (!d) return;
+      var firma = JSON.stringify(d.datos);
+      abrirWhatsApp(window.open('', '_blank'), d.url);
+      if (enviadoFirma !== firma) {
+        d.datos['Canal'] = 'Botón WhatsApp';
+        registrar(d.asunto, d.datos, document.createElement('p')).then(function(res){ if (res.ok) enviadoFirma = firma; });
+      }
     });
   })();
 
@@ -1570,16 +1598,16 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     if (!days.length) elDays.innerHTML = '<p class="help">No hay días disponibles por ahora. Enviá tu pedido y coordinamos por WhatsApp.</p>';
     renderDays(); renderFr();
 
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
+    var enviadoFirma = '';
+    function leer(){
       msg.className = 'msg';
       var op = (form.querySelector('input[name="t-op"]:checked') || {}).value || '';
-      if (!v('t-dir')) { msg.textContent = 'Indicá la dirección del inmueble.'; document.getElementById('t-dir').focus(); return; }
-      if (!v('t-name')) { msg.textContent = 'Escribí tu nombre.'; document.getElementById('t-name').focus(); return; }
-      if (v('t-phone').replace(/\D/g, '').length < 8) { msg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('t-phone').focus(); return; }
+      if (!v('t-dir')) { msg.textContent = 'Indicá la dirección del inmueble.'; document.getElementById('t-dir').focus(); return null; }
+      if (!v('t-name')) { msg.textContent = 'Escribí tu nombre.'; document.getElementById('t-name').focus(); return null; }
+      if (v('t-phone').replace(/\D/g, '').length < 8) { msg.textContent = 'Escribí tu número de celular con código de área.'; document.getElementById('t-phone').focus(); return null; }
       var elegidos = days.filter(function(d){ return (sel[d.key] || []).length; });
-      if (days.length && !elegidos.length) { msg.textContent = 'Marcá al menos un día y una franja horaria para ir a tasar.'; return; }
-      if (!document.getElementById('t-ok').checked) { msg.textContent = 'Para enviar, aceptá el aviso de privacidad.'; document.getElementById('t-ok').focus(); return; }
+      if (days.length && !elegidos.length) { msg.textContent = 'Marcá al menos un día y una franja horaria para ir a tasar.'; return null; }
+      if (!document.getElementById('t-ok').checked) { msg.textContent = 'Para enviar, aceptá el aviso de privacidad.'; document.getElementById('t-ok').focus(); return null; }
       msg.textContent = '';
       var lineas = elegidos.map(function(d){
         return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(function(ix){ return etiqueta(d.fr[ix].f); }).join(' / ');
@@ -1595,16 +1623,38 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         'Celular: ' + v('t-phone') + '\n' +
         (lineas.length ? 'Días y horarios para ir a tasar:\n' + lineas.join('\n') + '\n' : '') +
         'Quedo a la espera de tu contacto. ¡Gracias!';
-      var url = 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text);
-      var w = window.open('', '_blank'), sb = form.querySelector('button[type=submit]');
-      sb.disabled = true;
-      registrar('Nueva solicitud de tasación - ' + v('t-name'), {
-        'Quiere': op, 'Tipo de propiedad': v('t-tipo'), 'Dirección': v('t-dir'),
-        'Ambientes': amb || '-', 'Superficie (m2)': m2 || '-',
-        'Nombre': v('t-name'), 'Celular': v('t-phone'),
-        'Días y horarios para ir a tasar': lineas.join('\n') || '-',
-        'Aceptó el aviso de privacidad': 'Sí'
-      }, msg).then(function(){ sb.disabled = false; abrirWhatsApp(w, url); });
+      return {
+        asunto: 'Nueva solicitud de tasación - ' + v('t-name'),
+        url: 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text),
+        datos: {
+          'Quiere': op, 'Tipo de propiedad': v('t-tipo'), 'Dirección': v('t-dir'),
+          'Ambientes': amb || '-', 'Superficie (m2)': m2 || '-',
+          'Nombre': v('t-name'), 'Celular': v('t-phone'),
+          'Días y horarios para ir a tasar': lineas.join('\n') || '-',
+          'Aceptó el aviso de privacidad': 'Sí'
+        }
+      };
+    }
+    var sbtn = form.querySelector('button[type=submit]'), wbtn = document.getElementById('t-wsp');
+    // «Enviar solicitud»: le llega a Magali por mail y al panel.
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var d = leer(); if (!d) return;
+      var firma = JSON.stringify(d.datos);
+      if (enviadoFirma === firma) { msg.className = 'msg ok'; msg.textContent = '✓ Esta solicitud ya fue enviada. Magali te contacta para confirmarla.'; return; }
+      sbtn.disabled = true; sbtn.textContent = 'Enviando…';
+      d.datos['Canal'] = 'Botón Enviar solicitud';
+      registrar(d.asunto, d.datos, msg).then(function(res){ sbtn.disabled = false; sbtn.textContent = 'Enviar solicitud'; if (res.ok) enviadoFirma = firma; });
+    });
+    // «Escribir por WhatsApp»: abre el chat con el pedido escrito. Si todavía no se envió, también lo registra para que no se pierda.
+    wbtn.addEventListener('click', function(){
+      var d = leer(); if (!d) return;
+      var firma = JSON.stringify(d.datos);
+      abrirWhatsApp(window.open('', '_blank'), d.url);
+      if (enviadoFirma !== firma) {
+        d.datos['Canal'] = 'Botón WhatsApp';
+        registrar(d.asunto, d.datos, document.createElement('p')).then(function(res){ if (res.ok) enviadoFirma = firma; });
+      }
     });
   })();
 
