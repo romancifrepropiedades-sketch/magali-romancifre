@@ -400,7 +400,7 @@ section[id], #aviso, #hero{scroll-margin-top:84px}
 .mapbox[hidden]{display:none}
 .mapbar{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 16px; padding:16px 20px; border-bottom:1px solid var(--line)}
 .mapbar span{color:var(--muted); font-size:.92rem}
-.map{height:380px; background:#EEE9F2}
+.map{height:380px; background:#EEE9F2; position:relative; z-index:0; isolation:isolate}
 .mapnote{margin:0; padding:10px 20px; border-top:1px solid var(--line)}
 .mapnote[hidden]{display:none}
 .leaflet-container{font-family:var(--font)}
@@ -457,6 +457,7 @@ footer{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
 .mapfilters select:focus-visible{outline:3px solid rgba(115,47,132,.3); border-color:var(--violet)}
 .f-clear{margin-left:auto; border:0; background:none; font:inherit; font-size:.9rem; font-weight:700; color:var(--violet); cursor:pointer; padding:10px 4px; text-decoration:underline; text-underline-offset:3px}
 .pop-aprox{display:block; margin-top:6px; font-size:.8rem; font-weight:600; color:#8A5A00}
+.pop-exp{display:block; margin-top:2px; font-size:.82rem; font-weight:600; color:var(--muted)}
 .pop-precio{display:block; margin-top:8px; font-style:normal; font-weight:800; color:var(--violet); font-size:1.02rem}
 @media (max-width:640px){ .mapfilters{padding:12px 16px} .mapfilters label{flex:1 1 140px} .mapfilters select{width:100%} .f-clear{margin-left:0} }
 
@@ -560,7 +561,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
 .nina-x{border:0; background:rgba(255,255,255,.18); color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.3rem; line-height:1; cursor:pointer}
 .nina-x:hover{background:rgba(255,255,255,.3)}
 .nina-head,.nina-chips,.nina-form,.nina-wa{flex:none}
-.nina-msgs{flex:1 1 auto; min-height:160px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#FAF8FC}
+.nina-msgs{flex:1 1 auto; min-height:60px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:#FAF8FC}
 .nm{max-width:88%; padding:11px 14px; border-radius:16px; font-size:.94rem; line-height:1.45; overflow-wrap:anywhere}
 .nm p{margin:0 0 8px}
 .nm p:last-child{margin-bottom:0}
@@ -692,11 +693,11 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         <p class="sub">Elegí los días y horarios en que podés. Magali recibe tu pedido por WhatsApp y te confirma la visita.</p>
       </div>
       <div class="mapbox" id="prop-map-box" hidden>
-        <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita</span></div>
+        <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita. Los precios son el alquiler mensual, más expensas.</span></div>
         <div class="mapfilters" id="map-filters" hidden>
           <label>Tipo<select id="f-tipo"><option value="">Todos</option></select></label>
           <label>Dormitorios<select id="f-dorm"><option value="">Todos</option></select></label>
-          <label>Precio por mes<select id="f-precio"><option value="">Cualquiera</option></select></label>
+          <label>Alquiler por mes (+ expensas)<select id="f-precio"><option value="">Cualquiera</option></select></label>
           <button type="button" class="f-clear" id="f-clear">Limpiar filtros</button>
         </div>
         <div id="prop-map" class="map" role="region" aria-label="Mapa de las propiedades en alquiler"></div>
@@ -1729,7 +1730,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       var d = document.createElement('div'); d.className = 'pop';
       var t = document.createElement('strong'); t.textContent = x.tipo + ' · ' + x.direccion; d.appendChild(t);
       var s = document.createElement('span'); s.textContent = [x.barrio, x.detalle || x.m2].filter(Boolean).join(' · '); d.appendChild(s);
-      if (x.precio) { var pr = document.createElement('em'); pr.className = 'pop-precio'; pr.textContent = pesos(x.precio) + ' por mes'; d.appendChild(pr); }
+      if (x.precio) { var pr = document.createElement('em'); pr.className = 'pop-precio'; pr.textContent = pesos(x.precio) + ' por mes + expensas'; d.appendChild(pr);
+        if (x.expensas) { var ex = document.createElement('small'); ex.className = 'pop-exp'; ex.textContent = 'Expensas: ' + pesos(x.expensas) + ' por mes'; d.appendChild(ex); } }
       if (!exacta) { var ap = document.createElement('small'); ap.className = 'pop-aprox'; ap.textContent = 'Ubicación aproximada'; d.appendChild(ap); }
       var acc = document.createElement('div'); acc.className = 'pop-acc';
       if (x.link) {
@@ -1891,10 +1893,10 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       return cargarPropiedades().then(function(l){
         if (!l || !l.length) return [{p: 'Podés ver las propiedades disponibles en el mapa de <a href="#visita">Coordiná tu visita</a>, o en el <a href="https://www.argenprop.com/inmobiliarias/roman-cifre-propiedades/inmuebles/alquiler" target="_blank" rel="noopener">listado de Argenprop</a>.'}];
         var items = l.map(function(x){
-          var det = [x.detalle || x.m2, x.precio ? '$ ' + Number(x.precio).toLocaleString('es-AR') + ' por mes' : ''].filter(Boolean).join(' · ');
+          var det = [x.detalle || x.m2, x.precio ? '$ ' + Number(x.precio).toLocaleString('es-AR') + ' por mes + expensas' + (x.expensas ? ' (expensas: $ ' + Number(x.expensas).toLocaleString('es-AR') + ')' : '') : ''].filter(Boolean).join(' · ');
           return '<strong>' + esc(x.tipo) + ' · ' + esc(x.direccion) + '</strong>' + (det ? '<br>' + esc(det) : '') + (x.link ? '<br><a href="' + esc(x.link) + '" target="_blank" rel="noopener">Ver publicación</a>' : '');
         });
-        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Las ves en el mapa, con filtros por tipo, dormitorios y precio, en <a href="#visita">Coordiná tu visita</a>. Los precios son por mes y pueden cambiar.'}];
+        return [{p: 'Estas son las propiedades en alquiler que tenemos hoy:'}, {ul: items}, {p: 'Las ves en el mapa, con filtros por tipo, dormitorios y precio, en <a href="#visita">Coordiná tu visita</a>. Los precios son el alquiler mensual y se suman las expensas. Pueden cambiar.'}];
       });
     }
 
@@ -1905,7 +1907,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       {id:'garantias', chip:'Garantías', kw:['garantia|3','garantias|3','caucion|3','finaer|3','seguro de caucion|3','seguro|1','propietaria|1','inhibicion|3','dominio|2','informe|1','informes|1','fiador|2'],
        r:[{p:'Aceptamos garantía propietaria de CABA, o seguro de caución a través de <strong>FINAER</strong> o <strong>Garantía Ya</strong>.'},{p:'Si elegís el seguro de caución, la preaprobación la gestionás vos como futuro inquilino. Si la garantía es propietaria, el inquilino abona los pedidos de informes de dominio e inhibición.'}]},
       {id:'costos', chip:'Cuánto pagar para ingresar', kw:['pagar|3','pago|2','ingresar|2','adelanto|3','deposito|3','honorarios|3','comision|3','costo|2','costos|2','efectivo|2','dolares|2','dolar|2','billete|2','billetes|2','firma|1','cuanto necesito|3'],
-       r:[{p:'<strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.'},{p:'<strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.'},{p:'El depósito se abona siempre en efectivo, en billetes de dólar, al momento de la firma. Con garantía propietaria, también se abonan los pedidos de informes de dominio e inhibición.'}]},
+       r:[{p:'<strong>Vivienda:</strong> 1 mes de adelanto y 1 mes de depósito, equivalente al valor de un mes de alquiler. Los honorarios inmobiliarios están a cargo del propietario.'},{p:'<strong>Local comercial:</strong> 1 mes de adelanto y 1 mes de depósito, más honorarios del 5% + IVA sobre el valor total del contrato. El alquiler es + IVA.'},{p:'El valor publicado es el del alquiler mensual y a eso se suman las expensas de cada unidad.'},{p:'El depósito se abona siempre en efectivo, en billetes de dólar, al momento de la firma. Con garantía propietaria, también se abonan los pedidos de informes de dominio e inhibición.'}]},
       {id:'contrato', chip:'Contrato y actualización', kw:['contrato|3','duracion|3','dura|2','actualiza|3','actualizacion|3','ipc|3','aumento|3','aumenta|3','ajuste|3','trimestral|3','anos|1'],
        r:[{p:'<strong>Vivienda:</strong> contrato por 2 años. <strong>Local comercial:</strong> 3 años.'},{p:'En ambos casos el alquiler se actualiza cada tres meses según el IPC (Índice de Precios al Consumidor).'}]},
       {id:'ingresos', chip:'Cómo demostrar ingresos', kw:['ingresos|3','ingreso|2','recibo|3','recibos|3','sueldo|3','independiente|3','monotributo|3','monotributista|3','certificacion|3','contador|3','dependencia|2','tres veces|3','3 veces|3','sociedad|2','srl|2'],
