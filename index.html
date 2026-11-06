@@ -763,7 +763,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     <div class="container">
       <div class="sec-head">
         <h2>Coordiná tu visita</h2>
-        <p class="sub">Elegí los días y horarios en que podés. Magali recibe tu pedido por WhatsApp y te confirma la visita.</p>
+        <p class="sub">Elegí los días y horarios en que podés. Magali recibe tu solicitud y te confirma la visita.</p>
       </div>
       <div class="mapbox" id="prop-map-box" hidden>
         <div class="mapbar"><b>Dónde están las propiedades</b><span>Tocá una para ver la publicación o elegirla para tu visita. Los precios son el alquiler mensual, más expensas (en locales, también más IVA).</span></div>
@@ -2160,9 +2160,10 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     }
     // Corrige errores de tipeo en las palabras que se usan para buscar ("domitorios" → "dormitorios").
     var VOCAB = ['dormitorio','dormitorios','ambiente','ambientes','habitacion','habitaciones','monoambiente','departamento','departamentos','cochera','terraza','ascensor','propiedad','propiedades','amoblado','luminoso','balcon'];
+    var NOFUZZY = ['cuantos','cuantas','cuanto','cuales','donde','quien','quienes'];   // palabras comunes que no se corrigen
     function corregir(tx){
       return tx.split(' ').map(function(tk){
-        if (tk.length < 6 || VOCAB.indexOf(tk) > -1) return tk;
+        if (tk.length < 6 || VOCAB.indexOf(tk) > -1 || NOFUZZY.indexOf(tk) > -1) return tk;
         for (var i = 0; i < VOCAB.length; i++) if (VOCAB[i].length >= 6 && parecida(tk, VOCAB[i])) return VOCAB[i];
         return tk;
       }).join(' ');
@@ -2176,7 +2177,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           if (kw.indexOf(' ') > -1) { if (tx.indexOf(kw) > -1) frases += w + 1; return; }
           for (var i = 0; i < tokens.length; i++) {
             var tk = tokens[i];
-            if (tk === kw || (tk.length >= 5 && kw.length >= 5 && (tk.indexOf(kw) === 0 || kw.indexOf(tk) === 0)) || (tk.length >= 6 && kw.length >= 6 && parecida(tk, kw))) {
+            if (tk === kw || (tk.length >= 5 && kw.length >= 5 && (tk.indexOf(kw) === 0 || kw.indexOf(tk) === 0)) || (tk.length >= 6 && kw.length >= 6 && NOFUZZY.indexOf(tk) < 0 && parecida(tk, kw))) {
               if (!porPalabra[i] || porPalabra[i] < w) porPalabra[i] = w;
               break;
             }
@@ -2242,6 +2243,11 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       var numeros = tokens.filter(function(w){ return /^\d{3,5}$/.test(w); });
       var porNum = l.filter(function(x){ var n = numeroCasa(x); return n && numeros.indexOf(n) > -1; });
       if (porNum.length === 1) return {uno: porNum[0]};
+      if (porNum.length > 1) {
+        var porCalleNum = porNum.filter(function(x){ return palabrasCalle(x).some(function(w){ return tokens.indexOf(w) > -1; }); });
+        if (porCalleNum.length === 1) return {uno: porCalleNum[0]};
+        if (porCalleNum.length > 1) return {varias: porCalleNum};
+      }
       if (numeros.length) return null;   // menciona otra numeración (por ej. una sucursal): no es una de las propiedades
       var c = l.filter(function(x){ return palabrasCalle(x).some(function(w){ return tokens.some(function(tk){ return tk === w || (tk.length >= 5 && w.length >= 5 && (tk.indexOf(w) === 0 || w.indexOf(tk) === 0)); }); }); });
       if (c.length > 1) c = refinar(tx, tokens, c);
