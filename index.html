@@ -277,7 +277,12 @@ h2{font-size:clamp(1.8rem, 5.5vw, 2.6rem); font-weight:800; letter-spacing:-0.03
 .hour{display:grid; grid-template-columns:46px repeat(4, minmax(0,1fr)); gap:6px; align-items:center}
 .hour > span{font-weight:800; font-size:.85rem; color:var(--muted)}
 .slot{padding:10px 2px; border-radius:10px; border:1px solid #CFC4D6; background:#fff; font:inherit; font-size:.92rem; font-weight:700; color:var(--ink); cursor:pointer; font-variant-numeric:tabular-nums}
+.slot{position:relative}
 .slot:disabled{opacity:.35; cursor:not-allowed; background:#F4F1F6}
+.slot.sug:not(:disabled)::after{content:''; position:absolute; top:5px; right:5px; width:6px; height:6px; border-radius:50%; background:var(--violet)}
+.slot.sug:not(:disabled){border-color:var(--violet)}
+.sug-dot{display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:50%; background:var(--violet)}
+.cal-dia.sugd:not(.off):not(.full){background:var(--tint)}
 .slot[aria-pressed="true"]{background:var(--tint); border-color:var(--violet); color:var(--violet); box-shadow:inset 0 0 0 1px var(--violet)}
 .picked{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; padding:0; list-style:none}
 .picked li{display:inline-flex; align-items:center; gap:8px; padding:5px 6px 5px 12px; background:var(--tint); border-radius:999px; font-size:.9rem; font-weight:600}
@@ -820,8 +825,10 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
 
         <div class="vcard vc-hor">
           <h3>2. Elegí los horarios</h3>
-          <p class="help">Cada visita dura 15 minutos. Podés marcar varios horarios y de distintos días.</p>
-          <p class="help" id="legend" hidden><b>Los horarios en gris no están disponibles</b> (ya reservados o fuera de plazo).</p>
+          <p class="help" id="dur-help">Cada visita dura 15 minutos (los locales, 30). Podés marcar varios horarios y de distintos días.</p>
+          <p class="help" id="prop-help">Elegí primero la propiedad: los horarios se ajustan a su ubicación y al recorrido del día.</p>
+          <p class="help" id="legend" hidden><b>Los horarios en gris no están disponibles</b> (reservados, fuera de plazo o sin tiempo para llegar desde otra visita).</p>
+          <p class="help" id="legend-sug" hidden><span class="sug-dot" aria-hidden="true"></span><b>Horario sugerido:</b> queda cerca de otra visita de ese día.</p>
           <p class="dia-sel" id="dia-sel" aria-live="polite"></p>
           <div class="slots" id="slots" role="group" aria-label="Horarios disponibles"></div>
           <ul class="picked" id="picked" aria-live="polite"></ul>
@@ -1058,7 +1065,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         <details class="qa"><summary>¿Tienen alquileres temporarios?</summary><div class="qa-r"><p>No, no tenemos alquileres temporarios. Trabajamos con contratos de alquiler de vivienda por 2 años y de local comercial por 3 años.</p></div></details>
         <details class="qa"><summary>¿Puedo pintar o hacer arreglos en el departamento?</summary><div class="qa-r"><p>Sí, se pueden hacer trabajos de pintura o arreglos, siempre que cuentes <strong>antes con la autorización del propietario</strong>. Cualquier modificación se acuerda antes de realizarla, especialmente si implica cambios en las instalaciones o en las características del inmueble.</p></div></details>
         <h3 class="faq-grupo">Visitas y tasaciones</h3>
-        <details class="qa"><summary>¿Cómo coordino una visita?</summary><div class="qa-r"><p>Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos. Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.</p><p>No es una reserva automática. Podés hacerlo desde <a href="#visita">Coordiná tu visita</a>.</p></div></details>
+        <details class="qa"><summary>¿Cómo coordino una visita?</summary><div class="qa-r"><p>Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos (los locales, 30). Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.</p><p>No es una reserva automática. Podés hacerlo desde <a href="#visita">Coordiná tu visita</a>.</p></div></details>
         <details class="qa"><summary>¿En qué horario atienden?</summary><div class="qa-r"><p>Magali atiende de lunes a viernes de 10 a 18 h y sábados de 10 a 13 h. Fuera de ese horario podés dejar tu consulta por WhatsApp y te responde apenas retoma la atención.</p></div></details>
         <details class="qa"><summary>¿Cuánto cuesta una tasación y cuánto tarda?</summary><div class="qa-r"><p>La tasación es <strong>sin cargo</strong> y se hace <strong>en 24 hs</strong>, con un informe profesional firmado por un matriculado.</p><p>Completá el formulario en <a href="#tasacion">Tasá tu propiedad</a> y elegí cuándo podemos ir a verla.</p></div></details>
         <details class="qa"><summary>¿Qué servicios tienen para propietarios?</summary><div class="qa-r"><p>Análisis de mercado con big data, puesta en valor con un arquitecto, tour virtual 360° con tecnología RICOH y MATTERPORT, fotografía inmobiliaria profesional, asesoría integral con convenio con Escribanía y asesoría contable, y publicidad digital para posicionar tu unidad al tope del ranking de los portales.</p><p>Más información en <a href="#agregamos-valor">Agregamos valor a tu inmueble</a>.</p></div></details>
@@ -1205,7 +1212,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       .then(function(r){ clearTimeout(corte); return r.json().catch(function(){ return {}; }).then(function(d){ return {ok: r.ok && d.ok === true}; }); })
       .catch(function(){ clearTimeout(corte); return {ok: false}; });
   };
-  function registrar(asunto, datos, el){
+  function registrar(asunto, datos, el, visitas){
     if (!SCRIPT_URL && !USAR_FORMSUBMIT) { el.className = 'msg'; el.textContent = ''; return Promise.resolve({ok: true}); }
     el.className = 'msg'; el.textContent = 'Registrando tu pedido…';
     var cuerpo = {_subject: asunto, _template: 'table', _captcha: 'false'};
@@ -1217,7 +1224,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       // Google Apps Script: texto plano para evitar la consulta previa de CORS.
       pedido = fetch(SCRIPT_URL, {
         method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({asunto: asunto, datos: datos}), signal: ctrl ? ctrl.signal : undefined
+        body: JSON.stringify({asunto: asunto, datos: datos, visitas: visitas || []}), signal: ctrl ? ctrl.signal : undefined
       }).then(function(r){
         clearTimeout(corte);
         return r.json().catch(function(){ return {}; }).then(function(d){
@@ -1299,7 +1306,13 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
   // Los horarios ocupados se leen de una hoja de Google Sheets (ver AGENDA_CSV_URL).
   (function(){
     var TZ = 'America/Argentina/Buenos_Aires';
-    var PASO = 15;               // duración de cada visita, en minutos
+    var PASO = 15;               // duración de cada visita, en minutos (grilla de horarios)
+    var DUR_LOCAL = 30;          // los locales se visitan 30 minutos
+    var VEL_CAMINATA = 80;       // metros por minuto (unos 4,8 km/h)
+    var MARGEN_TRASLADO = 5;     // minutos extra de colchón entre una visita y la siguiente
+    var TRASLADO_DEFECTO = 10;   // si falta la ubicación de alguna propiedad
+    var SUG_MAX_CAMINATA = 25;   // solo se sugieren horarios cerca de visitas a menos de 25 min a pie
+    var SUG_VENTANA = 30;        // un horario es sugerido si empieza (o termina) dentro de 30 min de otra visita
     // Horario de atención por día de la semana (0 = domingo), en minutos desde las 00:00: [apertura, cierre]
     var HORARIOS = {1:[600,1080], 2:[600,1080], 3:[600,1080], 4:[600,1080], 5:[600,1080], 6:[600,780]};
     var DIAS_ADELANTE = 30;      // cuántos días hacia adelante se muestran
@@ -1318,7 +1331,8 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     if (!form) return;
     var elDays = document.getElementById('days'), elSlots = document.getElementById('slots'),
         elPicked = document.getElementById('picked'), elMsg = document.getElementById('msg'),
-        elLegend = document.getElementById('legend');
+        elLegend = document.getElementById('legend'), elLegendSug = document.getElementById('legend-sug'),
+        elDurHelp = document.getElementById('dur-help'), elPropHelp = document.getElementById('prop-help');
 
     function pad(n){ return n < 10 ? '0' + n : '' + n; }
     function fmt(min){ return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
@@ -1340,15 +1354,51 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       }
       if (n) days.push({key:key, wd:wd, d:dt.getUTCDate(), m:dt.getUTCMonth() + 1, open:cfg[0], close:cfg[1], base:base, avail:{}, free:0});
     }
-    var busy = {};   // key -> [[desde, hasta], ...] en minutos
+    var busy = {};   // key -> [[desde, hasta, propiedad], ...] en minutos (propiedad = dirección del evento, o '')
+    var lista = [], porDir = {}, propActual = null;   // lista de propiedades (propiedades.json) y la elegida en el formulario
+
+    function norm(x){ return String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+    // Minutos a pie entre dos propiedades (calles en cuadrícula: se suman las distancias norte-sur y este-oeste).
+    function caminata(a, b){
+      if (!a || !b || a === b) return 0;
+      if (typeof a.lat !== 'number' || typeof a.lng !== 'number' || typeof b.lat !== 'number' || typeof b.lng !== 'number') return TRASLADO_DEFECTO;
+      var kLat = 111200, kLng = 111200 * Math.cos(a.lat * Math.PI / 180);
+      var m = Math.abs(a.lat - b.lat) * kLat + Math.abs(a.lng - b.lng) * kLng;
+      return Math.ceil(m / VEL_CAMINATA);
+    }
+    function duracionActual(){ return (propActual && propActual.tipo === 'Local') ? DUR_LOCAL : PASO; }
+    // Qué propiedad de la lista corresponde a un evento ocupado (si el calendario la informa).
+    function propDeEvento(r){ return r[2] ? (porDir[norm(r[2])] || null) : null; }
+    // Colchón de traslado entre la propiedad elegida y la del evento. 0 si no hay datos o es la misma propiedad.
+    function colchon(r){
+      var pe = propDeEvento(r);
+      if (!propActual || !pe) return 0;
+      if (pe === propActual) return 0;
+      return caminata(propActual, pe) + MARGEN_TRASLADO;
+    }
 
     function applyBusy(){
+      var dur = duracionActual();
       days.forEach(function(day){
-        day.avail = {}; day.free = 0;
+        day.avail = {}; day.sug = {}; day.free = 0; day.nsug = 0;
         var b = busy[day.key] || [];
         Object.keys(day.base).forEach(function(k){
-          var m = +k, taken = b.some(function(r){ return m < r[1] && m + PASO > r[0]; });
-          if (!taken) { day.avail[m] = true; day.free++; }
+          var m = +k, ok = true, t;
+          for (t = m; t < m + dur; t += PASO) if (!day.base[t]) { ok = false; break; }
+          if (!ok || m + dur > day.close) return;
+          var taken = b.some(function(r){ var c = colchon(r); return m < r[1] + c && m + dur > r[0] - c; });
+          if (taken) return;
+          day.avail[m] = true; day.free++;
+          // Sugerido: pegado a otra visita de ese día, a poca distancia a pie
+          if (propActual) {
+            var cerca = b.some(function(r){
+              var pe = propDeEvento(r); if (!pe) return false;
+              if (caminata(propActual, pe) > SUG_MAX_CAMINATA) return false;
+              var c = colchon(r), despues = m - (r[1] + c), antes = (r[0] - c) - (m + dur);
+              return (despues >= 0 && despues <= SUG_VENTANA) || (antes >= 0 && antes <= SUG_VENTANA);
+            });
+            if (cerca) { day.sug[m] = true; day.nsug++; }
+          }
         });
         // si algo elegido se ocupó mientras tanto, se descarta
         if (sel[day.key]) {
@@ -1389,6 +1439,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         if (!day) { b.disabled = true; b.className += ' off'; b.setAttribute('aria-label', largo + ', no disponible'); }
         else {
           if (!day.free) b.className += ' full';
+          if (day.nsug) b.className += ' sugd';
           if (count(clave)) b.className += ' has';
           b.setAttribute('aria-pressed', clave === current ? 'true' : 'false');
           b.setAttribute('aria-label', largo + (day.free ? '' : ', sin horarios disponibles'));
@@ -1399,14 +1450,14 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
     }
     function renderSlots(){
       elSlots.innerHTML = '';
-      var day = find(current), anyOff = false;
-      if (!day) { elLegend.hidden = true; if (elDiaSel) elDiaSel.textContent = ''; return; }
+      var day = find(current), anyOff = false, anySug = false;
+      if (!day) { elLegend.hidden = true; elLegendSug.hidden = true; if (elDiaSel) elDiaSel.textContent = ''; return; }
       if (elDiaSel) { var txt = DIA_LARGO[day.wd] + ' ' + day.d + ' de ' + MESES[day.m - 1]; elDiaSel.textContent = txt.charAt(0).toUpperCase() + txt.slice(1); }
       if (!day.free) {
         var p = document.createElement('p'); p.className = 'help';
         p.textContent = 'Este día ya no tiene horarios disponibles. Probá con otro día.';
         elSlots.appendChild(p);
-        elLegend.hidden = true; return;
+        elLegend.hidden = true; elLegendSug.hidden = true; return;
       }
       for (var h = Math.floor(day.open / 60); h * 60 < day.close; h++) {
         var row = document.createElement('div'); row.className = 'hour';
@@ -1414,17 +1465,18 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         for (var q = 0; q < 60; q += PASO) {
           var min = h * 60 + q;
           if (min < day.open || min + PASO > day.close) { row.appendChild(document.createElement('span')); continue; }
-          if (!day.avail[min]) anyOff = true;
+          if (!day.avail[min]) anyOff = true; else if (day.sug[min]) anySug = true;
           row.appendChild(slotBtn(day, min));
         }
         elSlots.appendChild(row);
       }
-      elLegend.hidden = !anyOff;
+      elLegend.hidden = !anyOff; elLegendSug.hidden = !anySug;
     }
     function slotBtn(day, min){
       var on = (sel[day.key] || []).indexOf(min) > -1;
       var b = document.createElement('button');
-      b.type = 'button'; b.className = 'slot'; b.textContent = fmt(min);
+      b.type = 'button'; b.className = 'slot' + (day.sug && day.sug[min] ? ' sug' : ''); b.textContent = fmt(min);
+      if (day.sug && day.sug[min]) b.title = 'Sugerido: queda cerca de otra visita';
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
       if (!day.avail[min]) { b.disabled = true; b.title = 'No disponible'; return b; }
       b.addEventListener('click', function(){ toggle(day.key, min); });
@@ -1490,7 +1542,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           d.ocupados.forEach(function(o){
             var s = new Date(o.s).getTime(), e = new Date(o.e).getTime();
             if (isNaN(s) || isNaN(e) || e <= ini || s >= fin) return;
-            (nuevo[day.key] = nuevo[day.key] || []).push([Math.round((Math.max(s, ini) - ini) / 60000), Math.round((Math.min(e, fin) - ini) / 60000)]);
+            (nuevo[day.key] = nuevo[day.key] || []).push([Math.round((Math.max(s, ini) - ini) / 60000), Math.round((Math.min(e, fin) - ini) / 60000), o.p || '']);
           });
         });
         busy = nuevo; refresh();
@@ -1508,7 +1560,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
           if (d === null && h === null) { d = 0; h = 1440; }   // sin horas = todo el día
           else if (d === null) d = 0;
           else if (h === null) h = d + PASO;
-          (nuevo[k] = nuevo[k] || []).push([d, h]);
+          (nuevo[k] = nuevo[k] || []).push([d, h, '']);
         });
         busy = nuevo; refresh();
       }).catch(function(){ /* si falla la lectura, se muestran todos los horarios y Magali confirma igual */ });
@@ -1532,9 +1584,25 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       if (!selProp.hidden && selProp.value && selProp.value !== 'otra') return selProp.options[selProp.selectedIndex].getAttribute('data-link') || '';
       return '';
     }
-    selProp.addEventListener('change', function(){ elMsg.textContent = ''; mostrarOtra(); });
-    fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); }).then(function(lista){
-      if (!lista || !lista.length) return;
+    function cambioPropiedad(){
+      var antes = 0, despues = 0;
+      Object.keys(sel).forEach(function(k){ antes += sel[k].length; });
+      var ix = (!selProp.hidden && selProp.value && selProp.value !== 'otra') ? selProp.options[selProp.selectedIndex].getAttribute('data-i') : null;
+      propActual = (ix !== null && lista[+ix]) ? lista[+ix] : null;
+      var dur = duracionActual();
+      elDurHelp.textContent = dur === DUR_LOCAL
+        ? 'Las visitas a locales duran 30 minutos. Podés marcar varios horarios y de distintos días.'
+        : 'Cada visita dura 15 minutos (los locales, 30). Podés marcar varios horarios y de distintos días.';
+      elPropHelp.hidden = !!propActual;
+      applyBusy(); renderDays(); renderSlots(); renderPicked();
+      Object.keys(sel).forEach(function(k){ despues += sel[k].length; });
+      if (despues < antes) { elMsg.className = 'msg'; elMsg.textContent = 'Quitamos horarios que no están disponibles para esa propiedad (por la duración o el tiempo para llegar desde otra visita).'; }
+    }
+    selProp.addEventListener('change', function(){ elMsg.textContent = ''; mostrarOtra(); cambioPropiedad(); });
+    fetch('propiedades.json', {cache: 'no-cache'}).then(function(r){ if (!r.ok) throw new Error('sin lista'); return r.json(); }).then(function(datos){
+      if (!datos || !datos.length) return;
+      lista = datos; porDir = {};
+      lista.forEach(function(x){ porDir[norm(x.direccion)] = x; });
       var nombres = {alquiler: 'En alquiler', venta: 'En venta'};
       ['alquiler', 'venta'].forEach(function(op){
         var items = lista.filter(function(x){ return x.operacion === op; });
@@ -1543,12 +1611,14 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
         items.forEach(function(x){
           var o = document.createElement('option');
           o.textContent = etiquetaProp(x);
+          o.setAttribute('data-i', lista.indexOf(x));
           if (x.link) o.setAttribute('data-link', x.link);
           og.appendChild(o);
         });
         selProp.insertBefore(og, selProp.querySelector('option[value="otra"]'));
       });
       selProp.hidden = false; inProp.hidden = true; labProp.setAttribute('for', 'v-sel');
+      refresh();   // ya se conocen las propiedades de los eventos ocupados
     }).catch(function(){ /* sin lista: queda el campo de texto */ });
 
     var enviadoFirma = '';
@@ -1568,22 +1638,28 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       var lines = picked.map(function(d){
         return '- ' + DIA_LARGO[d.wd] + ' ' + d.d + '/' + d.m + ': ' + sel[d.key].map(fmt).join(', ');
       });
+      var dur = duracionActual(), visitas = [];
+      picked.forEach(function(d){
+        sel[d.key].forEach(function(min){
+          visitas.push({inicio: d.key + 'T' + fmt(min) + ':00-03:00', fin: d.key + 'T' + fmt(min + dur) + ':00-03:00', prop: propActual ? propActual.direccion : prop});
+        });
+      });
       var text = 'Hola Magali, quiero coordinar una visita.\n' +
         'Propiedad: ' + prop + '\n' +
         (linkSeleccionado() ? 'Aviso: ' + linkSeleccionado() + '\n' : '') +
         'Nombre: ' + name + '\n' +
         'Celular: ' + phone + '\n' +
         'Personas: ' + people + '\n' +
-        'Días y horarios que me sirven (visitas de 15 min):\n' + lines.join('\n') + '\n' +
+        'Días y horarios que me sirven (visitas de ' + dur + ' min):\n' + lines.join('\n') + '\n' +
         'Quedo a la espera de tu confirmación. ¡Gracias!';
+      var datos = {'Propiedad o local': prop, 'Link del aviso': linkSeleccionado() || '-', 'Nombre': name, 'Celular': phone, 'Personas': people};
+      datos['Días y horarios (visitas de ' + dur + ' min)'] = lines.join('\n');
+      datos['Aceptó el aviso de privacidad'] = 'Sí';
       return {
         asunto: 'Nueva solicitud de visita - ' + name,
+        visitas: visitas,
         url: 'https://wa.me/' + NUM + '?text=' + encodeURIComponent(text),
-        datos: {
-          'Propiedad o local': prop, 'Link del aviso': linkSeleccionado() || '-', 'Nombre': name, 'Celular': phone, 'Personas': people,
-          'Días y horarios (visitas de 15 min)': lines.join('\n'),
-          'Aceptó el aviso de privacidad': 'Sí'
-        }
+        datos: datos
       };
     }
     var sbtn = form.querySelector('button[type=submit]'), wbtn = document.getElementById('v-wsp');
@@ -1595,7 +1671,10 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       if (enviadoFirma === firma) { elMsg.className = 'msg ok'; elMsg.textContent = '✓ Esta solicitud ya fue enviada. Magali te contacta para confirmarla.'; return; }
       sbtn.disabled = true; sbtn.textContent = 'Enviando…';
       d.datos['Canal'] = 'Botón Enviar solicitud';
-      registrar(d.asunto, d.datos, elMsg).then(function(res){ sbtn.disabled = false; sbtn.textContent = 'Enviar solicitud'; if (res.ok) enviadoFirma = firma; });
+      registrar(d.asunto, d.datos, elMsg, d.visitas).then(function(res){
+        sbtn.disabled = false; sbtn.textContent = 'Enviar solicitud';
+        if (res.ok) { enviadoFirma = firma; sel = {}; cargarOcupados(); refresh(); }
+      });
     });
     // «Escribir por WhatsApp»: abre el chat con el pedido escrito. Si todavía no se envió, también lo registra para que no se pierda.
     wbtn.addEventListener('click', function(){
@@ -1604,7 +1683,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       abrirWhatsApp(window.open('', '_blank'), d.url);
       if (enviadoFirma !== firma) {
         d.datos['Canal'] = 'Botón WhatsApp';
-        registrar(d.asunto, d.datos, document.createElement('p')).then(function(res){ if (res.ok) enviadoFirma = firma; });
+        registrar(d.asunto, d.datos, document.createElement('p'), d.visitas).then(function(res){ if (res.ok) { enviadoFirma = firma; sel = {}; cargarOcupados(); refresh(); } });
       }
     });
   })();
@@ -2154,7 +2233,7 @@ button.fab{border:0; font:inherit; font-weight:700; cursor:pointer}
       {id:'local', chip:'Alquilar un local', kw:['local|3','locales|3','comercial|3','comercio|3','negocio|3','rubro|3','iva|2'],
        r:[{p:'Para <strong>locales comerciales</strong>: contrato por 3 años, actualización trimestral por IPC, garantía propietaria o seguro de caución, 1 mes de depósito (en efectivo, en billetes de dólar, al firmar) y 1 mes de adelanto.'},{p:'Los honorarios son del 5% + IVA sobre el valor total del contrato y el alquiler es + IVA. Si sos monotributista, independiente o sociedad, se pide certificación de ingresos de contador público. Detalle en <a href="#condiciones">Condiciones de alquiler</a>.'}]},
       {id:'visitas', chip:'Coordinar una visita', kw:['visita|3','visitas|3','visitar|3','conocer|3','coordinar|3','agendar|3','turno|3','cita|2','recorrer|2','ir a ver|3','quiero ver|3','conocer la propiedad|4','ver la propiedad|4','ver un departamento|4','ver el departamento|4','puedo ir a ver|4'],
-       r:[{p:'Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos. Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.'},{p:'No es una reserva automática. Lo hacés en <a href="#visita">Coordiná tu visita</a>.'}]},
+       r:[{p:'Elegí la propiedad, el día en el calendario y los horarios en que podés. Cada visita dura 15 minutos (los locales, 30). Se abre WhatsApp con tu pedido ya escrito y Magali te confirma o te propone otro horario.'},{p:'No es una reserva automática. Lo hacés en <a href="#visita">Coordiná tu visita</a>.'}]},
       {id:'horarios', chip:'Horarios de atención', kw:['horario|3','horarios|3','atienden|3','atencion|3','atender|2','abren|3','abierto|3','cerrado|3','feriado|3','fin de semana|3','sabado|2','domingo|2','que hora|3'],
        r:function(){ var ts = Date.now(), a = proximaApertura(ts); return [{p:'Magali atiende de <strong>lunes a viernes de 10 a 18 h</strong> y <strong>sábados de 10 a 13 h</strong>.'},{p: atendiendo(ts) ? 'Ahora está atendiendo: podés escribirle por WhatsApp.' : 'Ahora estamos fuera de horario' + (a ? ': retoma ' + cuando(a, ts) + '.' : '.') + ' Podés dejar tu consulta por WhatsApp y te responde apenas vuelva.'}]; }},
       {id:'tasacion', chip:'Tasación', kw:['tasacion|3','tasar|3','tasarme|3','valuacion|3','valuar|3','cuanto vale|3','cuanto sale mi|3','vender mi|4','matriculado|3','informe profesional|3','tasan|3','tasaciones|3','vender|3','vendo|3','cuanto puedo pedir|5','cuanto pedir|4','gratis|2','sin cargo|3','cuanto vale mi|4'],
